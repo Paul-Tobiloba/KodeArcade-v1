@@ -1,0 +1,12 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.impeccable/review/*.png
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.log
