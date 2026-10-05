@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-05T00:00:00Z",
+  "title": "Design System: KodeArcade",
+  "extensions": {
+    "colorMeta": {
+      "violet": { "role": "primary", "displayName": "Build Violet", "tonalRamp": ["oklch(15% .17 290)", "oklch(27% .17 290)", "oklch(38% .17 290)", "oklch(50% .17 290)", "oklch(61% .17 290)", "oklch(73% .17 290)", "oklch(84% .17 290)", "oklch(95% .17 290)"] },
+      "brand-teal": { "role": "secondary", "displayName": "Play Teal", "tonalRamp": ["oklch(15% .10 180)", "oklch(27% .10 180)", "oklch(38% .10 180)", "oklch(50% .10 180)", "oklch(61% .10 180)", "oklch(73% .10 180)", "oklch(84% .10 180)", "oklch(95% .10 180)"] },
+      "brand-yellow": { "role": "tertiary", "displayName": "Play Yellow", "tonalRamp": ["oklch(15% .13 85)", "oklch(27% .13 85)", "oklch(38% .13 85)", "oklch(50% .13 85)", "oklch(61% .13 85)", "oklch(73% .13 85)", "oklch(84% .13 85)", "oklch(95% .13 85)"] },
+      "ink": { "role": "neutral", "displayName": "Ink", "tonalRamp": ["oklch(15% .025 260)", "oklch(27% .025 260)", "oklch(38% .025 260)", "oklch(50% .025 260)", "oklch(61% .025 260)", "oklch(73% .025 260)", "oklch(84% .025 260)", "oklch(95% .025 260)"] },
+      "cloud": { "role": "neutral", "displayName": "Cloud", "tonalRamp": ["oklch(15% .008 275)", "oklch(27% .008 275)", "oklch(38% .008 275)", "oklch(50% .008 275)", "oklch(61% .008 275)", "oklch(73% .008 275)", "oklch(84% .008 275)", "oklch(95% .008 275)"] }
+    },
+    "typographyMeta": {
+      "headline": { "displayName": "Course headline", "purpose": "Current course h1; locally hosted Fredoka." },
+      "wordmark": { "displayName": "Wordmark", "purpose": "Ink Fredoka lettering alongside the approved K." },
+      "body": { "displayName": "System reading face", "purpose": "Root reference; lesson paragraphs use contextual sizes." }
+    },
+    "shadows": [
+      { "name": "dialog", "value": "0 20px 80px #11182740", "purpose": "Settings and feedback dialogs." },
+      { "name": "robot", "value": "0 4px 7px #51448a29", "purpose": "Robot illustration only, not logo treatment." }
+    ],
+    "motion": [
+      { "name": "drawer", "value": "180ms ease-out", "purpose": "Drawer transform and main width/margin; disabled by reduced motion." },
+      { "name": "robot-movement", "value": "360ms cubic-bezier(.16,1,.3,1)", "purpose": "Execution-stage movement; disabled by reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "header-tagline", "value": "1100px" },
+      { "name": "drawer-overlay", "value": "900px" },
+      { "name": "course-content-container", "value": "750px" },
+      { "name": "phone", "value": "620px" },
+      { "name": "compact-wordmark", "value": "360px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary action", "kind": "button", "refersTo": "button-primary", "description": "Run or continue action.",
+      "html": "<button class=\"ds-primary\">Run program</button>",
+      "css": ".ds-primary{font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;min-height:46px;padding:12px 18px;border:0;border-radius:8px;background:var(--violet,#6d4aff);color:white;cursor:pointer}.ds-primary:hover:not(:disabled){background:var(--violet-dark,#5332d6)}.ds-primary:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}.ds-primary:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Secondary action", "kind": "button", "refersTo": "button-secondary", "description": "Supporting action on a light surface.",
+      "html": "<button class=\"ds-secondary\">Try again</button>",
+      "css": ".ds-secondary{font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;min-height:44px;padding:10px 14px;border:1px solid #c6d3ce;border-radius:8px;background:white;color:var(--ink,#172033);cursor:pointer}.ds-secondary:hover:not(:disabled){filter:brightness(.95)}.ds-secondary:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Nickname field", "kind": "input", "refersTo": "nickname-field", "description": "Optional labelled learner input.",
+      "html": "<label class=\"ds-field\">Nickname <span>(optional)</span><input placeholder=\"Your nickname\" /></label>",
+      "css": ".ds-field{display:block;font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;color:var(--ink,#172033)}.ds-field span{font-weight:400;color:var(--muted,#586477)}.ds-field input{display:block;width:100%;font:inherit;font-weight:400;color:inherit;border:1px solid #a9b3c3;padding:12px;border-radius:7px;margin-top:9px;caret-color:var(--violet,#6d4aff)}.ds-field input::placeholder{color:var(--muted,#586477)}.ds-field input:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}"
+    },
+    {
+      "name": "Current module", "kind": "nav", "description": "Selected module within the dark course drawer.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Course modules\"><button class=\"ds-module\" aria-current=\"step\"><span class=\"ds-number\">1</span><span><strong>Sequences</strong><small>Build your first program</small></span></button></nav>",
+      "css": ".ds-nav{padding:16px;background:#111827}.ds-module{display:flex;width:100%;align-items:center;gap:11px;min-height:65px;padding:12px 10px;text-align:left;font-family:'Segoe UI',system-ui,sans-serif;background:#2d2650;color:white;border:0;border-radius:8px;cursor:pointer}.ds-module strong{display:block;font-size:.8rem;font-weight:650}.ds-module small{display:block;color:#b9c2d4;font-size:.65rem;margin-top:5px}.ds-number{display:flex;align-items:center;justify-content:center;width:29px;height:29px;border-radius:50%;background:#b09aff;color:#201436;font-size:.72rem;flex-shrink:0}.ds-module:hover{background:#253046}.ds-module:focus-visible{outline:3px solid #c6b6ff;outline-offset:4px}"
+    },
+    {
+      "name": "Concept chip", "kind": "chip", "refersTo": "concept-chip", "description": "Non-interactive concept label.",
+      "html": "<span class=\"ds-chip\">Sequences</span>",
+      "css": ".ds-chip{display:inline-block;background:#ede8ff;color:#5136ab;padding:5px 9px;border-radius:5px;font-family:'Segoe UI',system-ui,sans-serif;font-size:.7rem;font-weight:600}"
+    },
+    {
+      "name": "Lesson example card", "kind": "card", "refersTo": "lesson-card", "description": "A bordered supporting example alongside lesson prose.",
+      "html": "<aside class=\"ds-card\"><h2>Example program</h2><p>Arrange the steps in the order you want the robot to move.</p></aside>",
+      "css": ".ds-card{background:white;border:1px solid var(--line,#e1e5ee);border-radius:12px;padding:24px;font-family:'Segoe UI',system-ui,sans-serif;color:var(--ink,#172033)}.ds-card h2{margin:0 0 18px;font-size:.93rem;line-height:1.5;color:#5033a0}.ds-card p{margin:0;font-size:.8rem;line-height:1.75;color:#536075}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Build & Play",
+    "overview": "A friendly K assembled from coding blocks connects making with play. Violet, teal and yellow carry the identity against ink lettering and cloud backgrounds. The approved extension adds a consistent mark, wordmark and heading voice to the existing learning application.\n\nThe working surface stays legible and task-focused: a quiet lesson or mission heading, a visible execution stage, and a block editor. Flat geometry and rounded corners support the playful identity without competing with the learner's program.",
+    "keyCharacteristics": ["A consistent three-piece block-built K.", "Fredoka for the wordmark and principal course heading; system type for reading and controls.", "Light bordered workspaces and a dark course drawer.", "Visible focus and reduced-motion support."],
+    "rules": [
+      { "name": "The Accent Legibility Rule", "body": "Bright brand teal and yellow are identity accents, not small text colors on white; retain functional teal for readable block labels.", "section": "colors" },
+      { "name": "The Reading Voice Rule", "body": "Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”", "section": "typography" },
+      { "name": "The Mark Integrity Rule", "body": "Never stretch, rotate, relight or add an extra play triangle to the mark. Keep clear space of at least one quarter of its height. Use the normal symbol at 24 CSS pixels or larger; use the backed favicon below that. Use a tagline lockup at 260px wide or larger and omit the tagline for smaller placements.", "section": "shapes" }
+    ],
+    "dos": ["Do reuse the approved three-piece K and the exact tagline.", "Do preserve system typography for lesson reading and controls.", "Do keep focus, text scaling and reduced-motion behavior visible in new work.", "Do use the darker functional teal for white movement-block labels."],
+    "donts": ["Don't substitute a generic code icon for the approved mark.", "Don't use bright teal or yellow as small text on white.", "Don't stretch the logo or add lighting effects or a variant-only triangle.", "Don't treat this brand extension as permission to redesign the learning flow."]
+  }
+}

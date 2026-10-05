@@ -1,0 +1,13 @@
+@font-face { font-family: Fredoka; src: url('/fonts/Fredoka.ttf') format('truetype'); font-weight: 300 700; font-style: normal; font-display: swap; }
+:root { --brand-teal: #0f9f8f; --brand-yellow: #f6c445; }
+.course-app .brand { gap: 10px; flex-shrink: 0; letter-spacing: -.025em; color: var(--ink); }
+.course-app .brand .brand-symbol { display: block; width: 36px; height: 36px; object-fit: contain; }
+.course-app .brand .brand-wordmark { font-family: Fredoka, 'Segoe UI', sans-serif; font-weight: 600; color: var(--ink); font-size: 1.65rem; line-height: 1; }
+.course-app .tagline { letter-spacing: .025em; }
+.course-app h1 { font-family: Fredoka, 'Segoe UI', sans-serif; font-weight: 600; letter-spacing: -.02em; }
+@media (max-width: 620px) {
+  .course-app .brand { gap: 7px; }
+  .course-app .brand .brand-symbol { width: 28px; height: 28px; }
+  .course-app .brand .brand-wordmark { font-size: 1.3rem; }
+}
+@media (max-width: 360px) { .course-app .brand .brand-wordmark { font-size: 1.1rem; } }

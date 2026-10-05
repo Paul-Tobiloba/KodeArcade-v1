@@ -60,7 +60,7 @@ For young learners beginning their coding journey, KodeArcade is an accessible, 
 
 The interface should feel like a modern creative game, not a casino arcade. Avoid flashing elements, slot-machine imagery, manipulative reward patterns, and visual overload.
 
-### Working colour palette
+### Approved Build & Play palette
 
 | Role | Colour | Hex |
 |---|---|---|
@@ -76,20 +76,16 @@ Every colour combination must be tested for accessible contrast. Success, warnin
 
 ## Typography
 
-- Prefer an accessible, highly legible interface typeface such as **Atkinson Hyperlegible** when it can be bundled efficiently.
-- Use a rounded display face sparingly for headings or the wordmark.
-- Provide system-font fallbacks to reduce loading cost.
-- Avoid using stylized display text for instructions or code.
+- **Fredoka**, weight 600, is the self-hosted wordmark and primary-heading face.
+- **Segoe UI / system sans-serif** remains the body, instruction, and control face.
+- The font license ships with the assets. No remote font service is required.
+- Avoid using display lettering for code or long instructions.
 
-## Logo direction
+## Approved logo
 
-Start with a simple wordmark. A future symbol could combine:
+The **Build & Play** identity uses a three-piece, block-built K: violet stem, teal upper arm, and yellow lower arm. The geometry stays identical across full-color, reversed, and single-color versions. The primary wordmark is ink-colored, not split into two colors.
 
-- two interlocking code blocks;
-- a cursor or play triangle;
-- a subtle arcade-button or directional-pad shape.
-
-The mark must remain recognizable in one colour and at favicon size. Avoid a detailed mascot inside the primary logo.
+Reusable SVG logos and marks live in `public/brand/`. See [brand implementation and asset usage](BRAND_IMPLEMENTATION.md) for file names, clear space, minimum sizes, and font notes. Use the backed favicon at tab-icon sizes; keep detailed mascots outside the primary logo.
 
 ## Product vocabulary
 

@@ -132,7 +132,7 @@ export default function App() {
     <a className="skip-link" href="#workspace">Skip to learning</a>
     <header className="topbar">
       <button ref={drawerToggle} className="drawer-toggle" aria-label={drawerOpen ? 'Hide modules' : 'Show modules'} aria-controls="module-drawer" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(open => !open)}>{drawerOpen ? <PanelLeftClose size={22} /> : <PanelLeftOpen size={22} />}</button>
-      <a className="brand" href="#workspace" aria-label="KodeArcade learning workspace" inert={small && drawerOpen}><span className="brand-mark"><Code2 size={25} /></span>Kode<span>Arcade</span></a>
+      <a className="brand" href="#workspace" aria-label="KodeArcade learning workspace" inert={small && drawerOpen}><img className="brand-symbol" src="/brand/mark-color.svg" alt="" width="36" height="36" /><span className="brand-wordmark">KodeArcade</span></a>
       <span className="tagline">Play. Build. Learn.</span>
       <div className="header-actions" inert={small && drawerOpen}><span className="prototype-label">Learning preview</span><button aria-label="Settings" className="settings-button" onClick={() => settings.current?.showModal()}><Settings size={18} /><span>Settings</span></button></div>
     </header>
