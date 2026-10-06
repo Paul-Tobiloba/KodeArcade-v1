@@ -8,9 +8,11 @@ import CourseDrawer from './CourseDrawer';
 import LessonArticle from './LessonArticle';
 import FeedbackDialog from './FeedbackDialog';
 import MissionStage from './MissionStage';
+import { ByteSound } from './sound';
 
 export default function App() {
   const [loaded] = useState(loadSave);
+  const [sound] = useState(() => new ByteSound());
   const [save, setSave] = useState(loaded.save);
   const [saveWarning, setSaveWarning] = useState(loaded.warning);
   const [storageBlocked, setStorageBlocked] = useState(!!loaded.warning);
@@ -66,10 +68,16 @@ export default function App() {
     window.addEventListener('online', connection); window.addEventListener('offline', connection);
     return () => { motionQuery.removeEventListener('change', motion); widthQuery.removeEventListener('change', width); window.removeEventListener('online', connection); window.removeEventListener('offline', connection); };
   }, []);
+  useEffect(() => { sound.setEnabled(save.soundEnabled); }, [sound, save.soundEnabled]);
+  useEffect(() => {
+    const silence = () => { if (document.hidden) sound.stop(); };
+    document.addEventListener('visibilitychange', silence);
+    return () => { document.removeEventListener('visibilitychange', silence); sound.dispose(); };
+  }, [sound]);
   useEffect(() => () => { generation.current++; if (timer.current) clearTimeout(timer.current); }, []);
   useEffect(() => { editor.current?.highlight(activeBlock); }, [activeBlock]);
 
-  function stop() { generation.current++; if (timer.current) clearTimeout(timer.current); setRunning(false); setActiveBlock(''); }
+  function stop() { sound.stop(); generation.current++; if (timer.current) clearTimeout(timer.current); setRunning(false); setActiveBlock(''); }
   function focusHeading() { requestAnimationFrame(() => { heading.current?.focus(); window.scrollTo({ top: 0, behavior: 'auto' }); }); }
   function navigate(id: string) {
     const index = missionIndex(id); if (index < 0) return;
@@ -95,13 +103,15 @@ export default function App() {
   function dismissFeedback() { setFeedbackOpen(false); requestAnimationFrame(() => runButton.current?.focus({ preventScroll: true })); }
   function run() {
     stop(); setResumed(false); setNotice(''); setResult(null); setFeedbackOpen(false); setPosition(mission.start); setStep(0);
+    void sound.unlock();
     const outcome = editor.current!.run(mission);
-    if (!blockCount) { setResult(outcome); setFeedbackOpen(true); return; }
+    if (!blockCount) { setResult(outcome); setFeedbackOpen(true); void sound.play('retry'); return; }
     setSave(s => ({ ...s, progress: { ...s.progress, [mission.id]: { ...s.progress[mission.id], attempts: progress.attempts + 1 } } }));
     const token = generation.current;
     function finish() {
       if (generation.current !== token) return;
       setRunning(false); setActiveBlock(''); setResult(outcome); setFeedbackOpen(true);
+      void sound.play(outcome.success ? 'success' : 'retry');
       if (outcome.success) setSave(s => ({ ...s, progress: { ...s.progress, [mission.id]: { ...s.progress[mission.id], complete: true } } }));
     }
     if (reduced) { const last = outcome.frames.at(-1); if (last) { setPosition(last); setStep(last.step); } finish(); return; }
@@ -110,7 +120,7 @@ export default function App() {
     function advance() {
       if (generation.current !== token) return;
       const frame = outcome.frames[i++]; if (!frame) { finish(); return; }
-      setPosition(frame); setActiveBlock(frame.blockId); setStep(frame.step); timer.current = setTimeout(advance, 480);
+      setPosition(frame); setActiveBlock(frame.blockId); setStep(frame.step); void sound.play('move'); timer.current = setTimeout(advance, 480);
     }
     timer.current = setTimeout(advance, 200);
   }
@@ -132,7 +142,7 @@ export default function App() {
     <a className="skip-link" href="#workspace">Skip to learning</a>
     <header className="topbar">
       <button ref={drawerToggle} className="drawer-toggle" aria-label={drawerOpen ? 'Hide modules' : 'Show modules'} aria-controls="module-drawer" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(open => !open)}>{drawerOpen ? <PanelLeftClose size={22} /> : <PanelLeftOpen size={22} />}</button>
-      <a className="brand" href="#workspace" aria-label="KodeArcade learning workspace" inert={small && drawerOpen}><img className="brand-symbol" src="/brand/mark-color.svg" alt="" width="36" height="36" /><span className="brand-wordmark">KodeArcade</span></a>
+      <a className="brand" href="/" aria-label="KodeArcade home" inert={small && drawerOpen}><img className="brand-symbol" src="/brand/mark-color.svg" alt="" width="36" height="36" /><span className="brand-wordmark">KodeArcade</span></a>
       <span className="tagline">Play. Build. Learn.</span>
       <div className="header-actions" inert={small && drawerOpen}><span className="prototype-label">Learning preview</span><button aria-label="Settings" className="settings-button" onClick={() => settings.current?.showModal()}><Settings size={18} /><span>Settings</span></button></div>
     </header>
@@ -150,6 +160,7 @@ export default function App() {
           <section className="editor" aria-label="Code editor"><div className="editor-title"><h2><Code2 size={20} /> Build your program</h2><span>{blockCount} / 24 blocks</span></div><p className="editor-help">Drag blocks onto the canvas. Snap them together below the start block.</p>
             <BlockEditor key={`${mission.id}-${editorKey}`} ref={editor} mission={mission} initial={progress.workspace} legacy={progress.blocks} running={running} onChange={updateWorkspace} onError={setNotice} />
             <div className="run-controls"><button ref={runButton} className="primary run-button" onClick={running ? () => { stop(); setNotice('Run stopped. Your code is unchanged.'); } : run}>{running ? <Square size={18} /> : <Play size={18} fill="currentColor" />}{running ? 'Stop run' : 'Run code'}</button><button className="clear-button" disabled={running || !blockCount} onClick={() => editor.current?.clear()}><RotateCcw size={17} />Clear code</button></div>
+            <label className="toggle-label"><input type="checkbox" checked={save.soundEnabled} onChange={e => { const enabled = e.target.checked; sound.setEnabled(enabled); setSave(s => ({ ...s, soundEnabled: enabled })); }} /><span>Byte sound effects</span></label>
             <p className="save-note"><ShieldCheck size={14} />{saveWarning ? 'Saving unavailable — see message above' : 'Your code saves on this device'}</p><div className="sr-only" role="status">{notice}</div>{notice && <p className="inline-notice" aria-hidden="true">{notice}</p>}
           </section>
         </div>

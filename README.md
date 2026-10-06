@@ -45,6 +45,8 @@ A local React/TypeScript prototype now covers four Robot Rescue missions and a c
 
 ## Run locally
 
+The root page is the KodeArcade landing page. Choose **Start learning** to enter the workspace, or open `/#/learn` directly. For social-sharing artwork, metadata configuration, and the required public deployment origin, see [landing page notes](docs/LANDING_PAGE.md).
+
 Requires Node.js 22.12+ or 24 and npm. From this folder:
 
 ```sh
@@ -66,6 +68,10 @@ Browser tests require Playwright Chromium (`npx playwright install chromium`). T
 Offline reopening, curriculum review, a human-reviewed translation, external resource cards, and real-device/screen-reader checks are still pending. Blockly programs are interpreted directly without eval or JavaScript generation, with at most 24 instruction blocks, three levels of repeat nesting, and 120 executed steps. Conditions are outside this sprint. The platform is not yet deployed.
 
 Blockly API references: [flyout toolbox](https://docs.blockly.com/guides/configure/toolboxes/flyout/) and [workspace serialization](https://docs.blockly.com/guides/get-started/save-and-load/). Its local UI icons in `public/blockly-media` are copied from the installed Blockly package and retain its Apache-2.0 license.
+
+## Byte sound effects
+
+Run code to hear a soft rising bloop for each animated move, a gentle three-note retry cue, or a four-note success chime. Toggle **Byte sound effects** beneath the Run controls to mute; this preference is saved on this device. Reduced-motion runs play only the result cue. Audio starts after a Run click/tap, never on page load. Sounds are original local Web Audio synthesis, with no audio downloads. If the browser blocks audio, the learning activity still works and all feedback remains visible.
 
 ## Working capstone title
 

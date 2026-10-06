@@ -1,8 +1,8 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown> };
-export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; current: number; progress: Record<string, Progress> };
+export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; current: number; progress: Record<string, Progress> };
 export const SAVE_KEY = 'kodearcade-v1';
-export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, current: 0, progress: {} });
+export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, current: 0, progress: {} });
 export function freshProgress(index: number): Progress { return { blocks: initialProgram(missions[index]), attempts: 0, hints: 0, complete: false }; }
 const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 export function parseSave(raw: string | null): Save {
@@ -13,6 +13,7 @@ export function parseSave(raw: string | null): Save {
   save.nickname = typeof value.nickname === 'string' ? value.nickname.slice(0, 20) : '';
   save.reducedMotion = value.reducedMotion === true;
   save.largeText = value.largeText === true;
+  save.soundEnabled = value.soundEnabled !== false;
   save.current = Number.isInteger(value.current) && Number(value.current) >= 0 && Number(value.current) < missions.length ? Number(value.current) : 0;
   for (const mission of missions) {
     const p = value.progress[mission.id];

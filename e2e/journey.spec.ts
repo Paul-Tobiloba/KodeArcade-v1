@@ -20,7 +20,7 @@ async function dragRight(page: Page, touch = false) {
   await page.mouse.move(to.x + 25, to.y + to.height + 8, { steps: 20 }); await page.mouse.up();
 }
 test('drag blocks, run, recover, save and resume', async ({ page, isMobile }) => {
-  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message)); await page.goto('/');
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message)); await page.goto('/#/learn'); await expect(page.locator('.course-app')).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every program starts with a sequence');
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await expect(page.locator('.blocklyFlyout .blocklyDraggable')).toHaveCount(4);
@@ -45,7 +45,7 @@ test('drag blocks, run, recover, save and resume', async ({ page, isMobile }) =>
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('A different direction'); expect(errors).toEqual([]);
 });
 test('preferences, keyboard helpers and reset', async ({ page }) => {
-  await page.goto('/'); await page.keyboard.press('Tab');
+  await page.goto('/#/learn'); await expect(page.locator('.course-app')).toBeVisible(); await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to learning' })).toBeFocused(); await page.keyboard.press('Enter');
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await page.getByText('Keyboard helpers', { exact: true }).click();
@@ -62,7 +62,7 @@ test('preferences, keyboard helpers and reset', async ({ page }) => {
   await expect(page.getByText('0 / 24 blocks', { exact: true })).toBeVisible();
 });
 test('capture workspace and audit the app shell', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/#/learn'); await expect(page.locator('.course-app')).toBeVisible();
   await page.screenshot({ path: `.impeccable/review/${testInfo.project.name}-lesson.png`, fullPage: true });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
@@ -87,12 +87,13 @@ test('capture workspace and audit the app shell', async ({ page }, testInfo) => 
 });
 
 test('drawer modules, lesson before each challenge, and code preservation', async ({ page }, testInfo) => {
-  await page.goto('/');
+  await page.goto('/#/learn'); await expect(page.locator('.course-app')).toBeVisible();
   if (await page.getByRole('button', { name: 'Hide modules', exact: true }).isVisible()) await page.getByRole('button', { name: 'Hide modules', exact: true }).click();
   await expect(page.locator('#module-drawer')).toHaveAttribute('aria-hidden', 'true');
   await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await expect(page.locator('#module-drawer')).toHaveAttribute('aria-hidden', 'false');
-  await page.screenshot({ path: `.impeccable/review/${testInfo.project.name}-drawer.png`, fullPage: true });
+  await expect(page.locator('#module-drawer')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
+  await page.screenshot({ path: `.impeccable/review/${testInfo.project.name}-drawer.png`, fullPage: true, animations: 'disabled' });
   await page.locator('.module-button').filter({ hasText: 'Loops' }).click();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).isVisible()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await expect(page.locator('.current-module .challenge-list button')).toHaveCount(3);

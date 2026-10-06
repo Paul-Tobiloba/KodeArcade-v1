@@ -1,0 +1,42 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+test('landing, metadata and learning entry', async ({ page }, testInfo) => {
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/'); await page.evaluate(() => document.fonts.ready);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Play. Build.Learn.');
+  await expect(page.getByRole('link', { name: 'Start your adventure' })).toBeVisible();
+  expect(await page.locator('.hero-art img').evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/landing-${testInfo.project.name}.png`, fullPage: true });
+  expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
+  const html = await (await page.request.get('/')).text();
+  expect(html).toContain('og:image'); expect(html).toContain('/social/kodearcade-share.png'); expect(html).toContain('summary_large_image');
+  expect((await page.request.get('/social/kodearcade-share.png')).ok()).toBe(true);
+  await page.getByRole('button', { name: 'Search courses', exact: true }).click();
+  await expect(page.getByLabel('Find an adventure')).toBeFocused();
+  await page.getByLabel('Find an adventure').fill('space');
+  await expect(page.locator('.adventure-card')).toHaveCount(1);
+  await expect(page.locator('.adventure-card')).toContainText('Coming soon');
+  await page.getByLabel('Find an adventure').fill('not-a-course');
+  await expect(page.getByText('No adventures match that search.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Show all adventures' }).click();
+  await expect(page.locator('.adventure-card')).toHaveCount(4);
+  await page.getByRole('button', { name: 'Close course search' }).click();
+  await page.getByText('Where is my progress saved?', { exact: true }).click();
+  await expect(page.getByText('On this device, in this browser.', { exact: false })).toBeVisible();
+  await page.getByRole('link', { name: 'Start your adventure' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every program starts with a sequence');
+  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'KodeArcade home' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Play. Build.Learn.');
+  expect(errors).toEqual([]);
+});
+
+test('reference-sized first viewport', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop');
+  await page.setViewportSize({ width: 1672, height: 941 });
+  await page.goto('/'); await page.evaluate(() => document.fonts.ready);
+  await expect(page.locator('.hero-art img')).toBeVisible();
+  await page.screenshot({ path: '.impeccable/review/landing-reference.png' });
+});
