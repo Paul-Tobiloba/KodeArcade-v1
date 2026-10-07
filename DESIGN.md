@@ -99,9 +99,13 @@ The working surface stays legible and task-focused: a quiet lesson or mission he
 
 This captures `src/styles.css`, `src/course.css`, `src/brand.css` and the approved scope in `docs/BRAND_IMPLEMENTATION.md` on 5 October 2026. It documents the current application and a small identity extension, not a new page composition.
 
+The 7 October public-page extension carries Build & Play into the user-approved Byte adventure world: pastel clouds, violet floating islands, teal waterfalls and small golden goals. It preserves the incumbent identity and learning-workspace rules. Its page composition and code-led reference decisions live in `docs/ILLUSTRATED_PAGES.md`; this is an extension, not a replacement visual world.
+
 ## Colors
 
 The palette combines expressive identity accents with darker functional colors for readable controls.
+
+Public pages use scoped cloud ground (#f8faff), deep ink (#101333) and action violet (#6840f5), as implemented in `src/landing.css`. These public-page values do not replace the learning primitives in the frontmatter. White translucent panels and pale violet borders keep HTML readable over the artwork.
 
 ### Primary
 
@@ -133,6 +137,8 @@ The principal heading uses the headline token and reduces to 1.7rem at the narro
 
 **The Reading Voice Rule.** Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”
 
+Public pages extend Fredoka to expressive hero and section headings. Body copy, navigation, course-card titles and step-card titles keep system type. The public hero uses responsive display sizing; learning headings and reading widths retain their own rules.
+
 ## Layout
 
 The course header is sticky and 72px high, shrinking to 64px at 620px. Main padding is 30px 36px 24px on wide screens, then reduces through the existing responsive rules. The desktop drawer is 280px wide and shifts the main content; at 900px and below it overlays content and is at most 310px wide with 44px of viewport clearance.
@@ -141,9 +147,13 @@ The stage and editor use a two-column grid with minimum widths of 260px and 430p
 
 Spacing tokens record recurring observed dimensions, not a mandated new spacing scale. Preserve the established three-area Blockly workflow and existing reading widths.
 
+Public pages alternate wide illustrated sections with constrained readable content. Their navigation becomes an explicit menu at 900px; at 600px, two-column sections and the full catalog stack. Keep menu, search and learning links reachable. Decorative scene plates sit in isolated layers below real HTML, preserve their 3:2 aspect ratio and use linear masks to blend rectangular edges into the ground. Do not simulate an organic island contour with a generic mask. The approved sky hero retains its separate responsive crop.
+
 ## Elevation & Depth
 
 Most surfaces are flat, separated by borders and tonal fills. Modal dialogs use the shared `0 20px 80px #11182740` shadow and a dimmed backdrop. The robot has a small local illustration shadow; do not apply it to the logo. Drawer motion uses 180ms ease-out, while board movement uses 360ms cubic-bezier(.16,1,.3,1). Respect both the application reduced-motion setting and the system preference.
+
+Public-page depth comes primarily from the generated landscape. Step cards use the observed soft shadow (`0 12px 30px -20px #897bc4`); it is a scoped marketing treatment, not a new workspace or logo shadow.
 
 ## Shapes
 
@@ -177,7 +187,17 @@ Execution and editor workspaces are white, bordered and rounded with the workspa
 
 Use the assets in `public/brand/`: color for light surfaces, reverse for dark surfaces, and mono or white for one-color reproduction. The header combines the symbol with an ink Fredoka wordmark. SVG lockups embed the licensed font but retain editable text; confirm embedded-font support with print vendors. Mark files contain paths only.
 
+### Illustrated public pages
+
+The shared public navigation exposes Courses, How it works and For Parents, with a visible current-page state, labelled menu toggle and footer links. Public action links use a 13px radius, white labels and a visible focus ring. Search uses a visible label and result status; FAQs use native details/summary. Course cards link to the implemented arrow, word, builder and computer routes. All text and controls remain HTML above decorative artwork. The approved master SVG mark stays separate from generated promotional images.
+
 ## Do's and Don'ts
+
+### Learning entry and concept cadence
+
+The learning entry uses the existing light workspace ground, Fredoka heading, system reading text and purple actions. Course choices are spacious linked rows, grouped by suggested age rather than collected birth dates. Keep a visible Change course link inside the workspace and name the active course in its drawer. Only playable modules belonging to that course appear there; Computer Explorers does not inherit coding modules.
+
+Concept introductions open once per course/module, with a manual Read lesson action during practice. Reinforcement challenges go directly to building. Read-aloud is opt-in, has visible Listen/Stop controls, uses local English device voices and explains unavailable voices. Future video belongs to concept introductions, with captions and text alternatives. See docs/LEARNING_ENTRY.md.
 
 ### Do:
 

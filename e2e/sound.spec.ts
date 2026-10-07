@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+test.beforeEach(async ({ page }) => { await page.addInitScript(() => { if (!localStorage.getItem('kodearcade-v1')) localStorage.setItem('kodearcade-v1', JSON.stringify({ version: 1, course: 'words', current: 0, progress: {} })); }); });
 
 test('sound cues follow runs and mute persists', async ({ page }) => {
   await page.addInitScript(() => {
@@ -13,7 +14,7 @@ test('sound cues follow runs and mute persists', async ({ page }) => {
     };
   });
   const notes = () => page.evaluate(() => (window as typeof window & { playedNotes: number[] }).playedNotes.length);
-  await page.goto('/#/learn');
+  await page.goto('/#/learn/words');
   expect(await notes()).toBe(0);
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();

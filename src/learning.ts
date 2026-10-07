@@ -5,6 +5,7 @@ export type Mission = {
   id: string; title: string; concept: string; description: string; goal: string;
   size: number; start: Position; end: Position; walls: Position[]; loops: boolean;
   requireLoop?: boolean; starter: Direction[]; hints: string[]; reflection: string;
+  solution?: Direction[];
 };
 export const directions: Direction[] = ['right', 'down', 'left', 'up'];
 export const labels: Record<Direction, string> = { right: 'Move right', down: 'Move down', left: 'Move left', up: 'Move up' };
@@ -13,7 +14,7 @@ export const missions: Mission[] = [
     description: 'Byte’s battery is running low. Give our little robot a path to the charging station.',
     goal: 'Move Byte three squares right to the charging station.', size: 5,
     start: { x: 0, y: 2 }, end: { x: 3, y: 2 }, walls: [], loops: false, starter: [],
-    hints: ['Look at Byte and the yellow charging station. Are they in the same row?', 'A sequence is a set of instructions in order. Each movement block moves Byte one square.', 'For a station two squares away, you could use two Move right blocks.', 'Add a Move right block. You need three of these blocks in total, then select Run code.'],
+    hints: ['Look at Byte and the yellow charging station. Are they in the same row?', 'A sequence is a set of instructions in order. Each movement block moves Byte one square.', 'For a station two squares away, you could use two Move right blocks.', 'Add a Move right block. You need three of these blocks in total, then select Play.'],
     reflection: 'Each block is one step. Changing the number of blocks changes where Byte stops.' },
   { id: 'take-a-turn', title: 'The way around', concept: 'Direction & order',
     description: 'There’s a rock in the route. Plan a path around it and bring Byte safely to the station.',
@@ -65,6 +66,48 @@ export const missions: Mission[] = [
     goal: 'Reach row 2, column 3 by changing the order of the starter blocks.', size: 5, start: { x: 0, y: 3 }, end: { x: 2, y: 1 }, walls: [{ x: 1, y: 3 }], loops: true, starter: ['right', 'up', 'right', 'up'],
     hints: ['The very first move points at a rock.', 'You can fix a program by changing its order.', 'Moving up before right can avoid a rock beside the starting square.', 'Rearrange the blocks to Move up, Move up, Move right, Move right.'], reflection: 'The same set of blocks can behave differently when you change the order.' },
 ];
+// Deliberately varied practice routes: straight paths, corners, detours and patterns.
+const practice: { topic: string; title: string; start: Position; route: Direction[]; walls?: Position[] }[] = [
+  { topic: 'sequences', title: 'One tiny step', start: { x: 1, y: 2 }, route: ['right'] },
+  { topic: 'sequences', title: 'Two steps to sunshine', start: { x: 0, y: 1 }, route: ['right','right'] },
+  { topic: 'sequences', title: 'Back to the treehouse', start: { x: 4, y: 2 }, route: ['left','left','left'] },
+  { topic: 'sequences', title: 'Down to the garden', start: { x: 2, y: 0 }, route: ['down','down','down'] },
+  { topic: 'sequences', title: 'Around the little corner', start: { x: 1, y: 3 }, route: ['up','right'] },
+  { topic: 'sequences', title: 'Across the sky', start: { x: 0, y: 0 }, route: ['right','right','right','right'] },
+  { topic: 'sequences', title: 'Find the picnic spot', start: { x: 4, y: 0 }, route: ['down','down','left','left'] },
+  { topic: 'directions', title: 'Below the boulder', start: { x: 0, y: 1 }, route: ['down','right','right','up'], walls: [{ x: 1, y: 1 }] },
+  { topic: 'directions', title: 'The upper bridge', start: { x: 0, y: 3 }, route: ['up','right','right','right','down'], walls: [{ x: 1, y: 3 },{ x: 2, y: 3 }] },
+  { topic: 'directions', title: 'Left at the lookout', start: { x: 4, y: 4 }, route: ['up','up','left','left'], walls: [{ x: 3, y: 4 }] },
+  { topic: 'directions', title: 'A winding trail', start: { x: 0, y: 4 }, route: ['right','up','right','up'], walls: [{ x: 0, y: 3 },{ x: 2, y: 4 }] },
+  { topic: 'directions', title: 'The far side', start: { x: 4, y: 0 }, route: ['left','left','down','down','down'], walls: [{ x: 4, y: 1 },{ x: 3, y: 2 }] },
+  { topic: 'directions', title: 'The hidden opening', start: { x: 0, y: 0 }, route: ['down','down','right','right','right','right','up'], walls: [{ x: 2, y: 0 },{ x: 2, y: 1 },{ x: 2, y: 3 }] },
+  { topic: 'directions', title: 'Home through the canyon', start: { x: 4, y: 4 }, route: ['left','left','left','left','up','up','up'], walls: [{ x: 3, y: 3 },{ x: 2, y: 3 },{ x: 1, y: 3 }] },
+  { topic: 'loops', title: 'Two little hops', start: { x: 0, y: 2 }, route: ['right','right'] },
+  { topic: 'loops', title: 'Up the waterfall', start: { x: 1, y: 4 }, route: ['up','up','up'] },
+  { topic: 'loops', title: 'Left on repeat', start: { x: 4, y: 1 }, route: ['left','left','left','left'] },
+  { topic: 'loops', title: 'Down the rainbow', start: { x: 3, y: 0 }, route: ['down','down','down','down'] },
+  { topic: 'loops', title: 'A loop and a turn', start: { x: 0, y: 4 }, route: ['right','right','right','up'], walls: [{ x: 1, y: 3 }] },
+  { topic: 'loops', title: 'Dancing down the stairs', start: { x: 0, y: 0 }, route: ['right','down','right','down','right','down'] },
+  { topic: 'loops', title: 'The double bridge', start: { x: 4, y: 4 }, route: ['left','left','left','up','up','up'], walls: [{ x: 3, y: 3 }] },
+  { topic: 'debugging', title: 'Too many steps', start: { x: 0, y: 2 }, route: ['right','right'] },
+  { topic: 'debugging', title: 'Point to the sky', start: { x: 2, y: 4 }, route: ['up','up','up'] },
+  { topic: 'debugging', title: 'Turn before the rock', start: { x: 0, y: 2 }, route: ['up','right','right'], walls: [{ x: 1, y: 2 }] },
+  { topic: 'debugging', title: 'The left-hand clue', start: { x: 4, y: 1 }, route: ['left','left','down'] },
+  { topic: 'debugging', title: 'Finish the staircase', start: { x: 0, y: 4 }, route: ['right','up','right','up','right','up'] },
+  { topic: 'debugging', title: 'Down, then across', start: { x: 1, y: 0 }, route: ['down','down','right','right'], walls: [{ x: 2, y: 0 }] },
+  { topic: 'debugging', title: 'Byte’s final repair', start: { x: 4, y: 4 }, route: ['left','left','up','up','left'], walls: [{ x: 3, y: 3 }] },
+];
+for (const [index, item] of practice.entries()) {
+  let end = { ...item.start };
+  for (const direction of item.route) end = { x: end.x + (direction === 'right' ? 1 : direction === 'left' ? -1 : 0), y: end.y + (direction === 'down' ? 1 : direction === 'up' ? -1 : 0) };
+  const debugging = item.topic === 'debugging';
+  missions.push({ id: `${item.topic}-practice-${index + 1}`, title: item.title, concept: item.topic === 'directions' ? 'Direction & order' : item.topic[0].toUpperCase() + item.topic.slice(1),
+    description: debugging ? 'Byte has a mixed-up program. Watch it, change a block, and try again.' : 'Another island needs a little energy. Plan a route and help Byte recharge.',
+    goal: `Guide Byte to the yellow station${item.topic === 'loops' ? ' using a Repeat block' : ''}.`, size: 5, start: item.start, end, walls: item.walls ?? [], loops: item.topic === 'loops' || debugging, requireLoop: item.topic === 'loops',
+    starter: debugging ? [...item.route.slice(0, -1), item.route.at(-1) === 'up' ? 'right' : 'up'] : [], solution: item.route,
+    hints: ['Find Byte and the yellow station. Trace a clear path with your finger.', 'Each arrow or movement block takes one step. Rocks block the way.', item.topic === 'loops' ? 'Look for a move or a small pattern that repeats. Put it inside Repeat.' : 'Run your program and watch the highlighted block. Where does the route change?', `One route is: ${item.route.map(d => labels[d]).join(', ')}.${item.topic === 'loops' ? ' Group repeated moves in a Repeat block.' : ''}`],
+    reflection: item.topic === 'loops' ? 'Spotting a repeating pattern helps you write less code.' : debugging ? 'Watching, changing and testing turns a mistake into a discovery.' : 'A big journey is made from small instructions in the right order.' });
+}
 export const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y;
 export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };

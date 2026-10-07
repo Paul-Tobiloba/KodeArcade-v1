@@ -14,7 +14,7 @@ export type LearningModule = {
 export const modules: LearningModule[] = [
   { id: 'sequences', title: 'Sequences', description: 'Give clear instructions, one step at a time.', status: 'available', challengeIds: ['first-steps', 'sequence-up', 'sequence-corner'],
     lesson: { title: 'Every program starts with a sequence', introduction: 'Think about getting ready in the morning: put on your socks, then your shoes. You follow instructions in an order. Computers follow ordered instructions too. We call that order a sequence.',
-      sections: [{ title: 'One block, one instruction', text: 'In Robot Rescue, each movement block tells Byte to move exactly one square. Three Move right blocks move Byte three squares right. Byte does only what your program says, so every step needs an instruction.' }, { title: 'Read from top to bottom', text: 'Snap your first block under “when Run is pressed”. The block below it runs next, and the rest follow in order. Blocks left floating on the canvas are not part of your connected program.' }, { title: 'Predict, run, and notice', text: 'Before you press Run, follow the instructions with your finger or imagine Byte moving. After the run, compare your prediction with where Byte stopped. You can change the blocks and try again.' }],
+      sections: [{ title: 'One block, one instruction', text: 'In Robot Rescue, each movement block tells Byte to move exactly one square. Three Move right blocks move Byte three squares right. Byte does only what your program says, so every step needs an instruction.' }, { title: 'Read from top to bottom', text: 'Snap your first block under “when Play is pressed”. The block below it runs next, and the rest follow in order. Blocks left floating on the canvas are not part of your connected program.' }, { title: 'Predict, run, and notice', text: 'Before you press Play, follow the instructions with your finger or imagine Byte moving. After the run, compare your prediction with where Byte stopped. You can change the blocks and try again.' }],
       example: { title: 'A two-step journey', steps: ['Move right', 'Move right'], explanation: 'Byte moves one square right, then another square right. The total movement is two squares.' }, takeaway: 'A sequence is a set of instructions carried out in order.' } },
   { id: 'directions', title: 'Direction & order', description: 'Plan a route and choose what happens first.', status: 'available', challengeIds: ['take-a-turn', 'direction-gap', 'direction-home'],
     lesson: { title: 'The order changes the journey', introduction: 'Two programs can use the same movement blocks and still visit different squares. When rocks are in the way, the order of your instructions can decide whether Byte reaches the station.',
@@ -35,6 +35,14 @@ export const modules: LearningModule[] = [
   { id: 'project', title: 'Build project', description: 'Bring your ideas together in a route of your own.', status: 'available', challengeIds: ['rescue-project'],
     lesson: { title: 'Make a plan, then make it yours', introduction: 'Now you can use sequences, directions, loops, and debugging together. Your project is to choose a station and build a working route to it.', sections: [{ title: 'Choose your destination', text: 'Select a free square on the board to move the charging station. The starting square and the rock cannot be destinations.' }, { title: 'Build and improve', text: 'Make one working route, then see whether you can find a different one. You might replace repeated movements with a loop or take a different path around the rock.' }], example: { title: 'Your project plan', steps: ['Choose the destination', 'Build a route', 'Run and revise', 'Try another solution'], explanation: 'There is more than one way to solve this project. Explain one choice you made in your program.' }, takeaway: 'A program is something you can create, test, and improve.' } },
 ];
+
+for (const module of modules.filter(m => ['sequences', 'directions', 'loops', 'debugging'].includes(m.id))) {
+  const practiceIds = missions.filter(m => m.id.startsWith(`${module.id}-practice-`)).map(m => m.id);
+  // Start the youngest learners with one step before longer sequences.
+  module.challengeIds = module.id === 'sequences'
+    ? [...practiceIds.slice(0, 2), ...module.challengeIds, ...practiceIds.slice(2)]
+    : [...module.challengeIds, ...practiceIds];
+}
 
 export function moduleFor(missionId: string): LearningModule { return modules.find(m => m.challengeIds.includes(missionId))!; }
 export const challengeOrder = modules.flatMap(m => m.challengeIds);

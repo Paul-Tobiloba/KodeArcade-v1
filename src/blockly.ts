@@ -4,8 +4,9 @@ import { directions, labels, runProgram, type Block, type Mission, type RunResul
 
 Blockly.setLocale(Object.fromEntries(Object.entries(En).filter((entry): entry is [string, string] => typeof entry[1] === 'string')));
 Blockly.common.defineBlocksWithJsonArray([
-  { type: 'ka_start', message0: 'when Run is pressed', nextStatement: null, colour: '#a76d08', tooltip: 'Connect your program below this block.', hat: 'cap' },
+  { type: 'ka_start', message0: 'when Play is pressed', nextStatement: null, colour: '#a76d08', tooltip: 'Connect your program below this block.', hat: 'cap' },
   ...directions.map(direction => ({ type: `ka_${direction}`, message0: labels[direction], previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: `${labels[direction]} by one square.` })),
+  ...directions.map(direction => ({ type: `ka_arrow_${direction}`, message0: '%1', args0: [{ type: 'field_image', src: `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="M6 16h20m-8-8 8 8-8 8" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" transform="rotate(${({ right: 0, down: 90, left: 180, up: 270 })[direction]} 16 16)"/></svg>`)}`, width: 36, height: 36, alt: labels[direction] }], previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: `${labels[direction]} by one square.` })),
   { type: 'ka_repeat', message0: 'repeat %1 times', args0: [{ type: 'field_number', name: 'COUNT', value: 2, min: 2, max: 5, precision: 1 }], message1: 'do %1', args1: [{ type: 'input_statement', name: 'DO' }], previousStatement: null, nextStatement: null, colour: '#6d4aff', tooltip: 'Place blocks inside to repeat them. Choose 2 to 5 repeats.' },
 ]);
 
@@ -38,7 +39,7 @@ export function evaluateWorkspace(workspace: Blockly.Workspace, mission: Mission
         usedLoop = true;
         for (let i = 0; i < count && !error; i++) visit(body, depth + 1);
       } else {
-        const direction = directions.find(d => block!.type === `ka_${d}`);
+        const direction = directions.find(d => block!.type === `ka_${d}` || block!.type === `ka_arrow_${d}`);
         if (!direction) { error = 'This block cannot run in Robot Rescue. Remove it and try a movement block.'; return; }
         expanded.push({ id: block.id, kind: direction, direction, count: 1 });
         if (expanded.length > 120) { error = 'That repeats more than 120 steps. Reduce the repeat count and try again.'; return; }
@@ -51,18 +52,18 @@ export function evaluateWorkspace(workspace: Blockly.Workspace, mission: Mission
   return runProgram(mission, expanded, { usedLoop });
 }
 
-export function seedWorkspace(workspace: Blockly.WorkspaceSvg, blocks: Block[]) {
+export function seedWorkspace(workspace: Blockly.WorkspaceSvg, blocks: Block[], arrows = false) {
   const start = workspace.newBlock('ka_start');
   start.setDeletable(false); start.setMovable(false); start.setEditable(false);
   start.initSvg(); start.render(); start.moveBy(30, 45);
   let previous = start;
   for (const block of blocks) {
-    const next = workspace.newBlock(block.kind === 'repeat' ? 'ka_repeat' : `ka_${block.kind}`);
+    const next = workspace.newBlock(block.kind === 'repeat' ? 'ka_repeat' : `ka_${arrows ? 'arrow_' : ''}${block.kind}`);
     next.initSvg(); next.render();
     previous.nextConnection!.connect(next.previousConnection!);
     if (block.kind === 'repeat') {
       next.setFieldValue(String(block.count), 'COUNT');
-      const child = workspace.newBlock(`ka_${block.direction}`); child.initSvg(); child.render();
+      const child = workspace.newBlock(`ka_${arrows ? 'arrow_' : ''}${block.direction}`); child.initSvg(); child.render();
       next.getInput('DO')!.connection!.connect(child.previousConnection!);
     }
     previous = next;

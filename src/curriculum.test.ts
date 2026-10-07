@@ -27,10 +27,10 @@ const solutions: Record<string, State> = {
 describe('module curriculum', () => {
   it('gives each available topic several distinct challenges', () => {
     expect(new Set(challengeOrder).size).toBe(challengeOrder.length);
-    for (const module of modules.filter(m => m.status === 'available' && m.id !== 'project')) expect(module.challengeIds.length).toBeGreaterThanOrEqual(3);
+    for (const module of modules.filter(m => m.status === 'available' && m.id !== 'project')) expect(module.challengeIds.length).toBe(10);
     expect(new Set(challengeOrder)).toEqual(new Set(missions.map(m => m.id)));
     expect(nextChallenge('first-steps')).toBe('sequence-up');
-    expect(nextChallenge('sequence-corner')).toBe('take-a-turn');
+    expect(nextChallenge('sequence-corner')).toBe('sequences-practice-3');
     expect(nextChallenge('rescue-project')).toBeUndefined();
   });
   it('does not expose unfinished modules as playable challenges', () => {
@@ -39,7 +39,18 @@ describe('module curriculum', () => {
   for (const mission of missions) it(`${mission.id} has a working authored solution`, () => {
     const workspace = new Blockly.Workspace();
     try {
-      Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [{ type: 'ka_start', next: { block: solutions[mission.id] } }] } }, workspace);
+      let solution = solutions[mission.id];
+      if (mission.solution) {
+        solution = chain(...mission.solution);
+        if (mission.requireLoop) {
+          const route = mission.solution;
+          if (route.every(d => d === route[0])) solution = repeat(route.length, chain(route[0]));
+          else if (mission.id === 'loops-practice-20') solution = repeat(3, chain('right', 'down'));
+          else if (mission.id === 'loops-practice-19') solution = repeat(3, chain('right'), chain('up'));
+          else solution = repeat(3, chain('left'), repeat(3, chain('up')));
+        }
+      }
+      Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [{ type: 'ka_start', next: { block: solution } }] } }, workspace);
       expect(evaluateWorkspace(workspace, mission).success).toBe(true);
     } finally { workspace.dispose(); }
   });

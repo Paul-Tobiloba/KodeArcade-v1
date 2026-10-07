@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test('approved brand assets load without crowding navigation', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/#/learn');
+  await page.goto('/#/learn/arrows');
   await page.evaluate(() => document.fonts.ready);
   await expect(page).toHaveTitle('KodeArcade — Play. Build. Learn.');
   await expect(page.getByRole('link', { name: 'KodeArcade home' })).toBeVisible();

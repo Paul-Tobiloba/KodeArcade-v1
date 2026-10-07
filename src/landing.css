@@ -132,6 +132,94 @@
 .course-search:not([hidden]) { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; padding: 18px 0; }
 .course-search label { font-weight: 650; }.course-search input { min-height: 44px; border: 1px solid #c9c1e4; background: #fff; border-radius: 8px; padding: 10px 14px; flex: 1; min-width: 200px; }.course-search [role=status] { font-size: .8rem; color: #58658b; }
 .search-empty { padding: 20px; }.search-empty button { color: #5332d6; text-decoration: underline; }
+/* Illustrated lower-page world from the approved Byte adventure reference. */
+.landing ::selection { background: #ded4ff; color: #101333; }
+.landing :focus-visible { outline: 3px solid #5332d6; outline-offset: 4px; }
+.landing input { caret-color: #5332d6; }
+.landing-nav { position: relative; z-index: 5; }
+.landing nav a[aria-current=page] { color: #5332d6; text-decoration: underline; text-underline-offset: 7px; }
+.menu-toggle { display: none; }
+.text-link { display: inline-flex; gap: 9px; align-items: center; min-height: 44px; color: #5332d6; font-weight: 650; }
+.text-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+.learning-intro { max-width: none; width: 100%; padding: 75px max(5%,calc((100% - 1120px)/2)) 100px; min-height: 610px; border: 0; gap: 7%; grid-template-columns: .9fr 1.1fr; background: url('/images/steps-island.png') left bottom / auto 100% no-repeat; }
+.learning-intro .section-intro { padding-top: 12px; }
+.learning-intro h2,.support-section h2 { font-size: clamp(2rem,3.3vw,3rem); }
+.learning-intro .section-intro p { max-width: 33ch; margin-top: 18px; }
+.learning-steps { gap: 14px; counter-reset: learning-step; align-content: start; }
+.learning-steps li { position: relative; align-items: center; min-height: 128px; padding: 24px 26px 24px 40px; background: #ffffffed; border: 1px solid #ebe6ff; border-radius: 16px; counter-increment: learning-step; box-shadow: 0 12px 30px -20px #897bc4; }
+.learning-steps li::before { content: counter(learning-step); position: absolute; top: 12px; left: 12px; width: 28px; height: 28px; display: grid; place-items: center; border-radius: 50%; background: #eee8ff; color: #5332d6; font-weight: 750; font-size: .85rem; }
+.learning-steps li>svg { flex-shrink: 0; width: 42px; height: 42px; margin: 0; }
+.learning-steps h3 { font-family: 'Segoe UI',sans-serif; font-size: 1.03rem; font-weight: 750; }
+.learning-steps p { font-size: .88rem; line-height: 1.6; margin-top: 7px; }
+.module-section { max-width: 1240px; padding-top: 55px; padding-bottom: 55px; }
+.module-heading { margin-bottom: 25px; }
+.module-rows { padding: 10px 30px 0; background: #ffffffed; border: 1px solid #ebe6ff; border-radius: 20px 20px 0 0; border-bottom: 0; }
+.module-row { min-height: 80px; padding: 18px 0; }
+.module-row:first-child { border-top: 0; }
+.module-row h3 { font-family: 'Segoe UI',sans-serif; font-size: 1rem; font-weight: 750; }
+.module-section .build-project { margin: 0; border: 12px solid #fff; border-radius: 0 0 20px 20px; padding: 24px; }
+.build-project a { padding: 8px 15px; background: #08796e; color: white; border-radius: 10px; }
+.build-project a:hover { background: #065f55; }
+.support-section { max-width: none; width: 100%; min-height: 650px; padding: 65px max(5%,calc((100% - 1120px)/2)) 260px; border: 0; gap: 8%; align-items: start; background: url('/images/byte-star.png') left bottom / auto 100% no-repeat; }
+.support-section>div>svg { display: none; }
+.support-section p { max-width: 35ch; margin-top: 20px; }
+.support-section ul { padding: 35px; border-radius: 20px; background: #ffffffed; border: 1px solid #ebe6ff; gap: 25px; }
+.support-section li { font-weight: 600; font-size: .95rem; }
+.support-section li svg { color: white; background: #08796e; border-radius: 50%; width: 29px; height: 29px; padding: 6px; flex-shrink: 0; }
+.support-section li:nth-child(2) svg { background: #5342d8; }.support-section li:nth-child(3) svg { background: #7544df; }
+.landing-faq { max-width: none; width: 100%; padding: 55px max(5%,calc((100% - 1120px)/2)) 90px; min-height: 440px; background: url('/images/question-island.png') right center / 100% auto no-repeat; }
+.landing-faq h2 { text-align: center; font-size: 2.6rem; }
+.landing-faq details { width: 75%; border: 1px solid #ebe6ff; padding: 10px 20px; margin-bottom: 9px; border-radius: 13px; background: #fffffff2; }
+.landing-faq summary { display: list-item; cursor: pointer; font-size: .94rem; padding: 10px 0; color: #101333; }
+.landing-faq summary::marker { color: #6840f5; }
+.landing-faq p { font-size: .9rem; }
+.landing-final { max-width: none; min-height: 620px; padding: 45px 5% 300px; background: url('/images/journey-horizon.png') center bottom / auto 100% no-repeat; }
+.landing-final h2 { font-size: clamp(2rem,3.7vw,3.2rem); }
+.landing-final p { color: #465269; margin-top: 18px; }
+.landing-final .landing-button { margin-top: 22px; }
+.landing-footer { max-width: none; background: #ffffffed; padding-inline: max(5%,calc((100% - 1250px)/2)); border-radius: 10px 10px 0 0; justify-content: space-between; }
+.landing-footer nav { font-size: .8rem; gap: 24px; }
+.marketing-page { background: #f8faff url('/images/question-island.png') right 50px / 100% auto no-repeat; }
+.marketing-page-heading { max-width: 1120px; margin: 0 auto; padding: 55px 5% 45px; }
+.marketing-page-heading h1 { font-size: clamp(3rem,5.3vw,5rem); line-height: 1.04; margin: 15px 0 20px; letter-spacing: -.025em; max-width: 16ch; }
+.marketing-page-heading h1 span { color: #6840f5; }
+.marketing-page-heading p { max-width: 48ch; color: #465269; font-size: 1.12rem; }
+.full-catalog { max-width: 1120px; padding-block: 30px 65px; }
+.full-catalog .adventure-grid { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 18px; }
+.full-catalog .adventure-card { padding: 16px; gap: 20px; }
+.full-catalog .adventure-image { width: 38%; min-height: 200px; }
+.full-catalog .adventure-copy h3 { font-size: 1.2rem; }.full-catalog .adventure-copy p { font-size: .92rem; }.full-catalog .text-link { margin-top: auto; font-size: .9rem; }
+.full-catalog .course-search { display: flex; padding: 20px; margin-block: 20px; background: #ffffffed; border-radius: 13px; }
+.curriculum-guide,.practical-guide,.parent-guide,.computer-overview { max-width: 1120px; padding-block: 55px 70px; }
+.curriculum-guide>p { max-width: 70ch; margin-block: 20px; color: #465269; }
+.curriculum-list { padding-left: 25px; margin-block: 30px; }
+.curriculum-list li { display: grid; grid-template-columns: 1fr 1.7fr auto; gap: 20px; padding: 20px 0; border-bottom: 1px solid #ded9ed; align-items: center; }
+.curriculum-list h3 { font-size: 1.1rem; }.curriculum-list p,.curriculum-list span { color: #465269; font-size: .92rem; }
+.marketing-note { font-size: .9rem; }
+.computer-overview { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-top: 1px solid #ded9ed; }.computer-overview p { margin-block: 20px; color: #465269; }.computer-overview ul { padding: 0; list-style: none; align-self: center; display: grid; gap: 28px; }.computer-overview li { display: flex; gap: 16px; align-items: center; }.computer-overview svg { flex-shrink: 0; }.computer-overview li svg { color: #5332d6; }
+.guide-columns { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 40px; margin-block: 35px; }.guide-columns p { color: #465269; margin-top: 14px; }.guide-columns article>svg { color: #5332d6; margin-bottom: 14px; }
+@media(max-width: 900px) {
+  .menu-toggle { display: grid; place-items: center; width: 44px; height: 44px; padding: 9px; border-radius: 10px; background: #f0ebff; color: #352391; }
+  .landing-nav nav.menu-open { display: flex; position: absolute; top: calc(100% + 8px); left: 0; right: 0; padding: 15px 20px; background: #fff; border: 1px solid #ded7ff; border-radius: 16px; flex-wrap: wrap; gap: 8px 24px; box-shadow: 0 14px 28px -15px #7c70a1; }
+  .landing-nav nav.menu-open>a { display: flex; min-height: 44px; }
+  .landing-footer nav { display: flex; flex-wrap: wrap; }.landing .landing-footer nav>a { display: flex; }
+  .learning-intro { min-height: 650px; gap: 5%; padding: 55px 5% 90px; background-size: auto 500px; }.learning-steps li { padding: 24px 18px 24px 34px; gap: 14px; }.learning-steps li>svg { width: 30px; height: 30px; }
+  .support-section { padding: 55px 5% 190px; gap: 5%; background-size: auto 500px; }.support-section ul { padding: 25px; }
+  .landing-faq { padding-inline: 5%; background-size: auto 600px; }.landing-faq details { width: 80%; }
+  .guide-columns { gap: 25px; }
+}
+@media(max-width: 600px) {
+  .landing-nav .landing-button.small { font-size: .7rem; padding: 10px 8px; }.landing-nav .landing-brand { font-size: 1.12rem; gap: 5px; }.landing-nav .landing-brand img { width: 25px; height: 25px; }.landing-nav .nav-actions { gap: 4px; }.landing-nav .search-toggle { width: 32px; }.menu-toggle { width: 40px; }
+  .learning-intro { grid-template-columns: 1fr; padding: 45px 5% 230px; background-size: auto 480px; background-position: left bottom; gap: 28px; }.learning-intro h2,.support-section h2 { font-size: 2rem; }.learning-intro .section-intro p { max-width: 40ch; }.learning-steps li { min-height: 115px; padding-left: 40px; }.learning-steps li::before { width: 24px; height: 24px; left: 8px; }.learning-steps p { font-size: .85rem; }
+  .module-section { padding-top: 40px; }.module-heading { margin-bottom: 20px; }.module-rows { padding: 0 15px; }.module-row { gap: 12px; }.module-row h3 { font-size: .96rem; }.module-row p { font-size: .83rem; }.module-section .build-project { padding: 16px; border-width: 8px; }.build-project h3 { font-size: 1.15rem; }
+  .support-section { grid-template-columns: 1fr; min-height: 0; padding: 45px 5% 250px; background-size: auto 500px; background-position: left bottom; gap: 25px; }.support-section ul { padding: 25px; gap: 20px; }.support-section p { max-width: 40ch; }
+  .landing-faq { padding: 40px 5% 170px; background-size: auto 420px; background-position: right bottom; }.landing-faq h2 { font-size: 2rem; text-align: left; margin-bottom: 22px; }.landing-faq details { width: 100%; padding: 8px 15px; }.landing-faq summary { font-size: .88rem; }
+  .landing-final { min-height: 490px; padding: 40px 5% 240px; background-size: auto 370px; background-position: center bottom; }.landing-final h2 { font-size: 2.1rem; }.landing-final p { font-size: .9rem; }.landing-final p br { display: none; }
+  .landing-footer { flex-direction: column; align-items: flex-start; gap: 10px; }.landing-footer nav { gap: 22px; }.landing-footer>span:last-child { margin: 0; }
+  .marketing-page { background-size: auto 460px; background-position: 60% 80px; }.marketing-page-heading { padding: 40px 5% 35px; background: #f8faffbd; }.marketing-page-heading h1 { font-size: 3rem; }.marketing-page-heading p { font-size: 1rem; }
+  .full-catalog .adventure-grid { grid-template-columns: 1fr; }.full-catalog .adventure-card { padding: 12px; gap: 14px; }.full-catalog .adventure-image { min-height: 190px; }.full-catalog .adventure-copy h3 { font-size: 1rem; }.full-catalog .adventure-copy p { font-size: .83rem; }
+  .curriculum-guide,.practical-guide,.parent-guide,.computer-overview { padding-block: 40px; }.curriculum-list li { grid-template-columns: 1fr auto; gap: 8px; }.curriculum-list p { grid-column: 1 / -1; grid-row: 2; }.curriculum-list span { font-size: .8rem; }.curriculum-list { padding-left: 0; }.guide-columns { grid-template-columns: 1fr; gap: 30px; }.computer-overview { grid-template-columns: 1fr; gap: 35px; }
+}
 @media(min-width: 1700px) { .landing .hero-art { height: 680px; }.landing-hero { min-height: 485px; } }
 @media(max-width: 1250px) {
   .landing-nav { width: 94%; padding-inline: 20px; }.landing nav { gap: 20px; }.nav-actions { gap: 10px; }
@@ -141,7 +229,7 @@
   .adventure-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.adventure-image { width: 38%; }.adventure-copy p { font-size: .85rem; }.landing .adventure-copy h3 { font-size: 1rem; }.course-status>span { font-size: .75rem; }
 }
 @media(max-width: 900px) {
-  .landing nav { display: none; }.landing-hero { width: 89%; min-height: 480px; }.hero-copy { max-width: 60%; }.hero-copy h1 { font-size: 4.3rem; }.landing .hero-art img { object-position: 58% center; opacity: .65; }.hero-copy { background: #f9faffba; padding: 14px; border-radius: 16px; }.feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.feature-card>.round-arrow { display: flex; }
+  .landing nav { display: none; }.landing .landing-footer nav { display: flex; }.landing-hero { width: 89%; min-height: 480px; }.hero-copy { max-width: 60%; }.hero-copy h1 { font-size: 4.3rem; }.landing .hero-art img { object-position: 58% center; opacity: .65; }.hero-copy { background: #f9faffba; padding: 14px; border-radius: 16px; }.feature-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }.feature-card>.round-arrow { display: flex; }
 }
 @media(max-width: 600px) {
   .landing-nav { min-height: 64px; padding: 10px 12px; gap: 8px; border-radius: 16px; }.landing-brand { font-size: 1.25rem; }.landing-brand img { width: 28px; }.nav-actions { gap: 5px; }.landing-button.small { font-size: .73rem; padding: 10px; }.landing .search-toggle { width: 34px; padding: 7px; }
@@ -150,3 +238,17 @@
   .feature-grid { gap: 9px; }.feature-card { flex-direction: column; align-items: flex-start; padding: 15px; gap: 10px; }.feature-card>.round-arrow { display: none; }.landing .feature-card h2 { font-size: .88rem; }.feature-card p { font-size: .76rem; }.feature-icon { height: 42px; width: 42px; border-radius: 14px; }
   .adventures { padding-top: 28px; }.adventures-heading { align-items: flex-start; flex-direction: column; gap: 12px; }.landing .adventures h2 { font-size: 1.85rem; }.adventures-heading p { font-size: .85rem; }.adventure-grid { grid-template-columns: 1fr; }.adventure-image { width: 40%; min-height: 140px; }.landing .adventure-copy h3 { font-size: .96rem; }.adventure-copy p { font-size: .81rem; }.course-search:not([hidden]) { gap: 10px; }.course-search label { width: 100%; }
 }
+
+/* Isolate and softly blend scene plates; masks fade rectangular plate edges,
+   not the contours of Byte or the islands. Content remains real HTML above. */
+.learning-intro,.support-section,.landing-final { position: relative; isolation: isolate; overflow: clip; background: #f8faff; }
+.learning-intro { --scene-height: 610px; --scene-image: url('/images/steps-island.png'); }
+.support-section { --scene-height: 650px; --scene-image: url('/images/byte-star.png'); }
+.landing-final { --scene-height: 620px; --scene-image: url('/images/journey-horizon.png'); }
+.learning-intro::before,.support-section::before,.landing-final::before { content: ''; position: absolute; z-index: -1; pointer-events: none; bottom: 0; left: 0; width: calc(var(--scene-height) * 1.5); height: var(--scene-height); background: var(--scene-image) center / cover no-repeat; mask-image: linear-gradient(to right,transparent,#000 7%,#000 93%,transparent),linear-gradient(to bottom,transparent,#000 10%,#000 92%,transparent); mask-composite: intersect; }
+.landing-final::before { left: 50%; transform: translateX(-50%); }
+.marketing-page { background-image: none; }
+.marketing-page-heading { position: relative; isolation: isolate; overflow: clip; }
+.marketing-page-heading::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url('/images/question-island.png') right center / cover no-repeat; mask-image: linear-gradient(to right,transparent,#000 7%,#000 93%,transparent),linear-gradient(to bottom,#000 70%,transparent); mask-composite: intersect; }
+@media(max-width: 900px) { .learning-intro,.support-section { --scene-height: 500px; } }
+@media(max-width: 600px) { .learning-intro { --scene-height: 480px; }.support-section { --scene-height: 500px; }.landing-final { --scene-height: 370px; }.marketing-page-heading::before { opacity: .5; } }

@@ -28,7 +28,7 @@ The capstone will demonstrate a complete learning journey for one introductory c
 
 ## Intended audience
 
-The primary audience is young learners aged 8–14 who are new to programming, particularly those using shared, low-cost, or intermittently connected devices.
+The primary audience is young learners aged 6–14 who are new to programming, particularly those using shared, low-cost, or intermittently connected devices. Little Explorers (6–8) uses arrow blocks and short lessons; Code Adventurers (8–10) uses text blocks; Independent Builders (10–14) shares the text-block core with room for independent route design. Each coding course has separate saved progress, four modules of ten challenges, and one creative project. Computer Explorers adds ten mouse/touch and ten keyboard activities. See `docs/LEARNER_FEEDBACK.md` for the learner-testing changes.
 
 ## Capstone documents
 
@@ -45,7 +45,7 @@ A local React/TypeScript prototype now covers four Robot Rescue missions and a c
 
 ## Run locally
 
-The root page is the KodeArcade landing page. Choose **Start learning** to enter the workspace, or open `/#/learn` directly. For social-sharing artwork, metadata configuration, and the required public deployment origin, see [landing page notes](docs/LANDING_PAGE.md).
+The root page is the KodeArcade landing page. Public pages at `/#/courses`, `/#/how-it-works` and `/#/parents` provide the searchable course catalog, learning guide and parent information. Choose **Start learning** to enter the workspace, or open `/#/learn` directly. Course links open `/#/learn/arrows`, `/#/learn/words`, `/#/learn/builder` and `/#/learn/computer`. See [illustrated public pages](docs/ILLUSTRATED_PAGES.md) for the approved artwork extension and [landing page notes](docs/LANDING_PAGE.md) for social-sharing metadata and the required deployment origin. Hash routes share one social preview.
 
 Requires Node.js 22.12+ or 24 and npm. From this folder:
 

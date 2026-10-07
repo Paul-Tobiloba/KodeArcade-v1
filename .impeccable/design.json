@@ -1,8 +1,24 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-05T00:00:00Z",
+  "generatedAt": "2026-10-07T00:00:00Z",
   "title": "Design System: KodeArcade",
   "extensions": {
+    "publicPages": {
+      "scope": "7 October illustrated public-page extension of Build & Play; incumbent learning primitives remain unchanged.",
+      "source": "src/landing.css; src/Landing.tsx; src/MarketingPages.tsx; docs/ILLUSTRATED_PAGES.md",
+      "reference": "User-approved KodeArcade_ Byte’s Coding Adventure.png; code-led implementation, without a formal composition seed or quality card.",
+      "surfaceColors": { "ground": "#f8faff", "ink": "#101333", "action": "#6840f5" },
+      "responsive": { "menu": "900px", "stacked-sections-and-catalog": "600px" },
+      "sceneTreatment": "Isolated decorative layers below real HTML; 3:2 scene plates preserve aspect ratio and use linear edge blending, not fabricated organic-contour masks. Approved sky hero has a separate responsive crop.",
+      "provenance": "All nine shipped PNGs contain impeccable:prompt metadata; exact four new scene prompts are in docs/ILLUSTRATED_PAGES.md. Master SVG mark remains authoritative.",
+      "components": [
+        {
+          "name": "Public-page action", "kind": "button", "description": "Scoped public-page navigation action; learning controls retain their existing primitives.",
+          "html": "<a class=\"ds-public-action\" href=\"/#/learn\">Start Learning</a>",
+          "css": ".ds-public-action{display:inline-flex;align-items:center;justify-content:center;min-height:53px;padding:14px 25px;border-radius:13px;background:#6840f5;color:white;text-decoration:none;font-family:'Segoe UI',system-ui,sans-serif;font-size:1rem;font-weight:650;transition:background 160ms ease-out}.ds-public-action:hover{background:#5332d6}.ds-public-action:focus-visible{outline:3px solid #5332d6;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-public-action{transition:none}}"
+        }
+      ]
+    },
     "colorMeta": {
       "violet": { "role": "primary", "displayName": "Build Violet", "tonalRamp": ["oklch(15% .17 290)", "oklch(27% .17 290)", "oklch(38% .17 290)", "oklch(50% .17 290)", "oklch(61% .17 290)", "oklch(73% .17 290)", "oklch(84% .17 290)", "oklch(95% .17 290)"] },
       "brand-teal": { "role": "secondary", "displayName": "Play Teal", "tonalRamp": ["oklch(15% .10 180)", "oklch(27% .10 180)", "oklch(38% .10 180)", "oklch(50% .10 180)", "oklch(61% .10 180)", "oklch(73% .10 180)", "oklch(84% .10 180)", "oklch(95% .10 180)"] },

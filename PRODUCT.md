@@ -8,7 +8,7 @@ web
 
 ## Users and purpose
 
-Beginners aged approximately 8–14 learn to arrange and revise programs through Robot Rescue missions. Support recovery with progressive hints, saved work, and explained next steps. The user's idea; no research validation claimed.
+Beginners aged approximately 6–14 learn through age-labelled coding courses and Computer Explorers. Ages 6–8 use arrows and short lessons, ages 8–10 use text blocks, and ages 10–14 share the text curriculum with independent route design. Initial informal learner testing by the owner identified reading and mouse-control difficulties; no comparative learning-outcome or engagement claim is made.
 
 ## Stack
 
@@ -16,11 +16,11 @@ React, TypeScript, Vite, and Blockly. User explicitly requested drag-and-drop wi
 
 ## Scope and commitments
 
-Friday 9 October 2026: four missions (sequences, directions/order, loops, debugging) and one project. Conditions and the eight-mission world are expansion work. Nicknames optional; no account, backend, public chat, tracking, or learner-facing AI. Progress stays in this browser. KodeArcade branding only, independent of the parent workspace's company identity.
+Friday 9 October 2026: four coding modules (sequences, directions/order, loops, debugging), ten challenges each, and one project. Computer Explorers has ten mouse/touch and ten keyboard activities. Conditions and variables remain expansion work. Nicknames optional; no account, backend, public chat, tracking, or learner-facing AI. Each coding course keeps separate progress in this browser. KodeArcade branding only, independent of the parent workspace's company identity.
 
 ## Evidence and open decisions
 
-Planning docs are in docs/. Interviews, curriculum review, translated content, and real learner testing remain pending. English initially. Offline support must be verified before claimed. Deadline fixed; developer hours unknown.
+Planning docs are in docs/. Informal testing with the owner's children informed the 7 October iteration; follow-up testing and formal curriculum review remain pending. English initially. Offline support must be verified before claimed. Deadline fixed; developer hours unknown.
 
 ## Accessibility
 

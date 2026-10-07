@@ -1,10 +1,10 @@
 # Landing page and social sharing
 
-The public entry at `/` introduces KodeArcade. `/#/learn` opens the existing learning workspace without requiring server-side route rewrites; `#workspace` remains a supported learning anchor. The wordmark returns to the landing page. Learner saves keep their existing storage key. Blockly loads only when entering the workspace.
+The public entry at `/` introduces KodeArcade. Public pages at `/#/courses`, `/#/how-it-works` and `/#/parents` share navigation and footer links. `/#/learn` opens the existing learning workspace; `/#/learn/arrows`, `/#/learn/words`, `/#/learn/builder` and `/#/learn/computer` open the implemented courses. Hash routing requires no server-side route rewrites; `#workspace` remains a supported learning anchor. The wordmark returns to the landing page. Learner saves keep their existing storage key. Blockly loads only when entering the workspace.
 
 ## Design
 
-Persuade mode, within the approved Build & Play identity. Light cloud page, Fredoka headlines, system body copy, violet actions. The original Byte illustration carries the expressive fantasy atmosphere; it is concept art rather than an actual game screenshot. Sections explain the learning loop, four available modules and creative project, support features, and preview limitations. No invented outcomes, testimonials, account flow, or pricing.
+Persuade mode, within the approved Build & Play identity. The user-approved sky hero and matching lower-section scenes carry pastel clouds, floating violet islands and teal waterfalls. Fredoka headlines, system body copy and violet actions sit in real HTML above decorative concept art. Sections explain the learning loop, four coding modules and creative project, support features, and preview limitations. No invented outcomes, testimonials, account flow, or pricing. The catalog contains three coding paths sharing forty challenges plus a project, and twenty computer-basics activities. See [illustrated page notes](ILLUSTRATED_PAGES.md) for the scoped visual extension, exact new artwork prompts and verification limits.
 
 ## Artwork provenance
 
@@ -18,5 +18,7 @@ The sharing card is a generated promotional image, not the master logo asset. Ma
 ## Deployment requirement
 
 Set `SITE_URL` to the final public HTTPS origin when building (for example the actual hosting URL, not an invented domain). Vite inserts Open Graph, X large-image metadata, and, when configured, canonical and `og:url` tags into the initial HTML, so crawlers do not need JavaScript. Without an origin, development uses root-relative image URLs and omits canonical/og:url. Rebuild after setting the deployment origin. The image and page must be publicly reachable for social crawlers; a private GitHub repository or localhost link is not a public website. Platforms may cache earlier previews and choose their own crops.
+
+Client-side public-page titles update when navigating, but hash routes do not have distinct social metadata or crawler previews. The existing share card describes KodeArcade as a whole.
 
 No deployment or GitHub push is included in this local landing-page update.

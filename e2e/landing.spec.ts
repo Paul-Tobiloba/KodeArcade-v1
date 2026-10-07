@@ -14,9 +14,9 @@ test('landing, metadata and learning entry', async ({ page }, testInfo) => {
   expect((await page.request.get('/social/kodearcade-share.png')).ok()).toBe(true);
   await page.getByRole('button', { name: 'Search courses', exact: true }).click();
   await expect(page.getByLabel('Find an adventure')).toBeFocused();
-  await page.getByLabel('Find an adventure').fill('space');
+  await page.getByLabel('Find an adventure').fill('keyboard');
   await expect(page.locator('.adventure-card')).toHaveCount(1);
-  await expect(page.locator('.adventure-card')).toContainText('Coming soon');
+  await expect(page.locator('.adventure-card')).toContainText('Computer Explorers');
   await page.getByLabel('Find an adventure').fill('not-a-course');
   await expect(page.getByText('No adventures match that search.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Show all adventures' }).click();
@@ -25,6 +25,8 @@ test('landing, metadata and learning entry', async ({ page }, testInfo) => {
   await page.getByText('Where is my progress saved?', { exact: true }).click();
   await expect(page.getByText('On this device, in this browser.', { exact: false })).toBeVisible();
   await page.getByRole('link', { name: 'Start your adventure' }).click();
+  await expect(page.getByRole('heading', { name: 'Where shall we begin?' })).toBeVisible();
+  await page.getByRole('link', { name: /Ages 6–8 Little Explorers/ }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every program starts with a sequence');
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
