@@ -12,7 +12,7 @@ describe('mastery rewards', () => {
     for (let attempt = 1; attempt < 30; attempt++) for (let hint = 0; hint <= 4; hint++) expect(challengeStars(attempt, hint)).toBeGreaterThanOrEqual(1);
   });
   it('persists completed rewards independently for each course', () => {
-    let save = emptySave();
+    let save = switchCourse(emptySave(), 'arrows');
     save.progress['first-steps'] = { ...freshProgress(0), complete: true, stars: 4 };
     save = switchCourse(save, 'words');
     expect(save.progress['first-steps']).toBeUndefined();

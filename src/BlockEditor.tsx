@@ -6,7 +6,7 @@ import { directions, labels, type Block, type Mission, type RunResult } from './
 
 export type EditorHandle = { run: (mission: Mission) => RunResult; clear: () => void; highlight: (id: string) => void };
 type Props = { mission: Mission; initial: Record<string, unknown> | undefined; legacy: Block[]; running: boolean; arrows?: boolean; onChange: (state: Record<string, unknown>, count: number) => void; onError: (message: string) => void };
-type OverviewStep = { id: string; type: string; label: string; count: number; depth: number };
+type OverviewStep = { id: string; type: string; label: string; count: number; depth: number; scope: string[] };
 
 export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, initial, legacy, running, arrows = false, onChange, onError }, ref) {
   const element = useRef<HTMLDivElement>(null);
@@ -32,6 +32,8 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
       toolbox: { kind: 'flyoutToolbox', contents: [
         ...directions.map(d => ({ kind: 'block', type: `ka_${arrows ? 'arrow_' : ''}${d}`, gap: 8 })),
         ...(mission.loops ? [{ kind: 'sep', gap: 8 }, { kind: 'block', type: 'ka_repeat', gap: 8 }] : []),
+        ...(mission.conditionals ? ['ka_if', 'ka_if_else'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
+        ...(mission.variables ? ['ka_set_score', 'ka_change_score', 'ka_move_score'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
       ] },
       theme, renderer: 'geras', media: '/blockly-media/', sounds: false, trashcan: true, maxBlocks: 25,
       grid: { spacing: 24, length: 2, colour: '#d9dfe9', snap: false },
@@ -46,8 +48,9 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
     if (palette) {
       palette.getWorkspace().scrollbar?.setContainerVisible(false);
       const naturalHeight = palette.getWorkspace().getTopBlocks(false).reduce((height, block) => height + block.getHeightWidth().height + 8, mission.loops ? 24 : 16);
+      const naturalWidth = Math.max(...palette.getWorkspace().getTopBlocks(false).map(block => block.getHeightWidth().width)) + 24;
       // Palette targets stay large when a longer program scales down.
-      palette.getFlyoutScale = () => Math.min(.95, Math.max(.35, ((element.current?.clientHeight ?? 400) - 12) / naturalHeight));
+      palette.getFlyoutScale = () => Math.min(.95, ((element.current?.clientHeight ?? 400) - 12) / naturalHeight, ((element.current?.clientWidth ?? 600) * .43) / naturalWidth);
       palette.reflow();
     }
     try {
@@ -80,14 +83,16 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
         const height = Math.max(1, bounds.bottom - bounds.top);
         const scale = Math.min(.95, (metrics.viewWidth - 48) / width, (metrics.viewHeight - 80) / height);
         const steps: OverviewStep[] = [];
-        function visit(first: Blockly.Block | null, depth = 0) {
+        function visit(first: Blockly.Block | null, scope: string[] = []) {
           let block = first;
           while (block) {
             if (block.type !== 'ka_start') {
               const direction = directions.find(d => block!.type === `ka_${arrows ? 'arrow_' : ''}${d}`);
-              steps.push({ id: block.id, type: direction ?? 'repeat', label: direction ? labels[direction] : 'Repeat', count: Number(block.getFieldValue('COUNT') ?? 0), depth });
+              steps.push({ id: block.id, type: direction ?? (block.type === 'ka_repeat' ? 'repeat' : block.type), label: direction ? labels[direction] : block.type === 'ka_repeat' ? 'Repeat' : block.toString().split(' do ')[0], count: Number(block.getFieldValue('COUNT') ?? 0), depth: scope.length, scope });
             }
-            visit(block.getInputTargetBlock('DO'), depth + 1);
+            const owner = block.type === 'ka_repeat' ? `Repeat ×${block.getFieldValue('COUNT')}` : `IF ${block.getFieldValue('DIRECTION')} clear`;
+            visit(block.getInputTargetBlock('DO'), [...scope, `${owner}: DO`]);
+            visit(block.getInputTargetBlock('ELSE'), [...scope, `${owner}: ELSE`]);
             block = block.getNextBlock();
           }
         }
@@ -125,7 +130,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
       if (runningRef.current || !(event.target instanceof Element) || !event.target.closest('.blocklyFlyout .blocklyDraggable')) return;
       const source = ws.getFlyout()?.getWorkspace().getAllBlocks(false).find(b => b.getSvgRoot().contains(event.target as Node));
       const direction = source && directions.find(d => source.type === `ka_${arrows ? 'arrow_' : ''}${d}`);
-      if (direction) pointer = { x: event.clientX, y: event.clientY, ids: new Set(ws.getAllBlocks(false).map(b => b.id)), direction };
+      if (source && !event.target.closest('.blocklyEditableText')) pointer = { x: event.clientX, y: event.clientY, ids: new Set(ws.getAllBlocks(false).map(b => b.id)), direction: direction ?? source.type };
     };
     let tapFrame = 0;
     const up = (event: PointerEvent) => {
@@ -153,7 +158,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
     const ws = workspace.current; if (!ws || runningRef.current || ws.remainingCapacity() < 1) return;
     const root = ws.getBlocksByType('ka_start', false)[0]; if (!root) return;
     let last = root; while (last.getNextBlock()) last = last.getNextBlock()!;
-    const b = ws.newBlock(`ka_${arrows ? 'arrow_' : ''}${direction}`); b.initSvg(); b.render(); last.nextConnection!.connect(b.previousConnection!);
+    const b = ws.newBlock(direction.startsWith('ka_') ? direction : `ka_${arrows ? 'arrow_' : ''}${direction}`); b.initSvg(); b.render(); last.nextConnection!.connect(b.previousConnection!);
   }
   function editStep(action: 'earlier' | 'later' | 'delete') {
     const ws = workspace.current; const block = selected && ws?.getBlockById(selected.id);
@@ -174,7 +179,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
   }
   return <>
     <div className="blockly-labels"><h3>Blocks</h3><div><h3>Code canvas</h3><div className="history-buttons"><button aria-label="Undo block change" disabled={running} onClick={() => workspace.current?.undo(false)}><Undo2 size={16}/></button><button aria-label="Redo block change" disabled={running} onClick={() => workspace.current?.undo(true)}><Redo2 size={16}/></button></div></div></div>
-    <div className="blockly-container" style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><div className="blockly-host" ref={element} role="group" aria-label="Drag blocks from the palette into the code canvas" />{overview.length > 0 && <section className="program-overview" aria-label="Program steps"><p>Read across, then down. Tap a step to edit.</p><ol>{overview.map((step, index) => { const Icon = ({ right: ArrowRight, down: ArrowDown, left: ArrowLeft, up: ArrowUp } as Record<string, typeof ArrowRight>)[step.type] ?? RotateCw; return <li key={step.id}><button className={`${step.type === 'repeat' ? 'overview-repeat' : ''} ${highlighted === step.id ? 'step-running' : ''}`} aria-label={`Step ${index + 1}: ${step.label}${step.type === 'repeat' ? ` ${step.count} times` : ''}${step.depth ? ', inside repeat' : ''}`} aria-pressed={selected?.id === step.id} disabled={running} onClick={() => setSelectedId(step.id)}><small>{index + 1}{step.depth > 0 && <CornerDownRight size={10} />}</small><Icon size={22} />{step.type === 'repeat' && <span>×{step.count}</span>}</button></li>; })}</ol><div className="step-edit"><span>Step {overview.indexOf(selected) + 1}</span>{selected?.type === 'repeat' && <label>Repeat<input aria-label="Selected repeat count" type="number" min={2} max={5} value={selected.count} disabled={running} onChange={e => { const count = Number(e.target.value); if (count >= 2 && count <= 5) workspace.current?.getBlockById(selected.id)?.setFieldValue(String(count), 'COUNT'); }} /></label>}<button aria-label="Move step earlier" disabled={running || !workspace.current?.getBlockById(selected.id)?.getPreviousBlock() || workspace.current?.getBlockById(selected.id)?.getPreviousBlock()?.type === 'ka_start'} onClick={() => editStep('earlier')}><ChevronLeft size={20} /></button><button aria-label="Move step later" disabled={running || !workspace.current?.getBlockById(selected.id)?.getNextBlock()} onClick={() => editStep('later')}><ChevronRight size={20} /></button><button aria-label="Delete selected step" disabled={running} onClick={() => editStep('delete')}><Trash2 size={18} /></button></div></section>}{running && <div className="running-cover" role="status" aria-label="Code is running"/>}</div>
+    <div className="blockly-container" style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><div className="blockly-host" ref={element} role="group" aria-label="Drag blocks from the palette into the code canvas" />{overview.length > 0 && <section className="program-overview" aria-label="Program steps"><p>Read across, then down. Tap a step to edit.</p><ol>{overview.map((step, index) => { const Icon = ({ right: ArrowRight, down: ArrowDown, left: ArrowLeft, up: ArrowUp } as Record<string, typeof ArrowRight>)[step.type] ?? RotateCw; return <li key={step.id}><button className={`${step.type === 'repeat' ? 'overview-repeat' : ''} ${step.type.startsWith('ka_') ? 'overview-code' : ''} ${highlighted === step.id ? 'step-running' : ''}`} aria-label={`Step ${index + 1}: ${step.label}${step.type === 'repeat' ? ` ${step.count} times` : ''}${step.scope.length ? `, inside ${step.scope.join(', then ')}` : ''}`} aria-pressed={selected?.id === step.id} disabled={running} onClick={() => setSelectedId(step.id)}><small>{index + 1}{step.depth > 0 && <CornerDownRight size={10} />}</small>{step.scope.length > 0 && <em className="step-scope">{step.scope.join(' / ')}</em>}{step.type.startsWith('ka_') ? <span>{step.label}</span> : <Icon size={22} />}{step.type === 'repeat' && <span>×{step.count}</span>}</button></li>; })}</ol><div className="step-edit"><span>Step {overview.indexOf(selected) + 1}</span>{selected?.type === 'repeat' && <label>Repeat<input aria-label="Selected repeat count" type="number" min={2} max={5} value={selected.count} disabled={running} onChange={e => { const count = Number(e.target.value); if (count >= 2 && count <= 5) workspace.current?.getBlockById(selected.id)?.setFieldValue(String(count), 'COUNT'); }} /></label>}{selected?.type.startsWith('ka_') && <label>Edit value<input aria-label="Selected block value" type="number" min={-10} max={10} value={Number(workspace.current?.getBlockById(selected.id)?.getFieldValue('VALUE') ?? 0)} disabled={running || selected.type.includes('if') || selected.type === 'ka_move_score'} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= -10 && n <= 10) workspace.current?.getBlockById(selected.id)?.setFieldValue(String(n), 'VALUE'); }} /></label>}{(selected?.type.includes('if') || selected?.type === 'ka_move_score') && <select aria-label="Selected block direction" value={workspace.current?.getBlockById(selected.id)?.getFieldValue('DIRECTION') ?? 'right'} disabled={running} onChange={e => workspace.current?.getBlockById(selected.id)?.setFieldValue(e.target.value, 'DIRECTION')}>{directions.map(d => <option key={d} value={d}>{d}</option>)}</select>}<button aria-label="Move step earlier" disabled={running || !workspace.current?.getBlockById(selected.id)?.getPreviousBlock() || workspace.current?.getBlockById(selected.id)?.getPreviousBlock()?.type === 'ka_start'} onClick={() => editStep('earlier')}><ChevronLeft size={20} /></button><button aria-label="Move step later" disabled={running || !workspace.current?.getBlockById(selected.id)?.getNextBlock()} onClick={() => editStep('later')}><ChevronRight size={20} /></button><button aria-label="Delete selected step" disabled={running} onClick={() => editStep('delete')}><Trash2 size={18} /></button></div></section>}{running && <div className="running-cover" role="status" aria-label="Code is running"/>}</div>
     <details className={`keyboard-tools ${overview.length ? 'overview-tools' : ''}`} style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><summary>Keyboard helpers</summary><p>Add a movement to the end of the program. Use Undo to reverse a change. Full keyboard editing of nested blocks is still being evaluated.</p><div><label htmlFor="keyboard-move">Movement</label><select id="keyboard-move" value={keyboardType} onChange={e => setKeyboardType(e.target.value)}>{directions.map(d => <option key={d} value={d}>{labels[d]}</option>)}</select><button disabled={running} onClick={() => appendKeyboardBlock()}>Add block</button></div></details>
   </>;
 });

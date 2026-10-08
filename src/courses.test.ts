@@ -5,7 +5,7 @@ import { evaluateWorkspace } from './blockly';
 import { missions } from './learning';
 describe('age courses', () => {
   it('starts new young learners with a single arrow step', () => {
-    const save = emptySave(); expect(save.course).toBe('arrows');
+    const save = emptySave(); expect(save.course).toBe('grade-1');
     expect(missions[save.current].solution).toEqual(['right']);
     const ws = new Blockly.Workspace();
     try {
@@ -18,7 +18,7 @@ describe('age courses', () => {
     save.progress[id] = { ...freshProgress(index), complete: true };
     save = switchCourse(save, 'words'); expect(save.progress[id]).toBeUndefined();
     save.progress['first-steps'] = { ...freshProgress(0), attempts: 2 };
-    save = switchCourse(parseSave(JSON.stringify(save)), 'arrows');
+    save = switchCourse(parseSave(JSON.stringify(save)), 'grade-1');
     expect(save.current).toBe(index); expect(save.progress[id].complete).toBe(true);
     save = switchCourse(parseSave(JSON.stringify(save)), 'words');
     expect(save.progress['first-steps'].attempts).toBe(2);

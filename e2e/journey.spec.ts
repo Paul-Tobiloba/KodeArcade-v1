@@ -106,6 +106,6 @@ test('drawer modules, concept review, and code preservation', async ({ page }, t
   await page.getByRole('button', { name: 'Continue to challenge', exact: true }).click();
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).isVisible()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
-  await expect(page.locator('#module-drawer')).not.toContainText('Variables');
-  await expect(page.locator('#module-drawer')).not.toContainText('Conditionals');
+  await expect(page.locator('#module-drawer')).toContainText('Variables');
+  await expect(page.locator('#module-drawer')).toContainText('Conditionals');
 });

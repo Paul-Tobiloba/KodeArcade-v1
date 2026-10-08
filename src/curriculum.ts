@@ -1,4 +1,6 @@
 import { missions } from './learning';
+import { characterFor } from './characters';
+import { courses, type CourseId } from './courses';
 
 export type Lesson = {
   title: string; introduction: string;
@@ -10,6 +12,7 @@ export type LearningModule = {
   id: string; title: string; description: string; challengeIds: string[];
   status: 'available' | 'upcoming'; lesson: Lesson;
   plannedChallenges?: string[];
+  topicId?: string;
 };
 export const modules: LearningModule[] = [
   { id: 'sequences', title: 'Sequences', description: 'Give clear instructions, one step at a time.', status: 'available', challengeIds: ['first-steps', 'sequence-up', 'sequence-corner'],
@@ -28,10 +31,10 @@ export const modules: LearningModule[] = [
     lesson: { title: 'A bug is a clue', introduction: 'A program does not always do what you intended on the first try. A bug is a problem in the instructions. Debugging means finding that problem, making a change, and checking the result.',
       sections: [{ title: 'Start by watching', text: 'Run the supplied program. Notice the first step where Byte’s route differs from the route you wanted. The highlighted block shows which instruction is running.' }, { title: 'Make one useful change', text: 'A block might point the wrong way, be missing, or appear in the wrong place. Change the part your observation points to. A small change makes it easier to understand why the result changes.' }, { title: 'Test your repair', text: 'Run the program again. Did it reach the station? If not, compare the new feedback with the old feedback. Asking for a hint and trying again are both part of debugging.' }],
       example: { title: 'A missing step', steps: ['Move right', 'Move right', 'Add one more Move right'], explanation: 'If the station is three squares away and Byte stops after two, another rightward step finishes the route.' }, takeaway: 'Observe, change, test. Getting a first attempt wrong is useful information.' } },
-  { id: 'variables', title: 'Variables', description: 'Give a value a name, then use and change it.', status: 'upcoming', challengeIds: [], plannedChallenges: ['Name a value', 'Use a stored number', 'Update your value'],
-    lesson: { title: 'A name for a value', introduction: 'A variable lets a program store a value under a name. The value can be used later and can change while the program runs.', sections: [{ title: 'A value you can reuse', text: 'For example, a variable named steps could store the number 3. A program could read that value when deciding how many movements to make.' }], example: { title: 'Remember a number', steps: ['Set steps to 3', 'Use steps as a repeat count'], explanation: 'Changing the stored value changes the number the program uses.' }, takeaway: 'Variables challenges and blocks are planned; this module is not playable yet.' } },
-  { id: 'conditionals', title: 'Conditionals', description: 'Check something, then choose what to do.', status: 'upcoming', challengeIds: [], plannedChallenges: ['Ask a yes-or-no question', 'Choose between two paths', 'Combine a check with a loop'],
-    lesson: { title: 'Make a choice with a condition', introduction: 'A condition is something a program checks. The result tells it which instructions to run. For example: if the path is clear, move; otherwise, choose another direction.', sections: [{ title: 'A check that guides a choice', text: 'A condition has a true or false result. An if block runs its inside instructions only when the condition is true. An else branch describes what to do when it is false.' }], example: { title: 'Check the path', steps: ['If the path is clear', '    Move forward', 'Otherwise, choose another route'], explanation: 'This is a concept example; conditional blocks are not available in the current Robot Rescue editor.' }, takeaway: 'Conditionals challenges and blocks are planned; this module is not playable yet.' } },
+  { id: 'variables', title: 'Variables', description: 'Store, change and reuse a number with Nova.', status: 'available', challengeIds: Array.from({ length: 10 }, (_, i) => `variables-${i + 1}`),
+    lesson: { title: 'Nova’s treasure memory', introduction: 'Nova the Squirrel needs to remember a number. A variable is a named place to store a value. In this adventure, its name is score. Watch the score display as your blocks run.', sections: [{ title: 'SET puts a value in memory', text: 'Set score to 2 stores the number 2. Setting it again replaces the old number. Every new run starts fresh, so always SET score before reading or changing it.' }, { title: 'CHANGE updates the number', text: 'Change score by 1 adds one to the stored value. Change by -1 subtracts one. Repeating CHANGE with a loop counts up or down.' }, { title: 'Use the value', text: 'Move right by score steps reads the current value and moves that many squares. It does not use up or change score. If you update score, the next movement reads the new value. Finish at the star with the target score.' }], example: { title: 'Remember, update, use', steps: ['Set score to 2', 'Change score by 1', 'Move right by score steps'], explanation: 'Score starts at 2 and becomes 3. Nova moves three squares right. The value is still 3 afterwards.' }, takeaway: 'SET replaces a value. CHANGE updates it. Reading a variable leaves its value in memory.' } },
+  { id: 'conditionals', title: 'Conditionals', description: 'Check a path and choose a branch with Milo.', status: 'available', challengeIds: Array.from({ length: 10 }, (_, i) => `conditionals-${i + 1}`),
+    lesson: { title: 'Milo’s decision jungle', introduction: 'Milo the Monkey checks the path before choosing a move. A condition asks a yes-or-no question. IF path right is clear checks the square to Milo’s right at that moment.', sections: [{ title: 'IF runs when the answer is yes', text: 'Place a movement inside DO. If the checked path is clear, those instructions run. If it is blocked by a rock or the edge, DO is skipped. The next block after IF still runs.' }, { title: 'ELSE gives another choice', text: 'An IF / ELSE block has two branches. DO runs when the checked path is clear. ELSE runs when it is blocked. Only one branch runs each time; put instructions in both.' }, { title: 'Check from the current square', text: 'After Milo moves, the answer may change. Putting a decision inside Repeat checks again on every repetition. The direction you check and the direction you move are choices you make.' }], example: { title: 'Choose the clear route', steps: ['If path right is clear', '    Move right', 'Else', '    Move up'], explanation: 'With a rock to the right, Milo skips Move right and moves up instead. With a clear square to the right, only Move right runs.' }, takeaway: 'A conditional chooses which instructions run using a check made right now.' } },
   { id: 'project', title: 'Build project', description: 'Bring your ideas together in a route of your own.', status: 'available', challengeIds: ['rescue-project'],
     lesson: { title: 'Make a plan, then make it yours', introduction: 'Now you can use sequences, directions, loops, and debugging together. Your project is to choose a station and build a working route to it.', sections: [{ title: 'Choose your destination', text: 'Select a free square on the board to move the charging station. The starting square and the rock cannot be destinations.' }, { title: 'Build and improve', text: 'Make one working route, then see whether you can find a different one. You might replace repeated movements with a loop or take a different path around the rock.' }], example: { title: 'Your project plan', steps: ['Choose the destination', 'Build a route', 'Run and revise', 'Try another solution'], explanation: 'There is more than one way to solve this project. Explain one choice you made in your program.' }, takeaway: 'A program is something you can create, test, and improve.' } },
 ];
@@ -44,7 +47,25 @@ for (const module of modules.filter(m => ['sequences', 'directions', 'loops', 'd
     : [...module.challengeIds, ...practiceIds];
 }
 
-export function moduleFor(missionId: string): LearningModule { return modules.find(m => m.challengeIds.includes(missionId))!; }
+for (const module of modules) {
+  const character = characterFor(module.title);
+  if (character.name === 'Byte') continue;
+  const adapt = (s: string) => s.replaceAll('Byte', character.name).replaceAll('charging station', 'star');
+  const l = module.lesson;
+  module.lesson = { ...l, introduction: adapt(l.introduction), sections: l.sections.map(s => ({ title: s.title, text: adapt(s.text) })), example: { ...l.example, explanation: adapt(l.example.explanation) } };
+}
+const gradedModules = courses.flatMap(course => [...course.topics, 'project'].map(topic => {
+  const base = modules.find(m => m.id === topic)!;
+  return { ...base, id: `${course.id}-${topic}`, topicId: topic,
+    description: `Grade ${course.grade} · ${course.size}×${course.size} board. ${base.description}`,
+    challengeIds: topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: 10 }, (_, i) => `${course.id}-${topic}-${i + 1}`) };
+}));
+export function modulesFor(course: CourseId) { return course.startsWith('grade-') ? gradedModules.filter(m => m.id.startsWith(`${course}-`)) : modules; }
+export function moduleFor(missionId: string): LearningModule { return [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId))!; }
 export const challengeOrder = modules.flatMap(m => m.challengeIds);
-export function nextChallenge(missionId: string) { return challengeOrder[challengeOrder.indexOf(missionId) + 1]; }
+export function nextChallenge(missionId: string) {
+  const course = courses.find(c => missionId.startsWith(`${c.id}-`));
+  const order = course ? modulesFor(course.id).flatMap(m => m.challengeIds) : challengeOrder;
+  return order[order.indexOf(missionId) + 1];
+}
 export function missionIndex(id: string) { return missions.findIndex(m => m.id === id); }

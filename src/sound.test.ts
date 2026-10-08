@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ByteSound } from './sound';
+import { ByteSound, soundProfiles, type SoundCharacter } from './sound';
 import { emptySave, parseSave } from './storage';
 
 function setup(state = 'running') {
@@ -14,6 +14,46 @@ function setup(state = 'running') {
   return { sound: new ByteSound(factory), factory, context, voices };
 }
 describe('Byte sound effects', () => {
+  it('uses six distinct character movement voices', async () => {
+    const pitches: number[] = [];
+    for (const character of Object.keys(soundProfiles) as SoundCharacter[]) {
+      const { sound, context } = setup();
+      sound.setCharacter(character); await sound.play('move');
+      const voice = context.createOscillator.mock.results[0].value;
+      pitches.push(voice.frequency.setValueAtTime.mock.calls[0][0]);
+      expect(voice.type).toBe(soundProfiles[character].wave);
+      sound.dispose();
+    }
+    expect(new Set(pitches).size).toBe(6);
+  });
+  it('keeps music opt-in, gesture-unlocked and independent of effects', async () => {
+    vi.useFakeTimers();
+    try {
+      const { sound, factory, context } = setup();
+      sound.setEnabled(false); sound.setMusic(true);
+      expect(factory).not.toHaveBeenCalled();
+      await sound.unlock();
+      expect(context.createOscillator).toHaveBeenCalledTimes(1);
+      await sound.play('move');
+      expect(context.createOscillator).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(800);
+      expect(context.createOscillator).toHaveBeenCalledTimes(2);
+      sound.setMusic(false);
+      await vi.advanceTimersByTimeAsync(5000);
+      expect(context.createOscillator).toHaveBeenCalledTimes(2);
+      sound.dispose(); expect(vi.getTimerCount()).toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
+  it('changes theme without overlapping loops and disposes every timer', async () => {
+    vi.useFakeTimers();
+    try {
+      const { sound, context } = setup(); await sound.unlock(); sound.setMusic(true);
+      sound.setMusic(true); expect(vi.getTimerCount()).toBe(1);
+      sound.setCharacter('Milo'); expect(vi.getTimerCount()).toBe(1);
+      expect(context.createOscillator.mock.results.at(-1)!.value.type).toBe('triangle');
+      sound.dispose(); expect(vi.getTimerCount()).toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
   it('is silent until a gesture and lazily creates one context', async () => {
     const { sound, factory, context } = setup('suspended');
     expect(factory).not.toHaveBeenCalled(); await sound.unlock(); await sound.play('move');

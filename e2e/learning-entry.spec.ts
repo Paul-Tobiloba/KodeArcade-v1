@@ -7,11 +7,11 @@ test('choose a course, scope the drawer, and learn a concept only once', async (
   expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
   await page.screenshot({ path: `.impeccable/review/learning-entry-${testInfo.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Explore courses', exact: true }).click();
-  await page.getByRole('link', { name: /Ages 6–8 Little Explorers/ }).click();
+  await page.getByRole('link', { name: /Grade 2/ }).click();
   await expect(page.getByRole('button', { name: 'Listen to lesson' })).toBeVisible();
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).count()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
-  await page.locator('#module-drawer').getByRole('button', { name: '2 Two steps to sunshine', exact: true }).click();
+  await page.locator('#module-drawer').getByRole('button', { name: '2 Byte: A different direction', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Listen to challenge' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Start challenge', exact: true })).toHaveCount(0);
   await page.reload();
@@ -19,7 +19,7 @@ test('choose a course, scope the drawer, and learn a concept only once', async (
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Listen to lesson' })).toBeVisible();
   await page.getByRole('button', { name: 'Show modules', exact: true }).count().then(async count => { if (count) await page.getByRole('button', { name: 'Show modules', exact: true }).click(); });
-  await expect(page.locator('#module-drawer')).toContainText('Little Explorers');
+  await expect(page.locator('#module-drawer')).toContainText('Grade 2');
   await expect(page.locator('#module-drawer')).not.toContainText('Variables');
   await page.locator('#module-drawer').getByRole('button', { name: /Loops/ }).click();
   await expect(page.getByRole('heading', { name: 'Say it once, repeat it with a loop' })).toBeVisible();

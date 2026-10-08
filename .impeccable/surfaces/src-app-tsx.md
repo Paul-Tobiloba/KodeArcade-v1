@@ -2,37 +2,41 @@
 version: 1
 slug: "src-app-tsx"
 primary_target: "src/App.tsx"
-related_targets: ["src/BlockEditor.tsx","src/FeedbackDialog.tsx","src/MissionStage.tsx","src/course.css"]
+related_targets: ["src/LearningEntry.tsx","src/BlockEditor.tsx","src/FeedbackDialog.tsx","src/MissionStage.tsx","src/VoiceSettings.tsx","src/course.css"]
 ---
 
-# Learning workspace rewards — 8 October 2026
+# Grade learning workspace — 8 October 2026
 
-Mode: Operate. Scope: current Byte workspace and feedback, preserving course selection, current-course drawer, block/touch/keyboard affordances, concept-once lessons and local progress.
+Mode: Operate. Ordinary code-led extension of Build & Play, preserving local progress, concept-once lessons and mouse/touch/keyboard affordances. This current contract supersedes the earlier proposal-only grade boundary and obsolete 100px phone toolbar/280–440px board measurements.
 
 ## Direction contract
 
-THESIS: Give the child a readable task, an inviting meadow board and a working program canvas; keep rewards supportive rather than turning practice into a grade screen.
+THESIS: Choose Grade 1–6, then build a readable program and watch its character-led world react. Keep the desktop task, board and editor together, with supportive rewards after execution.
 
-OWN-WORLD: Retain the block K, Fredoka headings, deep ink rail and violet action buttons. Add a mint-and-green illustrated board surround, a pale violet editor heading and warm gold stars; all playable cells and controls remain semantic interactive elements.
+OWN-WORLD: Preserve the block K, violet actions, Fredoka headings, plain reading/control type, deep ink drawer and topic scenery. Byte guides sequences/projects; Dash directions, Gigi loops, Fix debugging, Milo conditionals and Nova variables. Semantic playable cells and controls stay above decorative artwork. No replacement identity or concept seed.
 
-STORY: Choose a course, meet a concept once, build and watch Byte, then either celebrate earned stars or adjust after a brief clue. Stars and future conceptual assessments remain separate.
+STORY: Choose a grade, meet an idea once, build, run, notice, revise and celebrate briefly. Lessons can be reopened. Challenge stars remain separate from future conceptual assessments.
 
-FIRST VIEWPORT: The challenge owns the screen beneath one 56px toolbar. Hide duplicate course/breadcrumb/title/instructions, hint banner, star explainer and editor labels. The actual 1308×677 laptop viewport must retain a 300px-or-larger board and a 450px-or-taller editor, Play beneath the board, every available palette choice visible and no document or canvas scrollbars, wheel scrolling or panning. One real Blockly palette supports dragging or tapping to append; do not add a duplicate arrow inventory. Ordinary bounded programs automatically fit the canvas. When fitting would reduce Blockly below .55 scale, show readable ordered step tiles with a minimum 44px target, arrow/repeat/count/nesting cues, selection, earlier/later/delete actions, repeat-count editing and execution highlighting. These edit the underlying saved Blockly program. Keep palette sizing independent of program scale and position keyboard helpers beyond its measured width. Navigation, lessons, hints and preferences open on demand; disclosures never take workspace height. Phones stack the board and its Play controls above the editor beneath a two-row 100px toolbar. Lessons remain scrollable reading pages.
+FIRST VIEWPORT: Course entry exposes six grade choices, suggested ages, board sizes and actual coverage without redundant grade eyebrows. Larger-screen challenge mode owns 100dvh beneath a 56px toolbar: board and editor stay visible, with Play beneath the board and no document scrolling. At widths ≤950px or heights ≤600px, stack the board above the editor and allow page scrolling beneath the sticky toolbar. Portrait phones use a 108px toolbar; small-screen board surround is 320–480px and editor is 480–640px. Long tablet course titles truncate with an ellipsis. Lessons retain normal reading scroll.
 
-FORM: Existing three-area learning workspace extended from the user's pinned 8 October screenshots. Code-led local extension; no concept-seed or new composition round. Signature interaction: earned stars appear in sequence with one soft chime each, only after Byte's run completes. Retry notice lasts three seconds, with persistent text available in the run log.
+FORM: Extend the incumbent entry and three-area Blockly workspace. One palette supports drag or tap-to-append, independently sized from the program and constrained by natural height and 43% of host width. Move by score wraps over two lines. Ordinary programs fit; below .55 Blockly scale, an editable readable overview exposes ancestor Repeat and IF DO / ELSE scope, direction/count/value editing, selection, ordering, deletion and execution highlighting. Changes edit the existing saved Blockly program. Keyboard helpers sit beyond measured palette width. Navigation, preferences, lessons and hints open on demand.
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+SIGNATURE: After successful execution, reveal earned stars with optional soft character cues and a 30-piece confetti burst lasting 2.8 seconds; reduced motion removes confetti. Original device-local synth profiles and sparse eight-note themes have separate effect/music controls, with music off by default and gesture-unlocked. Music pauses for narration, hidden tabs and success feedback. Retry feedback lasts three seconds with its explanation retained in the accessible run log.
 
-## Constraints
+FINISH: Unreviewed and undocumented is unfinished. Record the finish verdict and provenance evidence; preserve incumbent DESIGN.md and its sidecar for this ordinary extension.
 
-Latest responsive exception (8 October): the user explicitly replaced the no-scroll requirement on smaller screens. At widths up to 950px or heights up to 600px, allow normal vertical page scrolling, stack board above editor, retain a sticky toolbar, give the board surround 280–440px height and editor 480–640px height. Larger screens keep the fixed no-scroll workspace. This supersedes the phone portion of FIRST VIEWPORT above, without changing the established brand or larger-screen composition.
+## Current implementation boundary
 
-Latest navigation direction: replace toolbar stars with a physically centred course/topic label and challenge markers. Completed challenges show green checks; the current challenge has a violet outline. Markers navigate within the active topic. Smaller screens show a five-challenge window with the full list in the drawer. Earned stars remain in the success dialog, not the top navigation.
+Grade 1 has sequences, directions and debugging: 30 challenges + one project. Grade 2 adds loops: 40 + one project. Grades 3–6 include all six topics, adding conditionals and variables: 60 + one project each. Boards are 5, 5, 6, 7, 8 and 10 squares per side. Grades 1–2 use arrows, Grades 3–6 text blocks. The 316 new activities are generated variants with distinct IDs/progress, not independently authored or educationally validated curriculum tasks. The 61 legacy activities, arrows/words/builder routes and saves remain accessible; Computer Explorers retains twenty activities.
 
-Mobile icon refinement: group lesson/listen/hint together beneath progress; separate the labelled Courses library link from these tools. Use the panel icon only for the sidebar toggle. Portrait mobile header and drawer inset are 108px after this refinement.
+IF and IF / ELSE evaluate adjacent clearance from the current square. SET, CHANGE and Move by score use a number initialized each run; the number is separate from reward stars. Grade/topic lessons reuse existing concept teaching. No formal standards alignment, typed language, quizzes, separate assessment gates, badges, per-topic projects or videos are supplied. Neon, Better Auth and Resend remain the chosen deferred backend stack.
 
-Do not invent quiz-ready state, locks, functions modules, avatars/accounts or unavailable games from the sample screenshots. Preserve Play beneath the board as explicitly requested earlier and shown in the retry reference. New curriculum requirements live in SPIRAL_CURRICULUM.md; this pass does not implement 440 tasks. Landing backgrounds remain deferred. Pre-existing design-sidecar drift is reported, not repaired incidentally.
+Opt-in read-aloud uses installed local English voices. Automatic selection prefers child-related names, then known female names, with no API age/gender guarantee. Settings offers manual voice selection and Preview voice; the URI is saved under a separate key. No child text is sent to cloud speech.
 
-## Finish status
+## System preservation and finish status
 
-Current compact-layout finish disposition: ship at the four scored fixes. The reviewer resolved the readable 24-step overview, the current violet outline around a completed green check across screen sizes, keyboard helpers offset beyond the measured palette, and updated documentation. Nine refreshed fix captures showed no material regressions. This verdict covers those fixes; implementation, final verification and provenance evidence live in `docs/WORKSPACE_REWARDS.md`. It is not a global platform or accessibility certification.
+DESIGN.md and .impeccable/design.json remain unchanged. The eleven shipping rasters retain provenance with zero missing prompts reported. Topic atlases and scenery extend the incumbent world without becoming replacement global tokens.
+
+Pre-existing drift is reported, not repaired or canonized: recorded 72/64px headers, .8:1.5 proportions and 750px stacking predate challenge mode's responsive exception; Fredoka roles, mint/gold workspace surfaces, drawer states and overlays have expanded beyond older records. The sidecar retains older samples/breakpoints and a nine-raster provenance statement. See docs/TOPIC_MODULES.md.
+
+Earlier compact-workspace and topic-extension ship verdicts cover their original four-fix and two-fix scopes only. The current grade reviewer disposition is ship at the three scored fixes: stale landing availability/count, PRODUCT.md truth and the redundant grade eyebrow. All three are resolved, with no material regressions in fix captures. This verdict covers those fixes, not global platform, curriculum or accessibility certification. Supplied evidence: 444 unit tests across eleven files passed; production build passed with the known Blockly chunk-size warning; 32 browser checks passed with one intentional tablet skip; six entry/read-aloud checks passed after review fixes. This documentation pass inspected source and records, without independently rerunning those checks. Exact grade/audio boundaries live in docs/GRADE_COURSES.md.

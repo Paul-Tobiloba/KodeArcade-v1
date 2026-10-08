@@ -3,6 +3,7 @@ import * as Blockly from 'blockly/core';
 import { evaluateWorkspace } from './blockly';
 import { modules, challengeOrder, nextChallenge } from './curriculum';
 import { missions } from './learning';
+import { topicSolutions } from './topicMissions';
 type State = Blockly.serialization.blocks.State;
 const chain = (...types: string[]): State => {
   const [type, ...rest] = types;
@@ -28,7 +29,7 @@ describe('module curriculum', () => {
   it('gives each available topic several distinct challenges', () => {
     expect(new Set(challengeOrder).size).toBe(challengeOrder.length);
     for (const module of modules.filter(m => m.status === 'available' && m.id !== 'project')) expect(module.challengeIds.length).toBe(10);
-    expect(new Set(challengeOrder)).toEqual(new Set(missions.map(m => m.id)));
+    expect(new Set(challengeOrder)).toEqual(new Set(missions.filter(m => !m.id.startsWith('grade-')).map(m => m.id)));
     expect(nextChallenge('first-steps')).toBe('sequence-up');
     expect(nextChallenge('sequence-corner')).toBe('sequences-practice-3');
     expect(nextChallenge('rescue-project')).toBeUndefined();
@@ -36,10 +37,10 @@ describe('module curriculum', () => {
   it('does not expose unfinished modules as playable challenges', () => {
     for (const module of modules.filter(m => m.status === 'upcoming')) expect(module.challengeIds).toEqual([]);
   });
-  for (const mission of missions) it(`${mission.id} has a working authored solution`, () => {
+  for (const mission of missions.filter(m => !m.id.startsWith('grade-'))) it(`${mission.id} has a working authored solution`, () => {
     const workspace = new Blockly.Workspace();
     try {
-      let solution = solutions[mission.id];
+      let solution = solutions[mission.id] ?? topicSolutions[mission.id];
       if (mission.solution) {
         solution = chain(...mission.solution);
         if (mission.requireLoop) {

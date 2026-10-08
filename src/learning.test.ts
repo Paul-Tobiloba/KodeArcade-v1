@@ -60,7 +60,7 @@ describe('stored progress boundaries', () => {
     const save = emptySave();
     save.progress['first-steps'] = { blocks: moves('right'), attempts: 3, hints: 1, complete: false };
     expect(parseSave(JSON.stringify(save))).toEqual(save);
-    expect(parseSave(JSON.stringify({ ...save, current: 80 })).current).toBe(0);
+    expect(parseSave(JSON.stringify({ ...save, current: missions.length + 1 })).current).toBe(0);
   });
   it('ignores invalid project destination and repeat payload', () => {
     const save = emptySave();

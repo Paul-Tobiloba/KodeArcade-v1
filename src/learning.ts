@@ -1,3 +1,5 @@
+import { topicMissions } from './topicMissions';
+import { gradeMissions } from './gradeMissions';
 export type Direction = 'right' | 'down' | 'left' | 'up';
 export type Block = { id: string; kind: Direction | 'repeat'; direction: Direction; count: number };
 export type Position = { x: number; y: number };
@@ -6,6 +8,8 @@ export type Mission = {
   size: number; start: Position; end: Position; walls: Position[]; loops: boolean;
   requireLoop?: boolean; starter: Direction[]; hints: string[]; reflection: string;
   solution?: Direction[];
+  conditionals?: boolean; variables?: boolean; targetScore?: number;
+  requireElse?: boolean; requireChange?: boolean; requireVariableRead?: boolean;
 };
 export const directions: Direction[] = ['right', 'down', 'left', 'up'];
 export const labels: Record<Direction, string> = { right: 'Move right', down: 'Move down', left: 'Move left', up: 'Move up' };
@@ -108,12 +112,14 @@ for (const [index, item] of practice.entries()) {
     hints: ['Find Byte and the yellow station. Trace a clear path with your finger.', 'Each arrow or movement block takes one step. Rocks block the way.', item.topic === 'loops' ? 'Look for a move or a small pattern that repeats. Put it inside Repeat.' : 'Run your program and watch the highlighted block. Where does the route change?', `One route is: ${item.route.map(d => labels[d]).join(', ')}.${item.topic === 'loops' ? ' Group repeated moves in a Repeat block.' : ''}`],
     reflection: item.topic === 'loops' ? 'Spotting a repeating pattern helps you write less code.' : debugging ? 'Watching, changing and testing turns a mistake into a discovery.' : 'A big journey is made from small instructions in the right order.' });
 }
+missions.push(...topicMissions);
+missions.push(...gradeMissions);
 export const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y;
 export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };
 }
 export function initialProgram(mission: Mission): Block[] { return mission.starter.map(makeBlock); }
-export type Frame = Position & { blockId: string; step: number };
+export type Frame = Position & { blockId: string; step: number; score?: number; note?: string };
 export type RunResult = { frames: Frame[]; success: boolean; message: string };
 const delta: Record<Direction, Position> = { right: { x: 1, y: 0 }, left: { x: -1, y: 0 }, up: { x: 0, y: -1 }, down: { x: 0, y: 1 } };
 

@@ -303,6 +303,8 @@
 .program-overview li>button { width: 100%; min-height: 44px; height: 44px; position: relative; padding: 8px 4px 2px; gap: 2px; border-radius: 7px; background: #08796e; color: white; }
 .program-overview small { position: absolute; top: 1px; left: 4px; font-size: .55rem; display: flex; align-items: center; }
 .program-overview .overview-repeat { background: #6136e2; }
+.program-overview .step-scope { display: block; font-style: normal; font-size: .6rem; line-height: 1.2; padding-top: 4px; }
+.program-overview li>button:has(.step-scope) { height: auto; min-height: 64px; flex-direction: column; }
 .program-overview li>button[aria-pressed=true] { outline: 2px solid #5332d6; outline-offset: -2px; background: #075f57; }
 .program-overview li>button.step-running { outline: 3px solid #e6a017; outline-offset: -3px; background: #075f57; opacity: 1; }
 .program-overview .step-edit { display: flex; gap: 3px; align-items: center; font-size: .65rem; padding-bottom: 2px; }
@@ -323,9 +325,9 @@
 .reward-settings p { margin-top: 12px; line-height: 1.6; }
 @media(max-width: 950px) {
   .challenge-active .brand-wordmark { display: none; }
-  .game-context { display: grid; justify-items: center; gap: 4px; }
+  .game-context { position: static; transform: none; flex: 1; min-width: 0; display: grid; justify-items: center; gap: 4px; }
   .game-course-title { display: flex; align-items: center; gap: 8px; }
-  .game-course-title strong { font-size: .7rem; }
+  .game-course-title strong { font-size: .7rem; max-width: 145px; overflow: hidden; text-overflow: ellipsis; }
   .game-course-title span { font-size: .65rem; }
   .challenge-progress button { width: 24px; height: 24px; min-height: 24px; }
   .course-app.challenge-active .topbar { gap: 8px; padding: 0 8px; }
@@ -356,12 +358,47 @@
 }
 
 /* Small screens need room to play, rather than two panels squeezed into 100dvh. */
+.character-sprite { display: block; width: 100%; height: 100%; background-image: url('/images/topic-cast.png'); background-size: 300% 200%; background-repeat: no-repeat; }
+.celebration-confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; }
+.voice-settings { margin-block: 20px; }
+.voice-settings select { width: 100%; min-width: 0; min-height: 44px; padding: 8px; color: inherit; background: #fff; border: 1px solid #c7c5de; border-radius: 8px; font: inherit; }
+.celebration-confetti i { position: absolute; left: var(--confetti-x); top: -20px; width: 7px; height: 12px; background: var(--confetti-color); border-radius: 2px; animation: confetti-fall 2400ms cubic-bezier(.16,1,.3,1) var(--confetti-delay) both; }
+@keyframes confetti-fall { from { transform: translate(0,-5vh) rotate(0); opacity: 1; } to { transform: translate(var(--confetti-drift),105vh) rotate(540deg); opacity: 0; } }
+@media(prefers-reduced-motion: reduce) { .celebration-confetti { display: none; } }
+.robot-position>.character-sprite { width: 92%; height: 92%; }
+.course-app .board { grid-template-columns: repeat(var(--board-size,5),minmax(0,1fr)); grid-template-rows: repeat(var(--board-size,5),minmax(0,1fr)); }
+.course-app .robot-position { width: calc(100% / var(--board-size,5)); height: calc(100% / var(--board-size,5)); }
+.scene[data-character="Dash"] { --world-ground: #f6d5a2; --world-cell: #fff4df; --world-line: #c5a26f; }
+.scene[data-character="Gigi"] { --world-ground: #71bc8f; --world-cell: #e4f4e9; --world-line: #88b59a; }
+.scene[data-character="Fix"] { --world-ground: #dcb58a; --world-cell: #faf0e7; --world-line: #c8a889; }
+.scene[data-character="Milo"] { --world-ground: #b5d97a; --world-cell: #f0f7dc; --world-line: #a6c28a; }
+.scene[data-character="Nova"] { --world-ground: #edca85; --world-cell: #fff4df; --world-line: #c6ab79; }
+.course-app .scene:not([data-character="Byte"]) .board-surround { background: var(--world-ground); }
+.scene:not([data-character="Byte"]) .board-surround::before { content: ''; position: absolute; inset: 24px 0; background: url('/images/topic-worlds.png') var(--world-x) var(--world-y) / 300% 200% no-repeat; pointer-events: none; }
+.course-app .scene:not([data-character="Byte"]) .cell:not(.station):not(.rock) { background: var(--world-cell); border-color: var(--world-line); }
+.scene .board { z-index: 1; }
+.course-app.challenge-active .scene:not([data-character="Byte"]) .board { width: min(88cqw,88cqh); }
+.character-world,.runtime-note { z-index: 2; }
+.course-app.challenge-active .board-surround { position: relative; padding-block: 32px; }
+.character-world { position: absolute; top: 8px; left: 12px; right: 12px; font-size: .7rem; font-weight: 600; color: #174b39; }
+.runtime-note { position: absolute; bottom: 6px; left: 12px; right: 12px; font-size: .75rem; font-weight: 600; color: #172033; background: #ffffffed; border-radius: 6px; padding: 2px 8px; }
+.score-display { font-size: .75rem; white-space: nowrap; font-variant-numeric: tabular-nums; background: #fff4dc; color: #754400; padding: 4px 8px; border-radius: 6px; }
+.scene-heading:has(.score-display) { flex-wrap: wrap; gap: 4px; }
+.lesson-mentor { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.lesson-mentor>.character-sprite { width: 80px; height: 80px; flex: 0 0 80px; }
+.lesson-mentor strong { font-family: Fredoka,sans-serif; font-size: 1.2rem; }
+.lesson-mentor p { font-size: .85rem; color: #586477; margin: 4px 0 0; }
+.program-overview li>button.overview-code { height: auto; min-height: 64px; padding: 12px 4px 4px; font-size: .65rem; line-height: 1.2; }
+.editor:has(.overview-code) .program-overview { grid-template-rows: 20px minmax(0,1fr) 100px; }
+.editor:has(.overview-code) .step-edit { flex-wrap: wrap; }
+.editor:has(.overview-code) .program-overview ol { grid-template-columns: repeat(auto-fit,minmax(90px,1fr)); }
 @media(max-width: 950px), (max-height: 600px) {
+  .editor:has(.overview-code) .program-overview ol { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a287ff #f5f1ff; }
   .course-app.challenge-active { height: auto; min-height: 100dvh; overflow: visible; }
   .course-app.challenge-active .topbar { position: sticky; top: 0; z-index: 45; }
   .course-app.challenge-active .course-main { flex: none; overflow: visible; padding: 8px; }
   .course-app.challenge-active .workspace-grid { flex: none; grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 12px; }
   .course-app.challenge-active .scene { height: auto; }
-  .course-app.challenge-active .board-surround { flex: none; height: clamp(280px,calc(100vw - 48px),440px); padding: 12px; }
+  .course-app.challenge-active .board-surround { flex: none; height: clamp(320px,calc(100vw - 24px),480px); padding: 32px 12px; }
   .course-app.challenge-active .editor { height: clamp(480px,70dvh,640px); }
 }
