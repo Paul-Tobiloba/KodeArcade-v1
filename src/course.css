@@ -153,3 +153,215 @@
 .read-aloud span { max-width: 60ch; color: #465269; font-size: .9rem; }
 .course-picker>a { min-height: 44px; display: inline-flex; align-items: center; text-decoration: none; padding: 10px 16px; border-radius: 12px; }
 @media(max-width: 600px) { .entry-content { padding: 32px 20px 55px; }.entry-option { gap: 14px; flex-wrap: wrap; }.entry-age { width: 100%; }.entry-option>div { flex: 1; } }
+
+/* Owner-approved meadow workspace: real board and Blockly remain above the art. */
+.course-app { background: #f5f6ff; }
+.course-app .course-main { padding: 20px 26px 24px; }
+.course-app .course-picker { margin-bottom: 14px; padding-bottom: 10px; gap: 12px; }
+.course-picker>div>p { display: none; }
+.course-picker>div>strong { font-size: .85rem; }
+.course-picker>a { margin-left: auto; font-size: .78rem; }
+.course-app .breadcrumb { margin-bottom: 12px; }
+.course-app .island-trail { gap: 7px; margin-bottom: 16px; }
+.course-app .island-trail button { min-width: 38px; width: 38px; min-height: 38px; height: 38px; }
+.course-app .mission-heading { flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+.course-app .mission-heading h1 { font-size: clamp(1.7rem,2.4vw,2.5rem); }
+.course-app .mission-heading p { margin-top: 8px; }
+.mission-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.mission-tools .read-aloud { margin: 0; }
+.mission-tools .read-aloud span:empty { display: none; }
+.mission-tools .read-aloud span { flex-basis: 100%; }
+.challenge-reward { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 12px; background: #fff7df; color: #745000; }
+.challenge-reward>span:last-child { font-size: .75rem; }
+.star-rating { display: inline-flex; gap: 5px; color: #997723; }
+.star-rating .filled-star { color: #b87800; }
+.course-app .top-hints { padding: 12px 16px; margin-bottom: 8px; }
+.reward-explainer { font-size: .75rem; color: #465269; margin-bottom: 18px; }
+.reward-explainer summary { min-height: 28px; }
+.reward-explainer p { max-width: 75ch; line-height: 1.7; margin-top: 8px; }
+.course-app .workspace-grid { grid-template-columns: minmax(300px,1fr) minmax(430px,1.15fr); gap: 22px; }
+.course-app .scene { background: #e3f6ee; border-color: #a8d9c8; position: relative; top: auto; }
+.course-app .scene-heading { padding: 20px 20px 0; }
+.course-app .scene-heading h2 { font-family: Fredoka,sans-serif; font-size: 1.35rem; }
+.course-app .scene-heading svg { width: 25px; height: 25px; }
+.course-app .scene .goal { min-height: 58px; padding: 8px 20px 18px; font-size: .9rem; color: #36534a; }
+.course-app .board-surround { margin: 0; padding: 40px 10%; border-radius: 0; background: #b7e777 url('/images/meadow-board.png') center / cover no-repeat; }
+.course-app .board { max-width: none; border-color: #7ba887; background: #d6ead6; border-radius: 12px; }
+.course-app .cell { background: #eef7edee; border-color: #b0d0b2; }
+.course-app .cell:nth-child(even) { background: #e1efdfed; }
+.course-app .cell.station { background: #ffd660; color: #785000; border-color: #e2b140; }
+.course-app .cell.rock { background: #ccd7d1; color: #415b4f; }
+.course-app .board-legend,.course-app .position-readout { background: #fff; color: #465269; }
+.course-app .scene .run-controls { padding: 14px 18px; background: #fff; }
+.course-app .scene .stage-sound { background: #fff; padding: 0 18px 10px; }
+.course-app .clear-button { min-height: 48px; border: 1px solid #d6d0ed; border-radius: 10px; color: #352391; background: #fff; }
+.course-app .editor { border-color: #ded6ff; background: #fff; }
+.course-app .editor-title { background: #eee8ff; padding: 20px 20px 0; }
+.course-app .editor-title h2 { font-family: Fredoka,sans-serif; font-size: 1.35rem; }
+.course-app .editor-help { padding: 10px 20px 18px; margin: 0; background: #eee8ff; font-size: .85rem; color: #493c73; }
+.course-app .arrow-builder { background: #f5f1ff; margin: 0; padding: 12px 18px; }
+.course-app .blockly-labels>h3 { background: #e3f6ee; }
+.course-app .blockly-labels h3 { font-size: .85rem; }
+.course-app .blockly-host { height: 440px; }
+.course-app .arrow-course .blockly-host { height: 390px; }
+.course-drawer .current-module>.module-button { background: #342867; border-radius: 12px; }
+.course-drawer .selected-challenge { background: #6136e2; border-radius: 8px; }
+.course-drawer .selected-challenge>span { color: #fff; }
+.course-drawer .challenge-list button:has(svg)>span { color: #76e7b4; }
+.retry-toast { position: absolute; z-index: 8; top: 10px; left: 10px; right: 10px; display: flex; align-items: flex-start; gap: 10px; padding: 14px; border: 1px solid #e5b261; border-radius: 12px; background: #fff7e6; color: #803b10; box-shadow: 0 8px 22px -10px #71441b55; }
+.retry-toast strong { font-family: Fredoka,sans-serif; font-size: 1.2rem; }
+.retry-toast p { margin-top: 5px; font-size: .85rem; line-height: 1.5; }
+.retry-toast>span { font-size: .7rem; margin-left: auto; white-space: nowrap; }
+.retry-toast button { min-width: 44px; min-height: 44px; padding: 8px; color: #803b10; }
+.run-log { padding: 12px 20px; background: #fff; font-size: .8rem; color: #465269; }
+.run-log p { margin-top: 8px; line-height: 1.6; }
+.star-dialog { text-align: center; padding: 46px 34px 30px; background: #fff; position: fixed; }
+.celebration-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; color: #586477; }
+.reward-stars { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 100px; margin-block: 8px 20px; }
+.reward-stars svg { width: clamp(32px,8vw,60px); height: auto; }
+.reward-stars .unearned { color: #ddd2b5; }
+.reward-stars .earned { color: #ffbd28; stroke: #d89009; animation: star-arrives 450ms cubic-bezier(.16,1,.3,1) both; }
+.star-dialog h2 { font-family: Fredoka,sans-serif; font-size: 2.5rem; margin-bottom: 14px; }
+.star-dialog .feedback-message { color: #465269; font-size: 1.05rem; line-height: 1.7; max-width: 30ch; margin: 0 auto 26px; }
+.celebration-next { width: 100%; min-height: 56px; font-size: 1.1rem; }
+.star-dialog .next-challenge-label { margin-top: 18px; color: #586477; }
+@keyframes star-arrives { from { transform: translateY(16px) scale(.65) rotate(-12deg); filter: brightness(1.3); } to { transform: translateY(0) scale(1) rotate(0); filter: brightness(1); } }
+.still-stars .earned { animation: none; }
+@media(prefers-reduced-motion: reduce) { .reward-stars .earned { animation: none; } }
+@container(max-width: 800px) { .course-app .workspace-grid { grid-template-columns: minmax(0,1fr); }.course-app .board { max-width: 360px; }.course-app .board-surround { padding: 30px 10%; } }
+@media(max-width: 600px) { .course-app .course-main { padding: 18px 14px; }.mission-tools { gap: 8px; }.challenge-reward { flex-wrap: wrap; }.challenge-reward>span:last-child { font-size: .7rem; }.course-app .board-surround { padding: 30px 8%; }.course-app .scene .goal { min-height: 68px; }.star-dialog { padding: 40px 24px 26px; }.star-dialog h2 { font-size: 2rem; }.retry-toast { padding: 10px; }.retry-toast p { font-size: .8rem; } }
+
+/* The activity owns the viewport; supporting tools open over it, never above it. */
+.challenge-active { height: 100dvh; overflow: hidden; display: flex; flex-direction: column; }
+.course-app.challenge-active .topbar { flex: 0 0 56px; height: 56px; padding: 0 12px; gap: 12px; }
+.challenge-active .brand-symbol { width: 28px; height: 28px; }
+.challenge-active .brand-wordmark { font-size: 1.25rem; }
+.game-context { position: absolute; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; white-space: nowrap; }
+.game-course-title { display: grid; gap: 2px; }
+.game-course-title span { color: #62677d; font-size: .7rem; }
+.game-course-title strong { font-size: .8rem; }
+.challenge-progress { display: flex; align-items: center; gap: 4px; }
+.challenge-progress button { width: 28px; height: 28px; min-height: 28px; padding: 0; border: 1px solid #d8d5e8; border-radius: 50%; background: #fff; color: #5e5871; font-size: .7rem; font-variant-numeric: tabular-nums; }
+.challenge-progress button:hover { background: #eee8ff; border-color: #6d4aff; }
+.challenge-progress button[aria-current=step] { border: 2px solid #6d4aff; color: #5332d6; font-weight: 700; }
+.challenge-progress button.challenge-done { background: #087c56; border-color: #087c56; color: #fff; }
+.challenge-progress button.challenge-done[aria-current=step] { outline: 2px solid #6d4aff; outline-offset: 2px; }
+.game-tools { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.game-tools>button,.game-course-link,.game-tools .read-aloud button { width: 44px; height: 44px; min-height: 44px; padding: 10px; background: #fff; color: #363052; border: 1px solid #e0dfed; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; }
+.game-tools .game-hint { color: #855300; background: #fff8e5; border-color: #eed9a8; }
+.game-course-link>span { display: none; }
+.game-tools .read-aloud { margin: 0; position: relative; }
+.game-tools .read-aloud>span:empty { display: none; }
+.game-tools .read-aloud button { font-size: 0; gap: 0; }
+.game-tools .read-aloud button svg { width: 20px; height: 20px; flex-shrink: 0; }
+.game-tools .read-aloud>span { position: absolute; top: 52px; right: 0; width: 260px; background: white; border: 1px solid #d8d2ef; border-radius: 8px; padding: 12px; z-index: 55; font-size: .8rem; }
+.challenge-active .challenge-reward { padding: 4px 8px; border: 0; background: transparent; }
+.challenge-active .star-rating { gap: 3px; }
+.challenge-active .star-rating svg { width: 23px; height: 23px; }
+.challenge-active .header-actions { margin-left: 0; }
+.challenge-active .prototype-label,.challenge-active .settings-button span { display: none; }
+.challenge-active .settings-button { width: 44px; min-height: 44px; padding: 10px; }
+.challenge-active .course-drawer,.challenge-active .drawer-backdrop { top: 56px; }
+.course-app.challenge-active .course-main { flex: 1; min-height: 0; width: 100%; margin: 0; display: flex; flex-direction: column; position: relative; padding: 10px; overflow: hidden; }
+.challenge-active .course-picker,.challenge-active .breadcrumb,.challenge-active .island-trail,.challenge-active .workspace-footer { display: none; }
+.challenge-active .mission-heading,.challenge-active .position-readout { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.course-app.challenge-active .workspace-grid { flex: 1; min-height: 0; display: grid; align-items: stretch; grid-template-columns: minmax(0,1fr) minmax(0,1.1fr); gap: 10px; }
+.course-app.challenge-active .scene,.course-app.challenge-active .editor { height: 100%; min-height: 0; display: flex; flex-direction: column; position: relative; top: auto; border-radius: 14px; overflow: hidden; }
+.challenge-active .scene-heading { padding: 12px 16px 0; flex-shrink: 0; }
+.challenge-active .scene-heading h2 { font-size: 1.15rem; }
+.challenge-active .scene .goal { min-height: 0; padding: 6px 16px 12px; flex-shrink: 0; font-size: .83rem; }
+.course-app.challenge-active .board-surround { flex: 1; min-height: 0; padding: 12px; display: grid; place-items: center; container-type: size; }
+.course-app.challenge-active .board { width: min(94cqw,94cqh); max-width: none; flex-shrink: 0; }
+.challenge-active .board-legend,.challenge-active .byte-celebration,.challenge-active .save-note { display: none; }
+.challenge-active .scene .run-controls { padding: 10px 132px 10px 12px; flex-shrink: 0; gap: 8px; }
+.challenge-active .scene .run-button { min-height: 48px; font-size: 1rem; }
+.challenge-active .scene .clear-button { min-height: 48px; min-width: 44px; width: 44px; padding: 10px; font-size: 0; gap: 0; }
+.challenge-active .board-description,.challenge-active .run-log { position: absolute; bottom: 10px; margin: 0; padding: 0; border: 0; font-size: .7rem; }
+.challenge-active .board-description { right: 12px; }
+.challenge-active .run-log { right: 72px; }
+.challenge-active .board-description summary,.challenge-active .run-log summary { width: 52px; height: 48px; min-height: 48px; display: grid; place-items: center; padding: 0; border: 1px solid #dedeee; border-radius: 10px; font-size: 0; background: #fff; }
+.challenge-active .board-description summary::after { content: 'Board'; font-size: .7rem; }
+.challenge-active .run-log summary::after { content: 'Clue'; font-size: .7rem; }
+.challenge-active .board-description p,.challenge-active .run-log p { position: fixed; z-index: 40; bottom: 82px; left: 22px; width: min(430px,calc(100vw - 44px)); background: white; box-shadow: 0 8px 30px #17132b22; padding: 18px; border: 1px solid #dedeee; border-radius: 12px; line-height: 1.7; }
+.challenge-active .editor-title { flex-shrink: 0; min-height: 48px; padding: 10px 102px 10px 14px; display: flex; align-items: center; }
+.challenge-active .editor-title h2 { font-size: 1rem; }
+.challenge-active .editor-title>span { margin-left: auto; font-size: .65rem; }
+.challenge-active .blockly-labels { height: 0; min-height: 0; border: 0; display: block; }
+.challenge-active .blockly-labels h3 { display: none; }
+.challenge-active .history-buttons { position: absolute; z-index: 2; top: 2px; right: 8px; }
+.challenge-active .history-buttons button { width: 40px; height: 44px; padding: 10px; }
+.challenge-active .blockly-container { flex: 1; min-height: 0; }
+.course-app.challenge-active .course-main .blockly-host { height: 100%; }
+.challenge-active .keyboard-tools { position: absolute; z-index: 4; bottom: 8px; left: calc(var(--palette-width, 88px) + 12px); padding: 0; border: 0; font-size: .7rem; }
+.challenge-active .keyboard-tools summary { padding: 10px; min-height: 40px; background: #ffffffeb; border: 1px solid #e0dfed; border-radius: 8px; }
+.challenge-active .keyboard-tools[open] { width: min(330px,calc(100% - 24px)); background: #fff; border: 1px solid #ddd8ee; border-radius: 10px; padding: 12px; box-shadow: 0 8px 30px #17132b22; }
+.challenge-active .keyboard-tools p { margin: 10px 0; font-size: .75rem; }
+.program-overview { position: absolute; z-index: 3; inset: 0 4px 0 calc(var(--palette-width) + 4px); display: grid; grid-template-rows: 20px minmax(0,1fr) 44px; gap: 4px; padding: 4px; background: #fafbfe; }
+.program-overview>p { font-size: .65rem; color: #56506a; }
+.program-overview ol { display: grid; grid-template-columns: repeat(auto-fit,minmax(44px,1fr)); gap: 2px; align-content: start; list-style: none; padding: 0; margin: 0; }
+.program-overview li { min-width: 0; }
+.program-overview li>button { width: 100%; min-height: 44px; height: 44px; position: relative; padding: 8px 4px 2px; gap: 2px; border-radius: 7px; background: #08796e; color: white; }
+.program-overview small { position: absolute; top: 1px; left: 4px; font-size: .55rem; display: flex; align-items: center; }
+.program-overview .overview-repeat { background: #6136e2; }
+.program-overview li>button[aria-pressed=true] { outline: 2px solid #5332d6; outline-offset: -2px; background: #075f57; }
+.program-overview li>button.step-running { outline: 3px solid #e6a017; outline-offset: -3px; background: #075f57; opacity: 1; }
+.program-overview .step-edit { display: flex; gap: 3px; align-items: center; font-size: .65rem; padding-bottom: 2px; }
+.step-edit>span { margin-right: auto; }
+.step-edit button { width: 36px; min-height: 44px; padding: 6px; border: 1px solid #d8d5e8; background: white; }
+.step-edit label { display: flex; align-items: center; gap: 3px; }
+.step-edit input { width: 36px; padding: 4px; }
+.challenge-active .keyboard-tools.overview-tools { left: calc(var(--palette-width) + 50px); bottom: 4px; }
+.challenge-active .keyboard-tools.overview-tools:not([open]) summary { width: 38px; padding: 6px; font-size: 0; }
+.challenge-active .keyboard-tools.overview-tools:not([open]) summary::after { content: 'Keys'; font-size: .65rem; }
+.game-help { position: absolute; z-index: 35; top: 8px; right: 12px; width: min(360px,calc(100% - 24px)); padding: 18px; background: #fff9e8; border: 1px solid #ead5a5; border-radius: 14px; box-shadow: 0 12px 40px #34281722; }
+.game-help h2 { font-size: 1.1rem; }
+.game-help .hint-current { margin: 14px 0; line-height: 1.6; }
+.game-help .hint-cost { font-size: .72rem; color: #675336; margin: 10px 0; }
+.challenge-active .resume-banner,.challenge-active .warning,.challenge-active .inline-notice { position: absolute; z-index: 30; left: 20px; top: 12px; max-width: min(480px,calc(100% - 40px)); padding: 12px; background: #fff9e8; border: 1px solid #ead5a5; border-radius: 12px; box-shadow: 0 8px 30px #17132b22; }
+.challenge-active .resume-banner { display: none; }
+.reward-settings { margin-top: 18px; font-size: .85rem; }
+.reward-settings p { margin-top: 12px; line-height: 1.6; }
+@media(max-width: 950px) {
+  .challenge-active .brand-wordmark { display: none; }
+  .game-context { display: grid; justify-items: center; gap: 4px; }
+  .game-course-title { display: flex; align-items: center; gap: 8px; }
+  .game-course-title strong { font-size: .7rem; }
+  .game-course-title span { font-size: .65rem; }
+  .challenge-progress button { width: 24px; height: 24px; min-height: 24px; }
+  .course-app.challenge-active .topbar { gap: 8px; padding: 0 8px; }
+}
+@media(max-width: 700px) and (orientation: portrait) {
+  .course-app.challenge-active .topbar { flex: 0 0 108px; height: 108px; display: grid; grid-template-columns: 44px 28px minmax(0,1fr) 44px; grid-template-rows: 48px 52px; gap: 0 6px; padding-bottom: 8px; }
+  .challenge-active .game-context { position: static; transform: none; padding: 0; grid-column: 3; grid-row: 1; justify-self: center; }
+  .game-course-title { display: grid; justify-items: center; gap: 0; }
+  .game-course-title strong { display: none; }
+  .challenge-progress button { width: 26px; height: 26px; min-height: 26px; }
+  .challenge-active .header-actions { grid-column: 4; grid-row: 1; }
+  .challenge-active .game-tools { grid-row: 2; grid-column: 1 / -1; margin: 0; justify-content: center; gap: 8px; }
+  .challenge-active .game-course-link { width: auto; padding-inline: 12px; gap: 8px; margin-left: 8px; color: #5332d6; background: #f5f1ff; border-color: #ded6ff; text-decoration: none; }
+  .challenge-active .game-course-link>span { display: inline; font-size: .75rem; font-weight: 600; }
+  .challenge-active .course-drawer,.challenge-active .drawer-backdrop { top: 108px; }
+  .course-app.challenge-active .course-main { padding: 6px; }
+  .course-app.challenge-active .workspace-grid { grid-template-columns: minmax(0,1fr); grid-template-rows: minmax(0,1fr) minmax(0,1.05fr); gap: 6px; }
+  .challenge-active .scene-heading { padding: 6px 12px 0; }
+  .challenge-active .scene-heading h2 { font-size: .95rem; }
+  .challenge-active .scene .goal { font-size: .73rem; padding: 4px 12px 6px; }
+  .course-app.challenge-active .board-surround { padding: 4px; }
+  .challenge-active .scene .run-controls { padding-top: 6px; padding-bottom: 6px; }
+  .challenge-active .scene .run-button,.challenge-active .scene .clear-button { min-height: 44px; }
+  .challenge-active .board-description,.challenge-active .run-log { bottom: 6px; }
+  .challenge-active .board-description summary,.challenge-active .run-log summary { height: 44px; min-height: 44px; }
+  .challenge-active .editor-title { min-height: 40px; padding-top: 8px; padding-bottom: 8px; }
+  .challenge-active .editor-title h2 { font-size: .9rem; }
+}
+
+/* Small screens need room to play, rather than two panels squeezed into 100dvh. */
+@media(max-width: 950px), (max-height: 600px) {
+  .course-app.challenge-active { height: auto; min-height: 100dvh; overflow: visible; }
+  .course-app.challenge-active .topbar { position: sticky; top: 0; z-index: 45; }
+  .course-app.challenge-active .course-main { flex: none; overflow: visible; padding: 8px; }
+  .course-app.challenge-active .workspace-grid { flex: none; grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto; gap: 12px; }
+  .course-app.challenge-active .scene { height: auto; }
+  .course-app.challenge-active .board-surround { flex: none; height: clamp(280px,calc(100vw - 48px),440px); padding: 12px; }
+  .course-app.challenge-active .editor { height: clamp(480px,70dvh,640px); }
+}

@@ -1,11 +1,12 @@
 import type { CSSProperties, RefObject, ReactNode } from 'react';
 import { Flag, Mountain, Star } from 'lucide-react';
 import { same, type Mission, type Position, type RunResult } from './learning';
-type Props = { stageRef: RefObject<HTMLElement | null>; mission: Mission; position: Position; step: number; result: RunResult | null; running: boolean; onChooseEnd: (end: Position) => void; children: ReactNode };
-export default function MissionStage({ stageRef, mission, position, step, result, running, onChooseEnd, children }: Props) {
+type Props = { stageRef: RefObject<HTMLElement | null>; mission: Mission; position: Position; step: number; result: RunResult | null; running: boolean; onChooseEnd: (end: Position) => void; children: ReactNode; notice?: ReactNode };
+export default function MissionStage({ stageRef, mission, position, step, result, running, onChooseEnd, children, notice }: Props) {
   const project = mission.id === 'rescue-project';
   return <section ref={stageRef} className="scene" aria-label="Robot board">
-    <div className="scene-heading"><h2><Flag size={17} /> Your challenge</h2></div>
+    {notice}
+    <div className="scene-heading"><h2><Flag size={17} /> {mission.title}</h2></div>
     <p className="goal">{mission.goal}</p>
     <div className="board-surround"><div className="board" role="group" aria-label={`5 by 5 board. Byte starts at row ${mission.start.y + 1}, column ${mission.start.x + 1}. Station at row ${mission.end.y + 1}, column ${mission.end.x + 1}.`}>
       {Array.from({ length: 25 }, (_, index) => {

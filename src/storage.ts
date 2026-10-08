@@ -1,6 +1,6 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 import { isCourse, type CourseId } from './courses';
-export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown> };
+export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown> };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
 export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[] };
 export const SAVE_KEY = 'kodearcade-v1';
@@ -44,6 +44,7 @@ export function parseSave(raw: string | null): Save {
     const progress: Progress = { blocks, attempts: Number.isInteger(p.attempts) ? Math.max(0, Math.min(100000, Number(p.attempts))) : 0, hints: Number.isInteger(p.hints) ? Math.max(0, Math.min(4, Number(p.hints))) : 0, complete: p.complete === true };
     if (object(p.workspace) && JSON.stringify(p.workspace).length < 100000) progress.workspace = p.workspace;
     if (p.lessonSeen === true) progress.lessonSeen = true;
+    if (progress.complete && Number.isInteger(p.stars) && Number(p.stars) >= 1 && Number(p.stars) <= 5) progress.stars = Number(p.stars);
     if (mission.id === 'rescue-project' && object(p.end)) {
       const end = { x: Number(p.end.x), y: Number(p.end.y) };
       if (Number.isInteger(end.x) && Number.isInteger(end.y) && end.x >= 0 && end.x < 5 && end.y >= 0 && end.y < 5 && !same(end, mission.start) && !mission.walls.some(w => same(w, end))) progress.end = end;

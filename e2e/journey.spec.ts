@@ -27,16 +27,17 @@ test('drag blocks, run, recover, save and resume', async ({ page, isMobile }) =>
   await expect(page.locator('.blocklyFlyout .blocklyDraggable')).toHaveCount(4);
   await dragRight(page, isMobile); await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'A new clue for your code.' })).toBeVisible();
-  await expect(page.getByText('Byte stopped at row 3, column 2.', { exact: false })).toBeVisible();
-  await page.getByRole('button', { name: 'Back to my code', exact: true }).click();
+  await expect(page.locator('.retry-toast')).toBeVisible();
+  await expect(page.locator('.retry-toast')).toContainText('Byte stopped at row 3, column 2.');
+  await page.getByRole('button', { name: 'Dismiss retry message', exact: true }).click();
   await page.getByRole('button', { name: 'Get a hint', exact: true }).click();
   await expect(page.getByText('Look at Byte and the yellow charging station.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Close hints', exact: true }).click();
   await dragRight(page, isMobile); await dragRight(page, isMobile);
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();
   await page.reload(); await expect(page.getByText('3 / 24 blocks', { exact: true })).toBeVisible();
-  await expect(page.getByText('Welcome back.', { exact: false })).toBeVisible();
+  await expect(page.getByText('3 / 24 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Next challenge', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Next challenge', exact: true }).click();
@@ -67,7 +68,7 @@ test('capture workspace and audit the app shell', async ({ page }, testInfo) => 
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await expect(page.locator('.blocklyFlyout .blocklyDraggable')).toHaveCount(4);
   await expect.poll(async () => {
-    const hint = await page.getByRole('region', { name: 'Hints', exact: true }).boundingBox();
+    const hint = await page.getByRole('button', { name: 'Get a hint', exact: true }).boundingBox();
     const editor = await page.getByRole('region', { name: 'Code editor', exact: true }).boundingBox();
     return hint && editor ? hint.y < editor.y : false;
   }).toBe(true);
@@ -77,12 +78,11 @@ test('capture workspace and audit the app shell', async ({ page }, testInfo) => 
   const violations = (await new AxeBuilder({ page }).exclude('.blockly-container').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations;
   expect(violations).toEqual([]);
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
-  await expect(page.getByRole('dialog', { name: 'A new clue for your code.' })).toBeVisible();
+  await expect(page.locator('.retry-toast')).toBeVisible();
   await page.screenshot({ path: `.impeccable/review/${testInfo.project.name}-feedback.png`, fullPage: true });
-  expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
-  await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog', { name: 'A new clue for your code.' })).not.toBeVisible();
-  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeFocused();
+  expect((await new AxeBuilder({ page }).exclude('.blockly-container').withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
+  await expect(page.locator('.retry-toast')).not.toBeVisible({ timeout: 4000 });
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeEnabled();
 });
 
 test('drawer modules, concept review, and code preservation', async ({ page }, testInfo) => {

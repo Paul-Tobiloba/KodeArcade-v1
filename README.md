@@ -41,7 +41,9 @@ The primary audience is young learners aged 6–14 who are new to programming, p
 
 ## Current stage
 
-A local React/TypeScript prototype now covers four Robot Rescue missions and a creative route project. The submission deadline is Friday, 9 October 2026. Four missions plus the project are the approved sprint scope; eight missions remain an expansion plan. Interviews and learner testing have not yet been conducted. See [Friday sprint plan](docs/SPRINT_PLAN.md) for priorities and remaining work.
+A local React/TypeScript prototype covers four modules of ten Byte challenges and a creative route project, with separate progress for each coding course, plus twenty computer-introduction activities. Informal testing with the owner's children informed the age-labelled courses and fixed-screen workspace. The submission deadline is Friday, 9 October 2026; formal curriculum validation remains pending.
+
+The [spiral curriculum brief](docs/SPIRAL_CURRICULUM.md) records the expanded curriculum, 1–5-star rewards and age-specific assessments. The current implementation adds challenge stars, sequential success chimes and three-second retry notices; the expanded worlds, quizzes, mastery missions and badges remain planned. See [workspace reward notes](docs/WORKSPACE_REWARDS.md).
 
 ## Run locally
 

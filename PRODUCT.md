@@ -16,9 +16,13 @@ React, TypeScript, Vite, and Blockly. User explicitly requested drag-and-drop wi
 
 ## Scope and commitments
 
+Owner decision, 8 October 2026: the future platform will require signup, use Neon for the backend/database, Better Auth for authentication, and Resend for email. Record this stack now; defer implementation and provisioning until the learning-platform UI has been improved. The current prototype still has no signup/backend and keeps progress locally. Parent/guardian versus child account ownership and consent flow remain decisions to resolve before authentication implementation. No framework migration or choice between managed and self-hosted Better Auth has been approved.
+
 Friday 9 October 2026: four coding modules (sequences, directions/order, loops, debugging), ten challenges each, and one project. Computer Explorers has ten mouse/touch and ten keyboard activities. Conditions and variables remain expansion work. Nicknames optional; no account, backend, public chat, tracking, or learner-facing AI. Each coding course keeps separate progress in this browser. KodeArcade branding only, independent of the parent workspace's company identity.
 
 ## Evidence and open decisions
+
+The 8 October spiral curriculum brief (docs/SPIRAL_CURRICULUM.md) makes 1–5 challenge stars and age-appropriate end-of-topic assessment core product requirements. Current Byte challenges implement gradual retry/hint star caps, completion rewards and protected saved bests; expanded worlds, quizzes, mastery missions and badges are planned rather than shipped. Challenge mode must keep the board and canvas visible without document scrolling; long programs may scroll inside the canvas, while lesson pages retain normal reading scroll.
 
 Planning docs are in docs/. Informal testing with the owner's children informed the 7 October iteration; follow-up testing and formal curriculum review remain pending. English initially. Offline support must be verified before claimed. Deadline fixed; developer hours unknown.
 

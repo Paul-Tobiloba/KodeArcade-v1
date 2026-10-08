@@ -8,7 +8,7 @@ test('arrow course, stage Play, delayed feedback and independent saves', async (
   await expect(page.getByRole('region', { name: 'Current course' })).toContainText('Little Explorers');
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await expect(page.locator('.blocklyFlyout image')).toHaveCount(4);
-  await page.getByRole('button', { name: 'Add move right', exact: true }).click();
+  await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   await page.evaluate(() => { (document.activeElement as HTMLElement)?.blur(); window.scrollTo(0, 0); });
   await page.screenshot({ path: `.impeccable/review/age-course-${testInfo.project.name}.png`, fullPage: true });
@@ -30,11 +30,11 @@ test('arrow course, stage Play, delayed feedback and independent saves', async (
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   await page.reload(); await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   // A wrong route must also show its valid moves before feedback.
-  await page.getByRole('button', { name: 'Add move down', exact: true }).click();
+  await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_down').click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.locator('.robot-position')).toHaveCSS('--y', '3');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await expect(page.getByRole('dialog', { name: 'A new clue for your code.' })).toBeVisible();
+  await expect(page.locator('.retry-toast')).toBeVisible();
   expect(errors).toEqual([]);
 });
 

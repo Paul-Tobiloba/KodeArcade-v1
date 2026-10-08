@@ -19,17 +19,21 @@ test('sound cues follow runs and mute persists', async ({ page }) => {
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect.poll(notes).toBe(3);
-  await page.getByRole('button', { name: 'Back to my code', exact: true }).click();
+  await page.getByRole('button', { name: 'Dismiss retry message', exact: true }).click();
   await page.getByText('Keyboard helpers', { exact: true }).click();
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Add block', exact: true }).click();
   await expect(page.getByText('3 / 24 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();
-  await expect.poll(notes).toBe(10); // Retry's 3 notes, 3 steps, then 4 success notes.
+  await expect.poll(notes).toBe(11); // Retry's 3 notes, 3 steps, then 5 star chimes.
   await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Byte sound effects').uncheck();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.reload();
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByLabel('Byte sound effects')).not.toBeChecked();
+  await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();
   expect(await notes()).toBe(0);

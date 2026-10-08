@@ -1,0 +1,49 @@
+import { test, expect } from '@playwright/test';
+
+test('selecting, dragging and dropping a block does not shift the existing stack', async ({ page }) => {
+  await page.setViewportSize({ width: 1308, height: 677 });
+  await page.goto('/#/learn/arrows');
+  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  const palette = page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_down');
+  await palette.click();
+  await palette.click();
+  await expect(page.getByText('2 / 24 blocks', { exact: true })).toBeVisible();
+  const start = page.locator('.blocklySvg > .blocklyWorkspace > .blocklyBlockCanvas .ka_start > .blocklyPath');
+  await page.waitForTimeout(200);
+  const before = (await start.boundingBox())!;
+  const source = (await palette.boundingBox())!;
+  const steady = async () => {
+    const current = (await start.boundingBox())!;
+    expect(Math.abs(current.x - before.x)).toBeLessThan(1);
+    expect(Math.abs(current.y - before.y)).toBeLessThan(1);
+    expect(Math.abs(current.width - before.width)).toBeLessThan(1);
+  };
+  await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
+  await page.mouse.down();
+  await page.waitForTimeout(150);
+  await steady();
+  await page.mouse.move(before.x + 180, before.y + 160, { steps: 15 });
+  await page.waitForTimeout(150);
+  await steady();
+  await page.mouse.up();
+  await expect(page.getByText('3 / 24 blocks', { exact: true })).toBeVisible();
+  await page.waitForTimeout(250);
+  await steady();
+  await palette.click();
+  await expect(page.getByText('4 / 24 blocks', { exact: true })).toBeVisible();
+  await page.waitForTimeout(200);
+  await steady();
+  // Also exercise snapping onto the program, as in the user's recording.
+  const stack = (await start.locator('..').boundingBox())!;
+  await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(before.x + source.width / 2, stack.y + stack.height + source.height / 2 - 4, { steps: 20 });
+  await page.waitForTimeout(150);
+  await steady();
+  await page.mouse.up();
+  await expect(page.getByText('5 / 24 blocks', { exact: true })).toBeVisible();
+  await page.waitForTimeout(250);
+  await steady();
+  await expect(start.locator('..').locator('.ka_arrow_down')).toHaveCount(4);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+});

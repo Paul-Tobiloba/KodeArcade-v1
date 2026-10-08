@@ -10,7 +10,8 @@ test('choose a course, scope the drawer, and learn a concept only once', async (
   await page.getByRole('link', { name: /Ages 6–8 Little Explorers/ }).click();
   await expect(page.getByRole('button', { name: 'Listen to lesson' })).toBeVisible();
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
-  await page.getByRole('button', { name: /Island 2:/ }).click();
+  if (await page.getByRole('button', { name: 'Show modules', exact: true }).count()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+  await page.locator('#module-drawer').getByRole('button', { name: '2 Two steps to sunshine', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Listen to challenge' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Start challenge', exact: true })).toHaveCount(0);
   await page.reload();

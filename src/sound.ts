@@ -1,7 +1,7 @@
-export type SoundCue = 'move' | 'retry' | 'success';
+export type SoundCue = 'move' | 'retry' | 'success' | 'star';
 // Original, softly enveloped synth cues: no downloads, music loops, or harsh buzzers.
 const melodies: Record<SoundCue, number[]> = {
-  move: [440], retry: [392, 330, 349], success: [523.25, 659.25, 783.99, 1046.5],
+  move: [440], retry: [392, 330, 349], success: [523.25, 659.25, 783.99, 1046.5], star: [1046.5],
 };
 export class ByteSound {
   private context: AudioContext | null = null;
