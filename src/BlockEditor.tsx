@@ -3,33 +3,53 @@ import * as Blockly from 'blockly/core';
 import { Undo2, Redo2, ArrowRight, ArrowDown, ArrowLeft, ArrowUp, RotateCw, Trash2, ChevronLeft, ChevronRight, CornerDownRight } from 'lucide-react';
 import { evaluateWorkspace, seedWorkspace, theme } from './blockly';
 import { directions, labels, type Block, type Mission, type RunResult } from './learning';
+import { drawingWorkspaceCode, seedDrawingCode } from './drawingBlockly';
 
-export type EditorHandle = { run: (mission: Mission) => RunResult; clear: () => void; highlight: (id: string) => void };
-type Props = { mission: Mission; initial: Record<string, unknown> | undefined; legacy: Block[]; running: boolean; arrows?: boolean; onChange: (state: Record<string, unknown>, count: number) => void; onError: (message: string) => void };
+export type EditorHandle = { run: (mission: Mission) => RunResult; clear: () => void; highlight: (id: string) => void; drawingCode?: () => string };
+type Props = { mission: Mission; initial: Record<string, unknown> | undefined; legacy: Block[]; running: boolean; arrows?: boolean; drawing?: { code: string; step: number; turn: number; repeats?: number; advanced?: boolean; young?: boolean }; onChange: (state: Record<string, unknown>, count: number) => void; onError: (message: string) => void };
 type OverviewStep = { id: string; type: string; label: string; count: number; depth: number; scope: string[] };
 
-export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, initial, legacy, running, arrows = false, onChange, onError }, ref) {
+export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, initial, legacy, running, arrows = false, drawing, onChange, onError }, ref) {
   const element = useRef<HTMLDivElement>(null);
   const workspace = useRef<Blockly.WorkspaceSvg | null>(null);
   const change = useRef(onChange); change.current = onChange;
   const error = useRef(onError); error.current = onError;
   const runningRef = useRef(running); runningRef.current = running;
-  const [keyboardType, setKeyboardType] = useState('right');
+  const [keyboardType, setKeyboardType] = useState(drawing ? `ka_draw_${drawing.young ? 'arrow_' : ''}forward` : 'right');
   const [overview, setOverview] = useState<OverviewStep[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [highlighted, setHighlighted] = useState('');
   const [paletteWidth, setPaletteWidth] = useState(88);
   const selected = overview.find(step => step.id === selectedId) ?? overview[0];
+  const selectedBlock = selected && workspace.current?.getBlockById(selected.id);
+  const valueMin = drawing ? selected?.type.includes('forward') ? 1 : 0 : -10;
+  const valueMax = drawing ? selected?.type.includes('forward') ? 150 : 360 : 10;
+  const repeatMax = drawing ? 12 : 5;
+  const drawingTurn = !!drawing && selected?.type === 'ka_draw_turn';
+  function stepFields() {
+    return <>
+      {selected?.type === 'repeat' && <label>Repeat<input aria-label="Selected repeat count" type="number" min={2} max={repeatMax} value={selected.count} disabled={running} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= 2 && n <= repeatMax) selectedBlock?.setFieldValue(String(n),'COUNT'); }}/></label>}
+      {selected?.type.startsWith('ka_') && selectedBlock?.getField('VALUE') && <label>{drawing ? selected.type.includes('forward') ? 'Distance' : 'Angle' : 'Edit value'}<input aria-label="Selected block value" type="number" min={valueMin} max={valueMax} value={Number(selectedBlock.getFieldValue('VALUE') ?? 0)} disabled={running} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= valueMin && n <= valueMax) selectedBlock.setFieldValue(String(n),'VALUE'); }}/></label>}
+      {drawingTurn && <select aria-label="Selected turn direction" disabled={running} value={selectedBlock?.getFieldValue('SIDE') ?? 'left'} onChange={e => selectedBlock?.setFieldValue(e.target.value,'SIDE')}><option value="left">Left</option><option value="right">Right</option></select>}
+      {(selected?.type.includes('if') || selected?.type === 'ka_move_score') && <select aria-label="Selected block direction" value={selectedBlock?.getFieldValue('DIRECTION') ?? 'right'} disabled={running} onChange={e => selectedBlock?.setFieldValue(e.target.value,'DIRECTION')}>{directions.map(d => <option key={d} value={d}>{d}</option>)}</select>}
+    </>;
+  }
   useImperativeHandle(ref, () => ({
     run: m => workspace.current ? evaluateWorkspace(workspace.current, m) : { frames: [], success: false, message: 'The block workspace is still loading. Try again in a moment.' },
     clear: () => { if (workspace.current) { workspace.current.clear(); seedWorkspace(workspace.current, [], arrows); } },
     highlight: id => { workspace.current?.highlightBlock(id || null); setHighlighted(id); },
+    drawingCode: () => workspace.current ? drawingWorkspaceCode(workspace.current) : '',
   }), [arrows]);
 
   useEffect(() => {
     if (!element.current) return;
     const ws = Blockly.inject(element.current, {
-      toolbox: { kind: 'flyoutToolbox', contents: [
+      toolbox: { kind: 'flyoutToolbox', contents: drawing ? [
+        { kind: 'block', type: drawing.young ? 'ka_draw_arrow_forward' : 'ka_draw_forward', fields: { VALUE: drawing.step } },
+        ...['left','right'].map(side => ({kind:'block',type:drawing.young ? `ka_draw_arrow_${side}` : 'ka_draw_turn',fields:drawing.young ? {VALUE:drawing.turn} : {SIDE:side,VALUE:drawing.turn}})),
+        ...(drawing.repeats ? [{kind:'block',type:'ka_draw_repeat',fields:{COUNT:drawing.repeats}}] : []),
+        ...(drawing.advanced ? ['push','pop','pen_up','pen_down'].map(type => ({kind:'block',type:`ka_draw_${type}`})) : []),
+      ] : [
         ...directions.map(d => ({ kind: 'block', type: `ka_${arrows ? 'arrow_' : ''}${d}`, gap: 8 })),
         ...(mission.loops ? [{ kind: 'sep', gap: 8 }, { kind: 'block', type: 'ka_repeat', gap: 8 }] : []),
         ...(mission.conditionals ? ['ka_if', 'ka_if_else'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
@@ -59,7 +79,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
         const starts = ws.getBlocksByType('ka_start', false);
         if (starts.length !== 1 || ws.getAllBlocks(false).length > 25) throw new Error('Invalid workspace');
         starts[0].setDeletable(false); starts[0].setMovable(false); starts[0].setEditable(false);
-      } else seedWorkspace(ws, legacy, arrows);
+      } else { seedWorkspace(ws, legacy, arrows); if (drawing?.code) seedDrawingCode(ws,drawing.code, drawing.young); }
     } catch {
       ws.clear(); seedWorkspace(ws, legacy, arrows);
       error.current('The saved block layout could not be restored. Your last movement sequence is available; please check it before running.');
@@ -76,6 +96,9 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
         if (pointerHeld || ws.isDragging()) return;
         const resized = fittedWidth !== element.current?.clientWidth || fittedHeight !== element.current?.clientHeight;
         if (resized) Blockly.svgResize(ws);
+        // These empty SVG paths paint connection outlines; the actual block
+        // options carry their names. Do not expose them as listbox children.
+        element.current?.querySelectorAll('.blocklyHighlightedConnectionPath').forEach(path => path.setAttribute('aria-hidden','true'));
         const bounds = ws.getBlocksBoundingBox();
         const metrics = ws.getMetrics();
         if (!metrics) return;
@@ -88,9 +111,10 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
           while (block) {
             if (block.type !== 'ka_start') {
               const direction = directions.find(d => block!.type === `ka_${arrows ? 'arrow_' : ''}${d}`);
-              steps.push({ id: block.id, type: direction ?? (block.type === 'ka_repeat' ? 'repeat' : block.type), label: direction ? labels[direction] : block.type === 'ka_repeat' ? 'Repeat' : block.toString().split(' do ')[0], count: Number(block.getFieldValue('COUNT') ?? 0), depth: scope.length, scope });
+              const repeat = block.type === 'ka_repeat' || block.type === 'ka_draw_repeat';
+              steps.push({ id: block.id, type: direction ?? (repeat ? 'repeat' : block.type), label: direction ? labels[direction] : repeat ? 'Repeat' : block.toString().split(' do ')[0], count: Number(block.getFieldValue('COUNT') ?? 0), depth: scope.length, scope });
             }
-            const owner = block.type === 'ka_repeat' ? `Repeat ×${block.getFieldValue('COUNT')}` : `IF ${block.getFieldValue('DIRECTION')} clear`;
+            const owner = block.type === 'ka_repeat' || block.type === 'ka_draw_repeat' ? `Repeat ×${block.getFieldValue('COUNT')}` : `IF ${block.getFieldValue('DIRECTION')} clear`;
             visit(block.getInputTargetBlock('DO'), [...scope, `${owner}: DO`]);
             visit(block.getInputTargetBlock('ELSE'), [...scope, `${owner}: ELSE`]);
             block = block.getNextBlock();
@@ -158,7 +182,12 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
     const ws = workspace.current; if (!ws || runningRef.current || ws.remainingCapacity() < 1) return;
     const root = ws.getBlocksByType('ka_start', false)[0]; if (!root) return;
     let last = root; while (last.getNextBlock()) last = last.getNextBlock()!;
-    const b = ws.newBlock(direction.startsWith('ka_') ? direction : `ka_${arrows ? 'arrow_' : ''}${direction}`); b.initSvg(); b.render(); last.nextConnection!.connect(b.previousConnection!);
+    const b = ws.newBlock(direction.startsWith('ka_') ? direction : `ka_${arrows ? 'arrow_' : ''}${direction}`); b.initSvg();
+    if (drawing) {
+      if (b.getField('VALUE')) b.setFieldValue(String(direction.includes('forward') ? drawing.step : drawing.turn),'VALUE');
+      if (b.getField('COUNT')) b.setFieldValue(String(drawing.repeats ?? 4),'COUNT');
+    }
+    b.render(); last.nextConnection!.connect(b.previousConnection!);
   }
   function editStep(action: 'earlier' | 'later' | 'delete') {
     const ws = workspace.current; const block = selected && ws?.getBlockById(selected.id);
@@ -179,7 +208,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
   }
   return <>
     <div className="blockly-labels"><h3>Blocks</h3><div><h3>Code canvas</h3><div className="history-buttons"><button aria-label="Undo block change" disabled={running} onClick={() => workspace.current?.undo(false)}><Undo2 size={16}/></button><button aria-label="Redo block change" disabled={running} onClick={() => workspace.current?.undo(true)}><Redo2 size={16}/></button></div></div></div>
-    <div className="blockly-container" style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><div className="blockly-host" ref={element} role="group" aria-label="Drag blocks from the palette into the code canvas" />{overview.length > 0 && <section className="program-overview" aria-label="Program steps"><p>Read across, then down. Tap a step to edit.</p><ol>{overview.map((step, index) => { const Icon = ({ right: ArrowRight, down: ArrowDown, left: ArrowLeft, up: ArrowUp } as Record<string, typeof ArrowRight>)[step.type] ?? RotateCw; return <li key={step.id}><button className={`${step.type === 'repeat' ? 'overview-repeat' : ''} ${step.type.startsWith('ka_') ? 'overview-code' : ''} ${highlighted === step.id ? 'step-running' : ''}`} aria-label={`Step ${index + 1}: ${step.label}${step.type === 'repeat' ? ` ${step.count} times` : ''}${step.scope.length ? `, inside ${step.scope.join(', then ')}` : ''}`} aria-pressed={selected?.id === step.id} disabled={running} onClick={() => setSelectedId(step.id)}><small>{index + 1}{step.depth > 0 && <CornerDownRight size={10} />}</small>{step.scope.length > 0 && <em className="step-scope">{step.scope.join(' / ')}</em>}{step.type.startsWith('ka_') ? <span>{step.label}</span> : <Icon size={22} />}{step.type === 'repeat' && <span>×{step.count}</span>}</button></li>; })}</ol><div className="step-edit"><span>Step {overview.indexOf(selected) + 1}</span>{selected?.type === 'repeat' && <label>Repeat<input aria-label="Selected repeat count" type="number" min={2} max={5} value={selected.count} disabled={running} onChange={e => { const count = Number(e.target.value); if (count >= 2 && count <= 5) workspace.current?.getBlockById(selected.id)?.setFieldValue(String(count), 'COUNT'); }} /></label>}{selected?.type.startsWith('ka_') && <label>Edit value<input aria-label="Selected block value" type="number" min={-10} max={10} value={Number(workspace.current?.getBlockById(selected.id)?.getFieldValue('VALUE') ?? 0)} disabled={running || selected.type.includes('if') || selected.type === 'ka_move_score'} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= -10 && n <= 10) workspace.current?.getBlockById(selected.id)?.setFieldValue(String(n), 'VALUE'); }} /></label>}{(selected?.type.includes('if') || selected?.type === 'ka_move_score') && <select aria-label="Selected block direction" value={workspace.current?.getBlockById(selected.id)?.getFieldValue('DIRECTION') ?? 'right'} disabled={running} onChange={e => workspace.current?.getBlockById(selected.id)?.setFieldValue(e.target.value, 'DIRECTION')}>{directions.map(d => <option key={d} value={d}>{d}</option>)}</select>}<button aria-label="Move step earlier" disabled={running || !workspace.current?.getBlockById(selected.id)?.getPreviousBlock() || workspace.current?.getBlockById(selected.id)?.getPreviousBlock()?.type === 'ka_start'} onClick={() => editStep('earlier')}><ChevronLeft size={20} /></button><button aria-label="Move step later" disabled={running || !workspace.current?.getBlockById(selected.id)?.getNextBlock()} onClick={() => editStep('later')}><ChevronRight size={20} /></button><button aria-label="Delete selected step" disabled={running} onClick={() => editStep('delete')}><Trash2 size={18} /></button></div></section>}{running && <div className="running-cover" role="status" aria-label="Code is running"/>}</div>
-    <details className={`keyboard-tools ${overview.length ? 'overview-tools' : ''}`} style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><summary>Keyboard helpers</summary><p>Add a movement to the end of the program. Use Undo to reverse a change. Full keyboard editing of nested blocks is still being evaluated.</p><div><label htmlFor="keyboard-move">Movement</label><select id="keyboard-move" value={keyboardType} onChange={e => setKeyboardType(e.target.value)}>{directions.map(d => <option key={d} value={d}>{labels[d]}</option>)}</select><button disabled={running} onClick={() => appendKeyboardBlock()}>Add block</button></div></details>
+    <div className="blockly-container" style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><div className="blockly-host" ref={element} role="group" aria-label="Drag blocks from the palette into the code canvas" />{overview.length > 0 && <section className="program-overview" aria-label="Program steps"><p>Read across, then down. Tap a step to edit.</p><ol>{overview.map((step, index) => { const Icon = ({ right: ArrowRight, down: ArrowDown, left: ArrowLeft, up: ArrowUp } as Record<string, typeof ArrowRight>)[step.type] ?? RotateCw; return <li key={step.id}><button className={`${step.type === 'repeat' ? 'overview-repeat' : ''} ${step.type.startsWith('ka_') ? 'overview-code' : ''} ${highlighted === step.id ? 'step-running' : ''}`} aria-label={`Step ${index + 1}: ${step.label}${step.type === 'repeat' ? ` ${step.count} times` : ''}${step.scope.length ? `, inside ${step.scope.join(', then ')}` : ''}`} aria-pressed={selected?.id === step.id} disabled={running} onClick={() => setSelectedId(step.id)}><small>{index + 1}{step.depth > 0 && <CornerDownRight size={10} />}</small>{step.scope.length > 0 && <em className="step-scope">{step.scope.join(' / ')}</em>}{step.type.startsWith('ka_') ? <span>{step.label}</span> : <Icon size={22} />}{step.type === 'repeat' && <span>×{step.count}</span>}</button></li>; })}</ol><div className="step-edit"><span>Step {overview.indexOf(selected) + 1}</span>{stepFields()}<button aria-label="Move step earlier" disabled={running || !workspace.current?.getBlockById(selected.id)?.getPreviousBlock() || workspace.current?.getBlockById(selected.id)?.getPreviousBlock()?.type === 'ka_start'} onClick={() => editStep('earlier')}><ChevronLeft size={20} /></button><button aria-label="Move step later" disabled={running || !workspace.current?.getBlockById(selected.id)?.getNextBlock()} onClick={() => editStep('later')}><ChevronRight size={20} /></button><button aria-label="Delete selected step" disabled={running} onClick={() => editStep('delete')}><Trash2 size={18} /></button></div></section>}{running && <div className="running-cover" role="status" aria-label="Code is running"/>}</div>
+    <details className={`keyboard-tools ${overview.length ? 'overview-tools' : ''}`} style={{ '--palette-width': `${paletteWidth}px` } as CSSProperties}><summary>Keyboard helpers</summary><p>Add an instruction to the end of the program. Use Undo to reverse a change. Full keyboard editing of nested blocks is still being evaluated.</p><div><label htmlFor="keyboard-move">Instruction</label><select id="keyboard-move" value={keyboardType} onChange={e => setKeyboardType(e.target.value)}>{drawing ? <><option value={`ka_draw_${drawing.young ? 'arrow_' : ''}forward`}>Forward</option><option value={drawing.young ? 'ka_draw_arrow_left' : 'ka_draw_turn'}>Turn left</option>{drawing.young && <option value="ka_draw_arrow_right">Turn right</option>}{drawing.repeats && <option value="ka_draw_repeat">Repeat</option>}</> : directions.map(d => <option key={d} value={d}>{labels[d]}</option>)}</select><button disabled={running} onClick={() => appendKeyboardBlock()}>Add block</button></div></details>
   </>;
 });

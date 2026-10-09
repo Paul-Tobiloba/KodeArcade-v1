@@ -1,5 +1,6 @@
 import { topicMissions } from './topicMissions';
 import { gradeMissions } from './gradeMissions';
+import { journeyMissions } from './topicJourney';
 export type Direction = 'right' | 'down' | 'left' | 'up';
 export type Block = { id: string; kind: Direction | 'repeat'; direction: Direction; count: number };
 export type Position = { x: number; y: number };
@@ -113,7 +114,7 @@ for (const [index, item] of practice.entries()) {
     reflection: item.topic === 'loops' ? 'Spotting a repeating pattern helps you write less code.' : debugging ? 'Watching, changing and testing turns a mistake into a discovery.' : 'A big journey is made from small instructions in the right order.' });
 }
 missions.push(...topicMissions);
-missions.push(...gradeMissions);
+missions.push(...gradeMissions, ...journeyMissions);
 export const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y;
 export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };

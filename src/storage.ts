@@ -1,10 +1,11 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 import { firstChallenge, isCourse, type CourseId } from './courses';
-export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown> };
+import { SEQUENCE_TOPIC, type TopicRecord } from './topicJourney';
+export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text' };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
-export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[] };
+export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord> };
 export const SAVE_KEY = 'kodearcade-v1';
-export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [] });
+export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [], topicRecords: {} });
 export function switchCourse(save: Save, course: CourseId): Save {
   if (save.course === course) return save;
   const target = save.courseProgress[course] ?? { current: missions.findIndex(m => m.id === firstChallenge(course)), progress: {} };
@@ -25,6 +26,10 @@ export function parseSave(raw: string | null): Save {
     const parsed = parseSave(JSON.stringify({ version: 1, course: id, current: state.current, progress: state.progress }));
     save.courseProgress[id] = { current: parsed.current, progress: parsed.progress };
   }
+  if (object(value.topicRecords) && object(value.topicRecords[SEQUENCE_TOPIC])) {
+    const record = value.topicRecords[SEQUENCE_TOPIC];
+    save.topicRecords[SEQUENCE_TOPIC] = { watched: record.watched === true, guided: record.guided === true, mastered: record.mastered === true, masteryAttempts: Number.isInteger(record.masteryAttempts) ? Math.max(0, Math.min(100000, Number(record.masteryAttempts))) : 0 };
+  }
   save.nickname = typeof value.nickname === 'string' ? value.nickname.slice(0, 20) : '';
   save.reducedMotion = value.reducedMotion === true;
   save.largeText = value.largeText === true;
@@ -44,6 +49,8 @@ export function parseSave(raw: string | null): Save {
     }
     const progress: Progress = { blocks, attempts: Number.isInteger(p.attempts) ? Math.max(0, Math.min(100000, Number(p.attempts))) : 0, hints: Number.isInteger(p.hints) ? Math.max(0, Math.min(4, Number(p.hints))) : 0, complete: p.complete === true };
     if (object(p.workspace) && JSON.stringify(p.workspace).length < 100000) progress.workspace = p.workspace;
+    if (typeof p.textCode === 'string' && p.textCode.length <= 10000) progress.textCode = p.textCode;
+    if (p.codingMode === 'blocks' || p.codingMode === 'text') progress.codingMode = p.codingMode;
     if (p.lessonSeen === true) progress.lessonSeen = true;
     if (progress.complete && Number.isInteger(p.stars) && Number(p.stars) >= 1 && Number(p.stars) <= 5) progress.stars = Number(p.stars);
     if (mission.id.endsWith('rescue-project') && object(p.end)) {

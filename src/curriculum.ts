@@ -1,6 +1,7 @@
 import { missions } from './learning';
 import { characterFor } from './characters';
 import { courses, type CourseId } from './courses';
+import { sequenceExtras } from './topicJourney';
 
 export type Lesson = {
   title: string; introduction: string;
@@ -61,7 +62,7 @@ const gradedModules = courses.flatMap(course => [...course.topics, 'project'].ma
     challengeIds: topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: 10 }, (_, i) => `${course.id}-${topic}-${i + 1}`) };
 }));
 export function modulesFor(course: CourseId) { return course.startsWith('grade-') ? gradedModules.filter(m => m.id.startsWith(`${course}-`)) : modules; }
-export function moduleFor(missionId: string): LearningModule { return [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId))!; }
+export function moduleFor(missionId: string): LearningModule { return sequenceExtras.includes(missionId) ? gradedModules.find(m => m.id === 'grade-1-sequences')! : [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId))!; }
 export const challengeOrder = modules.flatMap(m => m.challengeIds);
 export function nextChallenge(missionId: string) {
   const course = courses.find(c => missionId.startsWith(`${c.id}-`));

@@ -298,7 +298,7 @@
 .challenge-active .keyboard-tools p { margin: 10px 0; font-size: .75rem; }
 .program-overview { position: absolute; z-index: 3; inset: 0 4px 0 calc(var(--palette-width) + 4px); display: grid; grid-template-rows: 20px minmax(0,1fr) 44px; gap: 4px; padding: 4px; background: #fafbfe; }
 .program-overview>p { font-size: .65rem; color: #56506a; }
-.program-overview ol { display: grid; grid-template-columns: repeat(auto-fit,minmax(44px,1fr)); gap: 2px; align-content: start; list-style: none; padding: 0; margin: 0; }
+.program-overview ol { display: grid; grid-template-columns: repeat(auto-fit,minmax(44px,1fr)); gap: 2px; align-content: start; list-style: none; padding: 0; margin: 0; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a287ff #f5f1ff; }
 .program-overview li { min-width: 0; }
 .program-overview li>button { width: 100%; min-height: 44px; height: 44px; position: relative; padding: 8px 4px 2px; gap: 2px; border-radius: 7px; background: #08796e; color: white; }
 .program-overview small { position: absolute; top: 1px; left: 4px; font-size: .55rem; display: flex; align-items: center; }
@@ -361,6 +361,29 @@
 .character-sprite { display: block; width: 100%; height: 100%; background-image: url('/images/topic-cast.png'); background-size: 300% 200%; background-repeat: no-repeat; }
 .celebration-confetti { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 5; }
 .voice-settings { margin-block: 20px; }
+.topic-journey { max-width: 1100px; }
+.journey-intro p { max-width: 70ch; margin-block: 12px; }
+.journey-nav { display: flex; gap: 12px; flex-wrap: wrap; margin-block: 24px; }
+.journey-nav [aria-current=step] { color: var(--violet-dark, #5332d6); border-color: #6d4aff; }
+.journey-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(240px, 1fr); gap: 36px; }
+.journey-layout h3 { margin-top: 28px; margin-bottom: 12px; }
+.journey-layout article>h3:first-child { margin-top: 0; }
+.journey-layout video { display: block; width: 100%; max-height: 340px; border-radius: 12px; background: #172033; }
+.journey-layout p { margin-block: 12px; max-width: 70ch; }
+.journey-layout aside>button { margin: 6px 8px 6px 0; }
+.guided-sequence { display: flex; gap: 8px; margin-block: 16px; }
+.guided-sequence>span { display: flex; padding: 12px; color: #08796e; border: 2px solid #08796e; border-radius: 8px; }
+.guided-sequence>span.shown { color: #fff; background: #08796e; }
+.journey-challenges { padding: 0; list-style: none; margin-top: 20px; }
+.journey-challenge { display: grid; width: 100%; gap: 6px; text-align: left; padding: 16px 0; border-radius: 0; border-bottom: 1px solid var(--line); }
+.journey-challenge strong { display: flex; gap: 8px; align-items: center; }
+.journey-challenge span { font-size: .875rem; font-weight: 400; color: var(--muted); }
+.journey-badge { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); color: #08796e; }
+.mastery-mission { max-width: 70ch; }
+.mastery-mission p { margin-block: 16px; }
+.mastery-options { display: flex; flex-wrap: wrap; gap: 16px; margin-block: 24px; }
+.mastery-options button { min-height: 64px; color: #08796e; }
+@media(max-width: 750px) { .journey-layout { grid-template-columns: minmax(0,1fr); gap: 24px; } }
 .voice-settings select { width: 100%; min-width: 0; min-height: 44px; padding: 8px; color: inherit; background: #fff; border: 1px solid #c7c5de; border-radius: 8px; font: inherit; }
 .celebration-confetti i { position: absolute; left: var(--confetti-x); top: -20px; width: 7px; height: 12px; background: var(--confetti-color); border-radius: 2px; animation: confetti-fall 2400ms cubic-bezier(.16,1,.3,1) var(--confetti-delay) both; }
 @keyframes confetti-fall { from { transform: translate(0,-5vh) rotate(0); opacity: 1; } to { transform: translate(var(--confetti-drift),105vh) rotate(540deg); opacity: 0; } }
@@ -389,11 +412,10 @@
 .lesson-mentor strong { font-family: Fredoka,sans-serif; font-size: 1.2rem; }
 .lesson-mentor p { font-size: .85rem; color: #586477; margin: 4px 0 0; }
 .program-overview li>button.overview-code { height: auto; min-height: 64px; padding: 12px 4px 4px; font-size: .65rem; line-height: 1.2; }
-.editor:has(.overview-code) .program-overview { grid-template-rows: 20px minmax(0,1fr) 100px; }
-.editor:has(.overview-code) .step-edit { flex-wrap: wrap; }
+.editor:has(.overview-code) .program-overview { grid-template-rows: auto minmax(0,1fr) auto; padding-bottom: 44px; }
+.editor:has(.overview-code) .step-edit { flex-wrap: wrap; min-width: 0; }
 .editor:has(.overview-code) .program-overview ol { grid-template-columns: repeat(auto-fit,minmax(90px,1fr)); }
 @media(max-width: 950px), (max-height: 600px) {
-  .editor:has(.overview-code) .program-overview ol { min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a287ff #f5f1ff; }
   .course-app.challenge-active { height: auto; min-height: 100dvh; overflow: visible; }
   .course-app.challenge-active .topbar { position: sticky; top: 0; z-index: 45; }
   .course-app.challenge-active .course-main { flex: none; overflow: visible; padding: 8px; }
@@ -401,4 +423,74 @@
   .course-app.challenge-active .scene { height: auto; }
   .course-app.challenge-active .board-surround { flex: none; height: clamp(320px,calc(100vw - 24px),480px); padding: 32px 12px; }
   .course-app.challenge-active .editor { height: clamp(480px,70dvh,640px); }
+}
+.coding-mode { display: flex; gap: 4px; margin-left: auto; }
+.challenge-active .editor:has(.text-editor) .editor-title { padding-right: 14px; }
+.coding-mode button { min-height: 34px; padding: 4px 12px; border: 1px solid #d9d0fa; border-radius: 8px; background: white; color: #302259; font-weight: 600; }
+.coding-mode button[aria-pressed="true"] { background: #5332d6; color: white; border-color: #5332d6; }
+.text-editor { min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #fafbfe; }
+.text-language, .text-execution { margin: 0; padding: 8px 16px; font-size: .8rem; color: #41345f; }
+.text-editor textarea, .drawing-lab textarea { resize: vertical; width: 100%; min-height: 200px; border: 1px solid #d9d0fa; border-radius: 8px; background: #fff; color: #172033; font: 16px/1.6 Consolas, monospace; padding: 16px; tab-size: 4; caret-color: #5332d6; }
+.text-editor textarea { flex: 1; min-height: 100px; resize: none; border-radius: 0; border-width: 1px 0; }
+.text-reference { padding: 8px 16px; max-height: 180px; overflow: auto; font-size: .85rem; }
+.text-reference summary { cursor: pointer; color: #5332d6; font-weight: 600; }
+.text-reference pre, .drawing-lab pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f3efff; padding: 12px; border-radius: 8px; color: #302259; }
+.drawing-entry { display: flex; gap: 24px; align-items: center; justify-content: space-between; border-bottom: 1px solid #e4ddfa; margin-bottom: 24px; padding-bottom: 16px; }
+.drawing-lab { max-width: 1100px; margin: 24px auto; }
+.drawing-lab h2 { margin-top: 24px; font-family: Fredoka, sans-serif; font-size: 1.6rem; line-height: 1.2; }
+.drawing-lab p { max-width: 72ch; line-height: 1.6; }
+.drawing-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.drawing-layout svg[role="img"] { width: 100%; max-height: 480px; background: #fff; border: 1px solid #d9d0fa; border-radius: 12px; }
+.drawing-layout label { display: block; margin: 16px 0 8px; font-weight: 600; }
+.drawing-layout textarea { margin-bottom: 16px; }
+.drawing-commands { display: flex; flex-wrap: wrap; gap: 8px; }
+.drawing-navigation { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding-bottom: 8px; }
+.drawing-navigation label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.drawing-navigation select, .drawing-commands select, .drawing-commands input { min-height: 40px; border: 1px solid #d9d0fa; border-radius: 8px; padding: 6px 10px; color: #172033; background: white; max-width: 100%; }
+.drawing-navigation > span { color: #41345f; font-size: .85rem; }
+.drawing-commands label { flex: 1 1 100px; margin: 8px 0; }
+.drawing-commands input { width: 90px; display: block; }
+.drawing-run, .drawing-pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.drawing-pagination { justify-content: space-between; margin-top: 12px; }
+.drawing-pagination span { display: flex; align-items: center; color: #08796e; gap: 4px; }
+.drawing-practice-note { font-size: .8rem; color: #41345f; }
+.drawing-arrow-list { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; padding: 0; }
+.drawing-arrow-list li { display: flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; background: #08796e; color: white; border-radius: 8px; padding: 8px; }
+.drawing-arrow-list fieldset { border: 1px solid #bce3d5; border-radius: 8px; padding: 8px; margin: 0; }
+.drawing-arrow-list legend { padding: 0 6px; font-weight: 600; }
+.drawing-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.drawing-tools button { width: 36px; height: 36px; min-width: 36px; border-radius: 50%; padding: 0; border: 2px solid transparent; color: white; }
+.drawing-tools button[aria-pressed="true"] { border-color: #172033; }
+.drawing-tools label { display: flex; align-items: center; gap: 8px; margin: 0 0 0 8px; font-size: .85rem; }
+.drawing-tools select { min-height: 36px; border: 1px solid #d9d0fa; border-radius: 8px; padding: 4px; color: #172033; background: white; }
+@media (max-width: 750px) { .drawing-layout { grid-template-columns: 1fr; gap: 24px; } .drawing-entry { flex-direction: column; align-items: start; gap: 8px; } .text-editor { min-height: 400px; } .text-reference { max-height: none; } }
+/* The drawing task shares the route-challenge shell; only its stage is white. */
+.course-app.challenge-active .drawing-artboard { flex: 1; min-height: 0; display: grid; place-items: center; background: #fff; padding: 12px; container-type: size; }
+.drawing-artboard svg { width: min(100cqw,100cqh); height: min(100cqw,100cqh); background: #fff; overflow: visible; }
+.drawing-scene .stage-tool { min-width: 48px; min-height: 48px; padding: 8px; border: 1px solid #ded6ff; border-radius: 10px; background: #fff; color: #363052; }
+.drawing-tools-popover { position: absolute; z-index: 10; bottom: 76px; right: 12px; width: min(340px,calc(100% - 24px)); padding: 16px; background: #fff; border: 1px solid #ded6ff; border-radius: 12px; box-shadow: 0 8px 30px #17132b22; }
+.drawing-tools-popover h3 { font-size: 1rem; }
+.drawing-tools-popover .drawing-tools { margin: 12px 0 0; }
+.drawing-tools-popover .drawing-tools button { width: 44px; height: 44px; }
+.game-help pre { white-space: pre-wrap; overflow-wrap: anywhere; margin-block: 12px; }
+@media(max-width: 950px), (max-height: 600px) {
+  .course-app.challenge-active .drawing-artboard { flex: none; height: auto; min-height: 340px; container-type: inline-size; }
+  .drawing-artboard svg { width: 100%; height: auto; max-height: 500px; }
+}
+/* Retired standalone drawing layout: kept out of the shared challenge shell. */
+@media (min-width: 951px) and (min-height: 601px) {
+  .drawing-active:not(.challenge-active) { height: 100dvh; overflow: hidden; }
+  .drawing-active:not(.challenge-active) .course-main { height: calc(100dvh - 72px); min-height: 0; padding: 12px 24px; display: flex; }
+  .drawing-active .course-picker { display: none; }
+  .drawing-active .drawing-lab { margin: 0 auto; width: 100%; min-height: 0; display: flex; flex-direction: column; }
+  .drawing-active .drawing-activity { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+  .drawing-active .drawing-activity > p { margin: 0 0 12px; }
+  .drawing-active .drawing-lab > button { align-self: start; }
+  .drawing-active .drawing-lab h2 { margin: 12px 0 4px; }
+  .drawing-active .drawing-lab > p { margin: 0 0 12px; }
+  .drawing-active .drawing-layout { flex: 1; min-height: 0; }
+  .drawing-active .drawing-layout > div:first-child { height: 100%; min-height: 0; display: flex; flex-direction: column; align-items: start; }
+  .drawing-active .drawing-layout svg[role="img"] { flex: 1; height: 0; min-height: 120px; max-height: none; }
+  .drawing-active .drawing-layout > div:last-child { max-height: 100%; overflow: auto; padding: 4px; }
+  .drawing-active .drawing-layout textarea { min-height: 120px; height: 20dvh; }
 }

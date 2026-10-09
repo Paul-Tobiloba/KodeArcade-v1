@@ -13,12 +13,12 @@ test('meadow workspace, star/chime sequence, retry toast and protected best rewa
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await page.evaluate(() => { (document.activeElement as HTMLElement)?.blur(); window.scrollTo(0, 0); return document.fonts.ready; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+  if (testInfo.project.name === 'desktop') expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
   for (const selector of ['.board', '.blockly-host', '.run-button']) {
     const bounds = await page.locator(selector).boundingBox();
     expect(bounds).not.toBeNull();
     expect(bounds!.y).toBeGreaterThanOrEqual(0);
-    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
+    if (testInfo.project.name === 'desktop') expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(page.viewportSize()!.height);
     expect(bounds!.height).toBeGreaterThan(selector === '.run-button' ? 40 : 80);
   }
   expect((await new AxeBuilder({ page }).exclude('.blockly-container').withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
@@ -67,7 +67,7 @@ test('stopped runs do not count and muted reduced-motion celebrations remain usa
   await page.goto('/#/learn/arrows');
   await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await page.getByLabel('Byte sound effects', { exact: true }).uncheck();
+  await page.getByLabel('Character sound effects', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();

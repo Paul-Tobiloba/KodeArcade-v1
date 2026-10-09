@@ -4,6 +4,7 @@ import { evaluateWorkspace } from './blockly';
 import { modules, challengeOrder, nextChallenge } from './curriculum';
 import { missions } from './learning';
 import { topicSolutions } from './topicMissions';
+import { sequenceExtras } from './topicJourney';
 type State = Blockly.serialization.blocks.State;
 const chain = (...types: string[]): State => {
   const [type, ...rest] = types;
@@ -29,7 +30,7 @@ describe('module curriculum', () => {
   it('gives each available topic several distinct challenges', () => {
     expect(new Set(challengeOrder).size).toBe(challengeOrder.length);
     for (const module of modules.filter(m => m.status === 'available' && m.id !== 'project')) expect(module.challengeIds.length).toBe(10);
-    expect(new Set(challengeOrder)).toEqual(new Set(missions.filter(m => !m.id.startsWith('grade-')).map(m => m.id)));
+    expect(new Set(challengeOrder)).toEqual(new Set(missions.filter(m => !m.id.startsWith('grade-') && !sequenceExtras.includes(m.id)).map(m => m.id)));
     expect(nextChallenge('first-steps')).toBe('sequence-up');
     expect(nextChallenge('sequence-corner')).toBe('sequences-practice-3');
     expect(nextChallenge('rescue-project')).toBeUndefined();
