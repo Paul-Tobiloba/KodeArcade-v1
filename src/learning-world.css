@@ -1,0 +1,180 @@
+/* Learning-only world: marketing surfaces intentionally keep their existing art. */
+.learning-world, .learning-entry { --learning-purple: #241259; --learning-violet: #6237df; --ink: #181339; --muted: #575472; --line: #ded9ed; background: #eeebf8; color: var(--ink); }
+.learning-world .topbar, .learning-entry .topbar { background: #241259; border-bottom: 1px solid #5b4191; color: #fff; }
+.learning-world .topbar .brand-wordmark, .learning-entry .topbar .brand-wordmark { color: #fff; }
+.learning-world .topbar .tagline, .learning-world .prototype-label { color: #d7cbf1; }
+.learning-world .topbar button, .learning-world .topbar .game-course-link { color: #fff; background: #352269; border-color: #6e58a1; }
+.learning-world .topbar button:hover, .learning-world .topbar .game-course-link:hover { background: #4d338d; }
+.learning-world .topbar .game-hint { color: #ffe3a1; }
+.learning-world .game-course-title span { color: #d7cbf1; }
+.learning-world .game-course-title strong { color: #fff; }
+.learning-world .challenge-progress button { background: transparent; border-color: #9381bb; color: #fff; font-size: .78rem; }
+.learning-world .challenge-progress button[aria-current=step] { color: #fff; background: #7543ef; border: 2px solid #ddd0ff; box-shadow: 0 0 0 3px #7446df66; }
+.learning-world .challenge-progress button.challenge-done { background: #147954; border-color: #91d8ba; }
+.learning-world .topbar .settings-button { min-width: 44px; }
+.learning-world .course-drawer { background: #1d1638; border-right: 1px solid #4c3c75; }
+.learning-world .course-main { max-width: 1440px; }
+.learning-world.drawer-open .course-main { margin-left: 0; width: 100%; }
+.learning-world .course-picker { background: #fff; border: 1px solid #ded9ed; border-radius: 14px; padding: 20px; }
+.learning-world .lesson-article, .learning-world .topic-journey, .learning-world .computer-basics { background: #fff; border: 1px solid #ded9ed; border-radius: 16px; padding: clamp(20px,3vw,40px); }
+.learning-world .topic-journey { margin-inline: auto; }
+.learning-world .lesson-mentor { background: #f2effb; border-radius: 12px; padding: 12px 18px; }
+.world-sprite { background-size: 300% 200%; background-position: 50% 100%; background-repeat: no-repeat; clip-path: inset(1%); }
+.learning-world.challenge-active .course-main { padding: 12px; }
+.learning-world.challenge-active .workspace-grid { gap: 12px; grid-template-columns: minmax(0,20fr) minmax(0,35fr) minmax(0,45fr); grid-template-rows: minmax(0,1fr); }
+.learning-world.challenge-active .scene, .learning-world.challenge-active .editor { border: 1px solid #c6b6e8; border-radius: 16px; background: #fff; }
+.learning-world .scene-heading, .learning-world .editor-title { background: #fff; border-bottom: 1px solid #e8e2f2; }
+.learning-world.challenge-active .tile-scene .scene-heading { padding: 14px 18px; gap: 10px; }
+.learning-world .stage-heading-copy { flex: 1; min-width: 0; }
+.learning-world.challenge-active .tile-scene .scene-heading h2 { font-size: clamp(1.05rem,1.6vw,1.45rem); line-height: 1.2; }
+.learning-world .scene-heading h2 svg { flex-shrink: 0; color: #078778; }
+.learning-world.challenge-active .tile-scene .goal { padding: 7px 0 0; font-size: .875rem; color: #49425e; line-height: 1.4; }
+.tile-scene .scene-heading>.world-sprite { display: block; width: 56px; height: 56px; flex: 0 0 56px; }
+.learning-world .world-status { min-height: 36px; flex-shrink: 0; padding: 7px 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: #f8f6fc; font-size: .75rem; }
+.learning-world .character-world { position: static; color: #55456e; font-size: .75rem; font-weight: 500; }
+.world-destination { display: flex; align-items: center; gap: 5px; font-weight: 600; color: #67500a; text-transform: capitalize; }
+.learning-world.challenge-active .tile-scene .board-surround { background: #fff; margin: 0; border-radius: 0; padding: 12px; flex: 1; min-height: 0; position: relative; overflow: hidden; }
+.learning-world .tile-scene .board-surround::before { content: none; }
+.tile-map { position: relative; z-index: 1; width: min(100cqw,100cqh); height: min(100cqw,100cqh); flex: none; outline: 1px solid #ded9ed; }
+.tile-art, .destination-sprite { display: block; background-image: var(--world-atlas); background-size: 300% 200%; background-repeat: no-repeat; }
+.terrain-path { background-position: 0 0; }
+.terrain-hedge { background-position: 50% 0; }
+.terrain-rocks { background-position: 100% 0; }
+.terrain-water { background-position: 0 100%; }
+.learning-world.course-app.challenge-active .tile-scene .board { position: absolute; inset: 0; width: auto; height: auto; max-width: none; aspect-ratio: auto; margin: 0; border: 0; border-radius: 0; overflow: visible; background: transparent; }
+.learning-world .tile-scene .cell { position: relative; border: 0; background: transparent !important; overflow: visible; }
+.tile-scene .cell>.tile-art { position: absolute; inset: 0; }
+.tile-scene .cell:not(.rock)::before { content: ''; position: absolute; inset: 0; border: 1px solid #80602c40; z-index: 1; pointer-events: none; }
+.destination-sprite { position: absolute; inset: -6%; background-position: 100% 100%; z-index: 1; clip-path: inset(1%); filter: drop-shadow(0 2px 2px #50351766); }
+.tile-scene .station::after { content: ''; position: absolute; inset: 1px; border: 2px solid #ffe665; box-shadow: inset 0 0 0 1px #80640a; border-radius: 10%; pointer-events: none; }
+.learning-world .tile-scene .robot-position { z-index: 3; }
+.learning-world .tile-scene .robot-position>.world-sprite { width: 114%; height: 114%; flex-shrink: 0; filter: drop-shadow(0 3px 2px #14221766); }
+.tile-scene .trail-dot { position: relative; z-index: 1; width: 15%; height: 15%; background: #7344ad; border: 2px solid #eee0ff; }
+.cell-coordinate { position: absolute; top: 2px; left: 2px; z-index: 4; font-size: clamp(8px,1vw,12px); line-height: 1.2; color: #231b2e; background: #fffef0e8; border-radius: 2px; padding: 1px 2px; pointer-events: none; }
+.learning-world .world-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 12px; min-height: 36px; flex-shrink: 0; font-size: .75rem; color: #5c526f; border-top: 1px solid #e8e2f2; }
+.world-toolbar button { min-height: 36px; padding: 4px 6px; font-size: .75rem; color: #5d388d; border-radius: 4px; gap: 5px; }
+.world-toolbar button[aria-pressed=true] { background: #eee7fc; }
+.learning-world.challenge-active .scene .run-controls { padding-block: 12px; border-top: 1px solid #e8e2f2; }
+.learning-world.challenge-active .scene .run-button { background: #6237df; font-size: 1.15rem; border-radius: 10px; }
+.learning-world.challenge-active .scene .clear-button { border-color: #d9ceee; border-radius: 10px; }
+.learning-world.challenge-active .editor-title { min-height: 62px; padding-left: 18px; background: #f7f4fe; }
+.learning-world .editor-title h2 { font-size: 1.2rem; color: #241259; gap: 10px; }
+.learning-world .editor-title h2>svg { width: 32px; height: 32px; padding: 6px; background: #6237df; color: white; border-radius: 8px; }
+.learning-world .editor-title>span { font-size: .75rem; }
+.learning-world .coding-mode { margin-right: 2px; }
+.learning-world .coding-mode button { min-height: 36px; }
+.learning-world .editor:has(.coding-mode):has(.blockly-container) .editor-title { padding-right: 102px; }
+.learning-world .history-buttons { top: 9px; }
+.learning-world .editor .keyboard-tools { position: static; flex-shrink: 0; padding: 0; border: 0; border-top: 1px solid #e8e2f2; background: #fff; }
+.learning-world .editor .keyboard-tools summary { min-height: 32px; padding: 6px 16px; border: 0; border-radius: 0; background: #fff; font-size: .75rem; }
+.learning-world .editor .keyboard-tools[open] { position: absolute; bottom: 48px; left: 12px; z-index: 6; width: min(330px,calc(100% - 24px)); padding: 12px; border: 1px solid #ddd8ee; border-radius: 10px; box-shadow: 0 8px 30px #17132b22; }
+.learning-world .blocklyMainBackground { stroke: none; }
+.editor-bottom-tools { flex-shrink: 0; display: flex; align-items: start; border-top: 1px solid #e8e2f2; background: #f7f4fe; color: #3e246e; }
+.editor-bottom-tools>span { flex: 1; align-self: center; padding: 10px 16px; font-size: .75rem; }
+.editor-clear { min-width: 44px; min-height: 44px; padding: 10px; color: #5c487c; flex-shrink: 0; }
+.command-reference { flex: 1; min-width: 0; color: #3e246e; background: #f7f4fe; font-size: .82rem; }
+.command-reference summary { display: flex; align-items: center; gap: 8px; min-height: 42px; padding: 8px 16px; font-weight: 600; }
+.command-reference summary::after { content: '+'; margin-left: auto; font-size: 1.1rem; }
+.command-reference[open] summary::after { content: '−'; }
+.command-reference>div { display: flex; gap: 8px; padding: 0 12px 12px; flex-wrap: wrap; }
+.command-reference article { flex: 1 1 110px; padding: 10px; background: #fff; border: 1px solid #e8e2f2; border-radius: 8px; }
+.command-reference strong { display: flex; align-items: center; gap: 6px; font-size: .75rem; }
+.command-reference strong svg { color: #08796e; flex-shrink: 0; }
+.command-reference p { margin: 6px 0 0; font-size: .75rem; color: #5b5270; line-height: 1.4; }
+.learning-world .drawing-scene .scene-heading { padding-bottom: 0; border: 0; }
+.learning-world .drawing-scene .goal { background: #fff; }
+.learning-world .drawing-artboard { border-block: 1px solid #e8e2f2; }
+.learning-world .mouse-garden { background: #f1f8f3; border: 1px solid #bbd7c4; }
+.learning-entry .entry-content { max-width: 1160px; padding-top: 48px; }
+.learning-entry .entry-content>h1 { font-size: clamp(2rem,4vw,3rem); }
+.learning-entry .entry-content>p { max-width: 68ch; }
+.learning-entry .entry-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; border: 0; }
+.learning-entry .entry-option { border: 1px solid #d9ceee; border-radius: 14px; background: #fff; padding: 22px; gap: 16px; flex-wrap: nowrap; }
+.learning-entry .entry-option:hover { border-color: #7543df; background: #faf8ff; }
+.learning-entry .entry-world-art { width: 88px; height: 88px; flex: 0 0 88px; border-radius: 50%; background: #f0eafa; }
+.learning-entry .entry-course-copy { flex: 1; min-width: 0; }
+.learning-entry .entry-option h2 { font-size: 1.25rem; line-height: 1.2; display: flex; gap: 6px; align-items: center; }
+.learning-entry .entry-option p { font-size: .875rem; line-height: 1.5; }
+.learning-entry .entry-option small { font-size: .75rem; }
+.learning-entry .entry-computer { grid-column: 1 / -1; }
+.learning-world :focus-visible, .learning-entry :focus-visible { outline: 3px solid #986cf5; outline-offset: 3px; }
+.learning-world .topbar :focus-visible { outline-color: #ffe28c; }
+.learning-world .game-tools .read-aloud>span { color: #241259; }
+.learning-world ::selection, .learning-entry ::selection { background: #d9c8ff; color: #241259; }
+.learning-world, .learning-entry { scrollbar-color: #9681b6 #eeebf8; }
+.activity-guide { min-width: 0; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #fff; border: 1px solid #c6b6e8; border-radius: 16px; }
+.activity-guide-title, .activity-guide-toggle { display: flex; align-items: center; gap: 8px; margin: 0; padding: 16px; min-height: 62px; flex-shrink: 0; color: #241259; background: #f7f4fe; border: 0; border-bottom: 1px solid #e8e2f2; font-size: 1rem; font-weight: 600; }
+.activity-guide-toggle { width: 100%; border-radius: 0; text-align: left; }
+.activity-guide-toggle>span { flex: 1; }
+.activity-guide-toggle[aria-expanded=true]>svg:last-child { transform: rotate(180deg); }
+.activity-guide-content { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 16px; font-size: .875rem; line-height: 1.6; }
+.activity-guide-content[hidden] { display: none; }
+.activity-concept>summary { display: flex; gap: 8px; align-items: start; color: #3e246e; font-weight: 600; min-height: 44px; }
+.activity-concept>summary>span { flex: 1; }
+.activity-concept>summary>svg { margin-top: 4px; flex-shrink: 0; }
+.activity-concept[open]>summary>svg:last-child { transform: rotate(180deg); }
+.activity-reading p { margin: 12px 0; color: #575472; }
+.activity-reading h3 { font-size: .875rem; margin: 20px 0 4px; color: #181339; }
+.activity-reading .read-aloud { margin-top: 12px; }
+.activity-reading .read-aloud button { font-size: .8rem; min-height: 44px; padding-inline: 8px; }
+.activity-example { margin-top: 16px; }
+.activity-example summary { color: #3e246e; min-height: 44px; }
+.activity-example ol { padding-left: 20px; white-space: pre-wrap; }
+.activity-instructions { border-top: 1px solid #e8e2f2; margin-top: 20px; padding-top: 20px; }
+.activity-instructions h2, .activity-hints h2 { display: flex; align-items: center; gap: 6px; font-size: 1rem; line-height: 1.3; }
+.activity-instructions h2>svg { color: #08796e; flex-shrink: 0; }
+.activity-instructions h3 { margin: 12px 0 8px; font-size: .9rem; }
+.activity-instructions p { margin: 8px 0 0; color: #575472; }
+.activity-hints { margin-top: 24px; padding-top: 20px; border-top: 1px solid #e8e2f2; }
+.activity-hint-heading { display: flex; align-items: center; justify-content: space-between; }
+.activity-hint-heading h2>svg { color: #855300; flex-shrink: 0; }
+.activity-hint-heading>button { min-height: 44px; min-width: 36px; padding: 8px; }
+.activity-hints p { margin: 12px 0; color: #575472; }
+.activity-hints .hint-current { color: #67500a; }
+.activity-hints .hint-cost { font-size: .75rem; }
+.activity-hints>.secondary { width: 100%; font-size: .8rem; }
+@media (min-width: 1101px) and (min-height: 601px) {
+  /* A long article scrolls in its own slot; the task and help stay findable. */
+  .activity-guide-content { flex: 1; display: grid; grid-template-rows: minmax(200px,1fr) auto auto; padding: 12px 16px; }
+  .activity-concept { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .activity-instructions, .activity-hints { margin-top: 12px; padding-top: 12px; }
+  .activity-instructions h2, .activity-hints h2 { margin: 0; }
+  .activity-hints p { margin: 8px 0; }
+}
+@media (min-width: 951px) and (max-width: 1100px) and (min-height: 601px) {
+  .learning-world.challenge-active .workspace-grid { grid-template-columns: minmax(0,44fr) minmax(0,56fr); grid-template-rows: auto minmax(0,1fr); }
+  .activity-guide { grid-column: 1 / -1; }
+  .activity-guide-title, .activity-guide-toggle { min-height: 44px; padding-block: 10px; }
+  .activity-guide-content { max-height: 180px; }
+}
+@media (min-width: 951px) {
+  .learning-world.challenge-active .topbar { position: relative; min-height: 68px; flex-basis: 68px; height: 68px; gap: 10px; }
+  .learning-world .game-context { position: static; transform: none; flex: 1; justify-content: center; gap: 14px; min-width: 0; }
+  .learning-world .game-course-title { max-width: 220px; overflow: hidden; }
+  .learning-world .game-course-title strong, .learning-world .game-course-title span { overflow: hidden; text-overflow: ellipsis; }
+  .learning-world .game-tools { margin-left: 0; }
+  .learning-world.challenge-active .course-drawer, .learning-world.challenge-active .drawer-backdrop { top: 68px; }
+}
+@media (min-width: 951px) and (max-width: 1250px) { .learning-world.challenge-active .brand-wordmark { display: none; } .learning-world .game-course-title strong { max-width: 175px; } }
+@media (max-width: 950px), (max-height: 600px) {
+  .learning-world.drawer-open .course-main { margin-left: 0; width: 100%; }
+  .learning-world.challenge-active .workspace-grid { grid-template-columns: minmax(0,1fr); grid-template-rows: auto auto auto; }
+  .activity-guide { height: auto; }
+  .activity-guide-content { max-height: none; overflow: visible; }
+  .learning-world.challenge-active .tile-scene .board-surround { flex: none; height: clamp(320px,calc(100vw - 24px),560px); }
+  .learning-world.challenge-active .tile-scene .board { width: auto; }
+  .learning-world.challenge-active .editor { height: 560px; }
+}
+@media (max-width: 700px) {
+  .learning-entry .entry-options { grid-template-columns: minmax(0,1fr); }
+  .learning-entry .entry-option { padding: 18px; gap: 12px; }
+  .learning-entry .entry-world-art { width: 64px; height: 64px; flex-basis: 64px; }
+  .learning-world.challenge-active .course-main { padding: 8px; }
+  .learning-world .world-status { flex-wrap: wrap; gap: 4px; padding: 6px 12px; }
+  .learning-world .character-world, .learning-world .world-destination { font-size: .7rem; }
+  .learning-world.challenge-active .tile-scene .scene-heading { padding: 12px; }
+  .learning-world.challenge-active .tile-scene .goal { font-size: .85rem; }
+  .learning-world .stage-heading-copy { padding: 0; }
+  .tile-scene .scene-heading>.world-sprite { width: 44px; height: 44px; flex-basis: 44px; }
+  .learning-world .score-display { font-size: .7rem; padding: 4px; }
+}

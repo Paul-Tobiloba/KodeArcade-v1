@@ -7,6 +7,7 @@ import { isCourse } from './courses';
 import './styles.css';
 import './course.css';
 import './brand.css';
+import './learning-world.css';
 const App = React.lazy(() => import('./App'));
 function Router() {
   const [hash, setHash] = React.useState(location.hash);

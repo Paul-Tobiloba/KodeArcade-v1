@@ -1,8 +1,63 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-07T00:00:00Z",
+  "generatedAt": "2026-10-09T00:00:00Z",
   "title": "Design System: KodeArcade",
   "extensions": {
+    "learningWorld": {
+      "scope": "9 October learning-only tile-world extension of Build & Play; frontmatter learning-* and block-* tokens are normative. Incumbent primitives and publicPages remain intact.",
+      "source": "src/learning-world.css; src/App.tsx; src/ActivityGuide.tsx; src/BlockEditor.tsx; src/MissionStage.tsx; src/CharacterSprite.tsx; src/LearningEntry.tsx; src/DrawingLab.tsx; src/blockly.ts; docs/TILE_WORLD_REDESIGN.md",
+      "paletteRoles": {
+        "navigation": "learning-nav",
+        "play": "learning-action",
+        "ground": "learning-ground",
+        "text": "learning-ink",
+        "supportingText": "learning-muted",
+        "border": "learning-line",
+        "workspaceBorder": "learning-panel-line",
+        "editorHeading": "learning-editor-ground",
+        "drawer": "learning-drawer",
+        "navigationControl": "learning-nav-control",
+        "focus": "learning-focus",
+        "navigationFocus": "learning-nav-focus",
+        "startBlock": "block-start",
+        "movementBlock": "teal",
+        "loopBlock": "violet",
+        "conditionalBlock": "block-conditional",
+        "variableBlock": "block-variable"
+      },
+      "layout": {
+        "desktop": "Width >1100px AND height >600px: 100dvh fixed workspace, 68px toolbar, 1440px content maximum, 12px padding/gap; minmax(0,20fr) minmax(0,35fr) minmax(0,45fr) columns for lesson/instructions/hints, challenge and editor. The concept article has its own scroll slot with a 200px minimum; the whole guide can also scroll long content.",
+        "compact": "Width 951–1100px AND height >600px: folded guide across the full row, 44px header, expanded content max-height 180px with scroll; stage/editor use 44/56 proportions.",
+        "stacked": "Width <=950px OR height <=600px: three rows for guide, stage and editor; page scroll beneath sticky toolbar; guide collapsed until opened or a hint request; tile surround clamp(320px,calc(100vw - 24px),560px), editor 560px.",
+        "drawer": "All learning surfaces: drawer overlays the workspace; main margin-left 0 and width 100%, without a reserved desktop 280px. Desktop remains nonmodal navigation; existing narrow-screen backdrop and focus trap are unchanged.",
+        "toolbar": "Portrait <=700px: 108px two-row toolbar. Other narrow viewports retain 56px base; wide short viewports retain 68px learning override.",
+        "entry": "1160px maximum; two columns, 16px gaps; one column <=700px. Card padding 22px/18px; mascot wells 88px/64px.",
+        "supersedes": "The three-column/folded/stacked learning workspace replaces the prior 1.05:1 stage/editor layout and reserved desktop drawer space. Earlier .8:1.5 and 750px container rules remain superseded for active learning; ordinary lesson reading retains inherited layout."
+      },
+      "geometry": {
+        "workspaceRadius": "rounded.dialog",
+        "playRadius": "rounded.learning-play",
+        "entryCardRadius": "rounded.workspace",
+        "blockly": "Native connected silhouettes, start cap, statement notches and loop/conditional cavities; no imitation block geometry.",
+        "atlas": "Transparent 3-column by 2-row six-slot atlas indexed at 300% 200%: path, hedge, rocks, water/obstacle, character, destination."
+      },
+      "stage": "Mission/goal, world/destination strip, live character and semantic collision map; Rows & columns, text board and position announcements. Play stays below stage. Square map centred on plain white with a thin learning-line outline, no map shadow or decorative world-scenery strips.",
+      "guide": "Concept prose and worked example, authored instructions and progressive hints share the activity guide. First challenge concept auto-opens only at wide desktop; later concepts start closed. Generic generated grade context is omitted, authored instructions retained and identical instruction/goal appears once within the guide. Narration stays opt-in and reads complete concept prose. Hint requests expand the folded guide and bring the heading into view; existing hint/star accounting and protected bests remain.",
+      "palette": "Native Blockly flyout scale is fixed at .95, independent of height fitting. Long lists use native flyout scrolling and reflow on resize. Program canvas fitting, editable long-program overview and pointer/drag gesture stability remain.",
+      "drawing": "Shared three-column/folded/stacked challenge shell and editor; smooth white paper, dotted target, Dash with pencil, progressive ink and heading pointer. Drawing work saves separately.",
+      "cast": {
+        "Byte": "Sequences/projects; Robot City; charging station",
+        "Dash": "Directions/order and drawing; Compass Canyon; carrot basket",
+        "Gigi": "Loops; Looping Jungle; golden leaf",
+        "Fix": "Debugging; Bug Workshop; toolbox",
+        "Milo": "Monkey; Conditionals; Decision Jungle; banana basket",
+        "Nova": "Variables; Treasure Grove; acorn basket",
+        "Pip": "Computer Explorers; Sound Garden; musical bell. Formal Events remains planned."
+      },
+      "compatibility": "Missing saved worldLayout resolves to open-v1 original maps. Fresh progress uses tiles-v1. Authored reference paths preserve starter debugging and conditional clearance evidence; creative projects retain original maps. Curriculum, local progress and deferred backend/account scope remain unchanged.",
+      "provenance": "Seven world PNGs have adjacent *.prompt.txt files and embedded prompts. This documentation pass did not rerun a raster scan.",
+      "review": "Prior tile-world review: ship for the sole scored start-block contrast correction; white on #a16908 is 4.626:1, native geometry unchanged, all 17 recaptures valid and all 18 recapture checks passed. Latest layout review: ship only for the P2 article-space correction and drawer-overlay addition; refreshed Byte/Grade 2/Text/Drawing show readable prose, complete narration and reachable instructions/hints, with no material fix regression observed. Supplied checks: initial final 30 browser checks, correction batch 21 checks, then 3 drawer-geometry checks across desktop/phone/tablet passed. Latest build passed with 106.42KB CSS and known 837.08KB app/Blockly chunk warning; latest unit rerun passed all 935 tests across fourteen files in 8.81 seconds after the UI corrections. Scoped detector returned [] before/after the initial layout work, before the final review fix; not rerun here. No whole-platform, curriculum or accessibility certification is implied. See docs/TILE_WORLD_REDESIGN.md."
+    },
     "publicPages": {
       "scope": "7 October illustrated public-page extension of Build & Play; incumbent learning primitives remain unchanged.",
       "source": "src/landing.css; src/Landing.tsx; src/MarketingPages.tsx; docs/ILLUSTRATED_PAGES.md",
@@ -20,6 +75,21 @@
       ]
     },
     "colorMeta": {
+      "learning-nav": {"role":"primary","displayName":"Learning Navigation Purple","tonalRamp":["oklch(15% .13 294)","oklch(27% .13 294)","oklch(38% .13 294)","oklch(50% .13 294)","oklch(61% .13 294)","oklch(73% .13 294)","oklch(84% .13 294)","oklch(95% .13 294)"]},
+      "learning-action": {"role":"primary","displayName":"Learning Action Violet","tonalRamp":["oklch(15% .21 292)","oklch(27% .21 292)","oklch(38% .21 292)","oklch(50% .21 292)","oklch(61% .21 292)","oklch(73% .21 292)","oklch(84% .21 292)","oklch(95% .21 292)"]},
+      "learning-ground": {"role":"neutral","displayName":"Learning Lavender Ground","tonalRamp":["oklch(15% .025 295)","oklch(27% .025 295)","oklch(38% .025 295)","oklch(50% .025 295)","oklch(61% .025 295)","oklch(73% .025 295)","oklch(84% .025 295)","oklch(95% .025 295)"]},
+      "learning-ink": {"role":"neutral","displayName":"Learning Purple Ink","tonalRamp":["oklch(15% .06 292)","oklch(27% .06 292)","oklch(38% .06 292)","oklch(50% .06 292)","oklch(61% .06 292)","oklch(73% .06 292)","oklch(84% .06 292)","oklch(95% .06 292)"]},
+      "learning-muted": {"role":"neutral","displayName":"Learning Muted Ink","tonalRamp":["oklch(15% .04 295)","oklch(27% .04 295)","oklch(38% .04 295)","oklch(50% .04 295)","oklch(61% .04 295)","oklch(73% .04 295)","oklch(84% .04 295)","oklch(95% .04 295)"]},
+      "learning-line": {"role":"neutral","displayName":"Learning Line","tonalRamp":["oklch(15% .025 295)","oklch(27% .025 295)","oklch(38% .025 295)","oklch(50% .025 295)","oklch(61% .025 295)","oklch(73% .025 295)","oklch(84% .025 295)","oklch(95% .025 295)"]},
+      "learning-panel-line": {"role":"neutral","displayName":"Learning Panel Line","tonalRamp":["oklch(15% .06 295)","oklch(27% .06 295)","oklch(38% .06 295)","oklch(50% .06 295)","oklch(61% .06 295)","oklch(73% .06 295)","oklch(84% .06 295)","oklch(95% .06 295)"]},
+      "learning-editor-ground": {"role":"neutral","displayName":"Learning Editor Ground","tonalRamp":["oklch(15% .02 295)","oklch(27% .02 295)","oklch(38% .02 295)","oklch(50% .02 295)","oklch(61% .02 295)","oklch(73% .02 295)","oklch(84% .02 295)","oklch(95% .02 295)"]},
+      "learning-drawer": {"role":"neutral","displayName":"Learning Drawer","tonalRamp":["oklch(15% .06 292)","oklch(27% .06 292)","oklch(38% .06 292)","oklch(50% .06 292)","oklch(61% .06 292)","oklch(73% .06 292)","oklch(84% .06 292)","oklch(95% .06 292)"]},
+      "learning-nav-control": {"role":"primary","displayName":"Learning Navigation Control","tonalRamp":["oklch(15% .11 294)","oklch(27% .11 294)","oklch(38% .11 294)","oklch(50% .11 294)","oklch(61% .11 294)","oklch(73% .11 294)","oklch(84% .11 294)","oklch(95% .11 294)"]},
+      "learning-focus": {"role":"primary","displayName":"Learning Focus Violet","tonalRamp":["oklch(15% .18 295)","oklch(27% .18 295)","oklch(38% .18 295)","oklch(50% .18 295)","oklch(61% .18 295)","oklch(73% .18 295)","oklch(84% .18 295)","oklch(95% .18 295)"]},
+      "learning-nav-focus": {"role":"tertiary","displayName":"Learning Navigation Focus","tonalRamp":["oklch(15% .12 90)","oklch(27% .12 90)","oklch(38% .12 90)","oklch(50% .12 90)","oklch(61% .12 90)","oklch(73% .12 90)","oklch(84% .12 90)","oklch(95% .12 90)"]},
+      "block-start": {"role":"tertiary","displayName":"Start Ochre","tonalRamp":["oklch(15% .12 78)","oklch(27% .12 78)","oklch(38% .12 78)","oklch(50% .12 78)","oklch(61% .12 78)","oklch(73% .12 78)","oklch(84% .12 78)","oklch(95% .12 78)"]},
+      "block-conditional": {"role":"tertiary","displayName":"Conditional Amber","tonalRamp":["oklch(15% .14 60)","oklch(27% .14 60)","oklch(38% .14 60)","oklch(50% .14 60)","oklch(61% .14 60)","oklch(73% .14 60)","oklch(84% .14 60)","oklch(95% .14 60)"]},
+      "block-variable": {"role":"secondary","displayName":"Variable Berry","tonalRamp":["oklch(15% .16 350)","oklch(27% .16 350)","oklch(38% .16 350)","oklch(50% .16 350)","oklch(61% .16 350)","oklch(73% .16 350)","oklch(84% .16 350)","oklch(95% .16 350)"]},
       "violet": { "role": "primary", "displayName": "Build Violet", "tonalRamp": ["oklch(15% .17 290)", "oklch(27% .17 290)", "oklch(38% .17 290)", "oklch(50% .17 290)", "oklch(61% .17 290)", "oklch(73% .17 290)", "oklch(84% .17 290)", "oklch(95% .17 290)"] },
       "brand-teal": { "role": "secondary", "displayName": "Play Teal", "tonalRamp": ["oklch(15% .10 180)", "oklch(27% .10 180)", "oklch(38% .10 180)", "oklch(50% .10 180)", "oklch(61% .10 180)", "oklch(73% .10 180)", "oklch(84% .10 180)", "oklch(95% .10 180)"] },
       "brand-yellow": { "role": "tertiary", "displayName": "Play Yellow", "tonalRamp": ["oklch(15% .13 85)", "oklch(27% .13 85)", "oklch(38% .13 85)", "oklch(50% .13 85)", "oklch(61% .13 85)", "oklch(73% .13 85)", "oklch(84% .13 85)", "oklch(95% .13 85)"] },
@@ -27,68 +97,232 @@
       "cloud": { "role": "neutral", "displayName": "Cloud", "tonalRamp": ["oklch(15% .008 275)", "oklch(27% .008 275)", "oklch(38% .008 275)", "oklch(50% .008 275)", "oklch(61% .008 275)", "oklch(73% .008 275)", "oklch(84% .008 275)", "oklch(95% .008 275)"] }
     },
     "typographyMeta": {
-      "headline": { "displayName": "Course headline", "purpose": "Current course h1; locally hosted Fredoka." },
-      "wordmark": { "displayName": "Wordmark", "purpose": "Ink Fredoka lettering alongside the approved K." },
-      "body": { "displayName": "System reading face", "purpose": "Root reference; lesson paragraphs use contextual sizes." }
+      "headline": {
+        "displayName": "Course headline",
+        "purpose": "Current course h1; locally hosted Fredoka."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "Ink Fredoka lettering alongside the approved K."
+      },
+      "body": {
+        "displayName": "System reading face",
+        "purpose": "Root reference; lesson paragraphs use contextual sizes."
+      },
+      "learning-entry-headline": {
+        "displayName": "Learning entry headline",
+        "purpose": "Responsive Fredoka course-entry heading."
+      },
+      "learning-stage-title": {
+        "displayName": "Learning stage title",
+        "purpose": "Fredoka mission title above the tile stage; inherited from course heading rules."
+      },
+      "learning-guide-reading": {
+        "displayName": "Activity guide reading",
+        "purpose": "System prose for the persistent or folded lesson/instructions/hints guide."
+      }
     },
     "shadows": [
-      { "name": "dialog", "value": "0 20px 80px #11182740", "purpose": "Settings and feedback dialogs." },
-      { "name": "robot", "value": "0 4px 7px #51448a29", "purpose": "Robot illustration only, not logo treatment." }
+      {
+        "name": "dialog",
+        "value": "0 20px 80px #11182740",
+        "purpose": "Settings and feedback dialogs."
+      },
+      {
+        "name": "robot",
+        "value": "0 4px 7px #51448a29",
+        "purpose": "Robot illustration only, not logo treatment."
+      },
+      {
+        "name": "learning-sprite",
+        "value": "drop-shadow(0 3px 2px #14221766)",
+        "purpose": "Live character only; not the mark."
+      },
+      {
+        "name": "learning-destination",
+        "value": "drop-shadow(0 2px 2px #50351766)",
+        "purpose": "Destination object on the map."
+      }
     ],
     "motion": [
-      { "name": "drawer", "value": "180ms ease-out", "purpose": "Drawer transform and main width/margin; disabled by reduced motion." },
+      { "name": "drawer", "value": "180ms ease-out", "purpose": "Base drawer transform and main width/margin; learning main does not move. Disabled by reduced motion." },
       { "name": "robot-movement", "value": "360ms cubic-bezier(.16,1,.3,1)", "purpose": "Execution-stage movement; disabled by reduced motion." }
     ],
     "breakpoints": [
-      { "name": "header-tagline", "value": "1100px" },
-      { "name": "drawer-overlay", "value": "900px" },
-      { "name": "course-content-container", "value": "750px" },
-      { "name": "phone", "value": "620px" },
-      { "name": "compact-wordmark", "value": "360px" }
+      {
+        "name": "header-tagline",
+        "value": "1100px"
+      },
+      {
+        "name": "drawer-overlay",
+        "value": "900px"
+      },
+      {
+        "name": "course-content-container",
+        "value": "750px"
+      },
+      {
+        "name": "phone",
+        "value": "620px"
+      },
+      {
+        "name": "compact-wordmark",
+        "value": "360px"
+      },
+      {
+        "name": "learning-stack-width",
+        "value": "950px"
+      },
+      {
+        "name": "learning-guide-fold-width",
+        "value": "1100px"
+      },
+      {
+        "name": "learning-stack-height",
+        "value": "600px"
+      },
+      {
+        "name": "learning-entry-and-portrait",
+        "value": "700px"
+      },
+      {
+        "name": "learning-compact-desktop-wordmark",
+        "value": "1250px"
+      }
     ]
   },
   "components": [
     {
-      "name": "Primary action", "kind": "button", "refersTo": "button-primary", "description": "Run or continue action.",
+      "name": "Primary action",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Run or continue action.",
       "html": "<button class=\"ds-primary\">Run program</button>",
       "css": ".ds-primary{font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;min-height:46px;padding:12px 18px;border:0;border-radius:8px;background:var(--violet,#6d4aff);color:white;cursor:pointer}.ds-primary:hover:not(:disabled){background:var(--violet-dark,#5332d6)}.ds-primary:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}.ds-primary:disabled{opacity:.45;cursor:not-allowed}"
     },
     {
-      "name": "Secondary action", "kind": "button", "refersTo": "button-secondary", "description": "Supporting action on a light surface.",
+      "name": "Secondary action",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Supporting action on a light surface.",
       "html": "<button class=\"ds-secondary\">Try again</button>",
       "css": ".ds-secondary{font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;min-height:44px;padding:10px 14px;border:1px solid #c6d3ce;border-radius:8px;background:white;color:var(--ink,#172033);cursor:pointer}.ds-secondary:hover:not(:disabled){filter:brightness(.95)}.ds-secondary:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}.ds-secondary:disabled{opacity:.45;cursor:not-allowed}"
     },
     {
-      "name": "Nickname field", "kind": "input", "refersTo": "nickname-field", "description": "Optional labelled learner input.",
+      "name": "Nickname field",
+      "kind": "input",
+      "refersTo": "nickname-field",
+      "description": "Optional labelled learner input.",
       "html": "<label class=\"ds-field\">Nickname <span>(optional)</span><input placeholder=\"Your nickname\" /></label>",
       "css": ".ds-field{display:block;font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;font-weight:600;color:var(--ink,#172033)}.ds-field span{font-weight:400;color:var(--muted,#586477)}.ds-field input{display:block;width:100%;font:inherit;font-weight:400;color:inherit;border:1px solid #a9b3c3;padding:12px;border-radius:7px;margin-top:9px;caret-color:var(--violet,#6d4aff)}.ds-field input::placeholder{color:var(--muted,#586477)}.ds-field input:focus-visible{outline:3px solid var(--violet-dark,#5332d6);outline-offset:4px}"
     },
     {
-      "name": "Current module", "kind": "nav", "description": "Selected module within the dark course drawer.",
+      "name": "Current module",
+      "kind": "nav",
+      "description": "Selected module within the dark course drawer.",
       "html": "<nav class=\"ds-nav\" aria-label=\"Course modules\"><button class=\"ds-module\" aria-current=\"step\"><span class=\"ds-number\">1</span><span><strong>Sequences</strong><small>Build your first program</small></span></button></nav>",
       "css": ".ds-nav{padding:16px;background:#111827}.ds-module{display:flex;width:100%;align-items:center;gap:11px;min-height:65px;padding:12px 10px;text-align:left;font-family:'Segoe UI',system-ui,sans-serif;background:#2d2650;color:white;border:0;border-radius:8px;cursor:pointer}.ds-module strong{display:block;font-size:.8rem;font-weight:650}.ds-module small{display:block;color:#b9c2d4;font-size:.65rem;margin-top:5px}.ds-number{display:flex;align-items:center;justify-content:center;width:29px;height:29px;border-radius:50%;background:#b09aff;color:#201436;font-size:.72rem;flex-shrink:0}.ds-module:hover{background:#253046}.ds-module:focus-visible{outline:3px solid #c6b6ff;outline-offset:4px}"
     },
     {
-      "name": "Concept chip", "kind": "chip", "refersTo": "concept-chip", "description": "Non-interactive concept label.",
+      "name": "Concept chip",
+      "kind": "chip",
+      "refersTo": "concept-chip",
+      "description": "Non-interactive concept label.",
       "html": "<span class=\"ds-chip\">Sequences</span>",
       "css": ".ds-chip{display:inline-block;background:#ede8ff;color:#5136ab;padding:5px 9px;border-radius:5px;font-family:'Segoe UI',system-ui,sans-serif;font-size:.7rem;font-weight:600}"
     },
     {
-      "name": "Lesson example card", "kind": "card", "refersTo": "lesson-card", "description": "A bordered supporting example alongside lesson prose.",
+      "name": "Lesson example card",
+      "kind": "card",
+      "refersTo": "lesson-card",
+      "description": "A bordered supporting example alongside lesson prose.",
       "html": "<aside class=\"ds-card\"><h2>Example program</h2><p>Arrange the steps in the order you want the robot to move.</p></aside>",
       "css": ".ds-card{background:white;border:1px solid var(--line,#e1e5ee);border-radius:12px;padding:24px;font-family:'Segoe UI',system-ui,sans-serif;color:var(--ink,#172033)}.ds-card h2{margin:0 0 18px;font-size:.93rem;line-height:1.5;color:#5033a0}.ds-card p{margin:0;font-size:.8rem;line-height:1.75;color:#536075}"
+    },
+    {
+      "name": "Learning Play",
+      "kind": "button",
+      "refersTo": "learning-play",
+      "description": "Primary action beneath the execution stage.",
+      "html": "<button class=\"ds-learning-play\">Play</button>",
+      "css": ".ds-learning-play{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:12px 18px;border:0;border-radius:10px;background:var(--learning-violet,#6237df);color:#fff;font:600 1.15rem 'Segoe UI',system-ui,sans-serif;cursor:pointer}.ds-learning-play:hover:not(:disabled){background:#5332d6}.ds-learning-play:focus-visible{outline:3px solid #986cf5;outline-offset:3px}.ds-learning-play:active:not(:disabled){filter:brightness(.92)}.ds-learning-play:disabled{opacity:.45;cursor:not-allowed}"
+    },
+    {
+      "name": "Learning toolbar",
+      "kind": "nav",
+      "refersTo": "learning-nav",
+      "description": "Purple navigation with current grade and reachable course control.",
+      "html": "<nav class=\"ds-learning-nav\" aria-label=\"Learning\"><strong>Grade 1<small>Sequences · Challenge 1 of 10</small></strong><a href=\"/#/learn\">Courses</a></nav>",
+      "css": ".ds-learning-nav{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:68px;padding:0 12px;background:var(--learning-purple,#241259);color:#fff;font-family:'Segoe UI',system-ui,sans-serif}.ds-learning-nav strong{font-size:.875rem}.ds-learning-nav small{display:block;margin-top:4px;font-size:.75rem;font-weight:400;color:#d7cbf1}.ds-learning-nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 12px;border:1px solid #6e58a1;border-radius:8px;background:#352269;color:#fff;font-size:.875rem;font-weight:600;text-decoration:none}.ds-learning-nav a:hover{background:#4d338d}.ds-learning-nav a:focus-visible{outline:3px solid #ffe28c;outline-offset:3px}.ds-learning-nav a:active{filter:brightness(.92)}"
+    },
+    {
+      "name": "Learning grade card",
+      "kind": "card",
+      "refersTo": "learning-grade-card",
+      "description": "Linked grade choice with suggested age and board size.",
+      "html": "<a class=\"ds-grade-card\" href=\"/#/learn/grade-1\"><h2>Grade 1</h2><p>Build your first program</p><small>Suggested ages 6–7 · 5×5 board</small></a>",
+      "css": ".ds-grade-card{display:block;padding:22px;border:1px solid #d9ceee;border-radius:14px;background:#fff;color:#181339;text-decoration:none;font-family:'Segoe UI',system-ui,sans-serif}.ds-grade-card h2{margin:0 0 8px;font-size:1.25rem;line-height:1.2}.ds-grade-card p{margin:0;color:#465269;font-size:.875rem;line-height:1.5}.ds-grade-card small{display:block;margin-top:8px;color:#465269;font-size:.75rem}.ds-grade-card:hover{border-color:#7543df;background:#faf8ff}.ds-grade-card:focus-visible{outline:3px solid #986cf5;outline-offset:3px}.ds-grade-card:active{background:#f2effb}"
+    },
+    {
+      "name": "Learning activity guide",
+      "kind": "custom",
+      "refersTo": "learning-activity-guide",
+      "description": "Concept prose, authored activity instructions and progressive hints; persistent on wide desktop and folded at compact widths.",
+      "html": "<aside class=\"ds-guide\" aria-label=\"Lesson and activity help\"><h2>Lesson &amp; instructions</h2><div class=\"ds-guide-content\"><details open><summary>Sequences</summary><p>Put instructions in the order you want the character to move.</p><button>Listen to topic</button></details><section><h3>Your activity</h3><p>Build a program to reach the destination.</p></section><section><h3>A little nudge?</h3><button>Reveal first hint</button></section></div></aside>",
+      "css": ".ds-guide{max-width:340px;max-height:540px;overflow:auto;border:1px solid #c6b6e8;border-radius:16px;background:#fff;color:#181339;font-family:'Segoe UI',system-ui,sans-serif;font-size:.875rem;line-height:1.6}.ds-guide h2{margin:0;padding:16px;min-height:30px;background:#f7f4fe;color:#241259;border-bottom:1px solid #e8e2f2;font-size:1rem}.ds-guide-content{padding:12px 16px}.ds-guide summary{min-height:44px;color:#3e246e;font-weight:600;cursor:pointer}.ds-guide p{color:#575472}.ds-guide section{margin-top:12px;padding-top:12px;border-top:1px solid #e8e2f2}.ds-guide h3{margin:0;font-size:1rem}.ds-guide button{min-height:44px;padding:8px;border:1px solid #d9ceee;border-radius:8px;background:#fff;color:#3e246e;font:600 .8rem 'Segoe UI',system-ui,sans-serif;cursor:pointer}.ds-guide button:hover{background:#f7f4fe}.ds-guide button:active{filter:brightness(.95)}.ds-guide button:focus-visible,.ds-guide summary:focus-visible{outline:3px solid #986cf5;outline-offset:3px}"
     }
   ],
   "narrative": {
     "northStar": "Build & Play",
-    "overview": "A friendly K assembled from coding blocks connects making with play. Violet, teal and yellow carry the identity against ink lettering and cloud backgrounds. The approved extension adds a consistent mark, wordmark and heading voice to the existing learning application.\n\nThe working surface stays legible and task-focused: a quiet lesson or mission heading, a visible execution stage, and a block editor. Flat geometry and rounded corners support the playful identity without competing with the learner's program.",
-    "keyCharacteristics": ["A consistent three-piece block-built K.", "Fredoka for the wordmark and principal course heading; system type for reading and controls.", "Light bordered workspaces and a dark course drawer.", "Visible focus and reduced-motion support."],
-    "rules": [
-      { "name": "The Accent Legibility Rule", "body": "Bright brand teal and yellow are identity accents, not small text colors on white; retain functional teal for readable block labels.", "section": "colors" },
-      { "name": "The Reading Voice Rule", "body": "Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”", "section": "typography" },
-      { "name": "The Mark Integrity Rule", "body": "Never stretch, rotate, relight or add an extra play triangle to the mark. Keep clear space of at least one quarter of its height. Use the normal symbol at 24 CSS pixels or larger; use the backed favicon below that. Use a tagline lockup at 260px wide or larger and omit the tagline for smaller placements.", "section": "shapes" }
+    "overview": "A friendly K assembled from coding blocks connects making with play. Violet, teal and yellow carry the identity against ink lettering and cloud backgrounds. The approved extension adds a consistent mark, wordmark and heading voice to the existing learning application.\n\nThe working surface stays legible and task-focused: a quiet lesson or mission heading, a visible execution stage, and a block editor. Flat geometry and rounded corners support the playful identity without competing with the learner's program.\n\nThe approved 9 October learning extension makes each coding activity a playable top-down tile world. Deep purple navigation frames white workspaces on pale lavender ground; the live mascot, walkable path, obstacles and destination share one meaningful map. The same shell carries grade selection, lessons, Blockly and bounded typed practice; drawing changes the stage to smooth white paper with Dash's pencil.\n\nThe approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 20/35/45 of the workspace columns to those roles. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.",
+    "keyCharacteristics": [
+      "A consistent three-piece block-built K.",
+      "Fredoka for the wordmark and principal course heading; system type for reading and controls.",
+      "Light bordered workspaces and a dark course drawer.",
+      "Visible focus and reduced-motion support.",
+      "Purple learning navigation and readable white workspaces around semantic mascot tile worlds.",
+      "A persistent wide-screen lesson guide, smaller stage and readable native Blockly palette."
     ],
-    "dos": ["Do reuse the approved three-piece K and the exact tagline.", "Do preserve system typography for lesson reading and controls.", "Do keep focus, text scaling and reduced-motion behavior visible in new work.", "Do use the darker functional teal for white movement-block labels."],
-    "donts": ["Don't substitute a generic code icon for the approved mark.", "Don't use bright teal or yellow as small text on white.", "Don't stretch the logo or add lighting effects or a variant-only triangle.", "Don't treat this brand extension as permission to redesign the learning flow."]
+    "rules": [
+      {
+        "name": "The Accent Legibility Rule",
+        "body": "Bright brand teal and yellow are identity accents, not small text colors on white; retain functional teal for readable block labels.",
+        "section": "neutral"
+      },
+      {
+        "name": "The Semantic Terrain Rule",
+        "body": "Every painted obstacle inside the playable map represents a collision cell; a walkable tile represents open ground. Decorative scenery outside the map never creates a second route or hidden collision rule.",
+        "section": "neutral"
+      },
+      {
+        "name": "The Reading Voice Rule",
+        "body": "Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”",
+        "section": "typography"
+      },
+      {
+        "name": "The Mark Integrity Rule",
+        "body": "Never stretch, rotate, relight or add an extra play triangle to the mark. Keep clear space of at least one quarter of its height. Use the normal symbol at 24 CSS pixels or larger; use the backed favicon below that. Use a tagline lockup at 260px wide or larger and omit the tagline for smaller placements.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do reuse the approved three-piece K and the exact tagline.",
+      "Do preserve system typography for lesson reading and controls.",
+      "Do keep focus, text scaling and reduced-motion behavior visible in new work.",
+      "Do use the darker functional teal for white movement-block labels.",
+      "Do apply learning tokens only within the learning shell and entry; preserve public-page rules and the master mark.",
+      "Do keep Play below the stage, real Blockly geometry, meaningful obstacle tiles and readable board alternatives.",
+      "Do preserve the shared white-paper drawing shell and Grade 1–6 entry choices.",
+      "Do keep native palette blocks at .95 scale and let long flyout lists scroll.",
+      "Do keep lesson prose, authored instructions and hints reachable within the responsive activity guide."
+    ],
+    "donts": [
+      "Don't substitute a generic code icon for the approved mark.",
+      "Don't use bright teal or yellow as small text on white.",
+      "Don't stretch the logo or add lighting effects or a variant-only triangle.",
+      "Don't treat this brand extension as permission to redesign the learning flow.",
+      "Don't replace collision data with a decorative complete-scene background or change saved learners' routes.",
+      "Don't imply that mascot artwork implements formal Events, full Python, new accounts or curriculum validation."
+    ]
   }
 }

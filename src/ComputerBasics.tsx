@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { MousePointer2, Keyboard, Star, ArrowRight, Check, RotateCcw } from 'lucide-react';
 import ReadAloud from './ReadAloud';
+import CharacterSprite from './CharacterSprite';
 
 const mouseLessons = [
   ['Meet your pointer', 'Move the pointer to the star and click it. On a tablet, tap the star.'],
@@ -47,13 +48,14 @@ export default function ComputerBasics({ complete, onComplete, onBack }: Props) 
     setModule(nextModule); setIndex(nextIndex); setMessage(''); setDrag(null); setSelected(false); setReplaying(false);
     setText(nextModule === 'keyboard' ? keyboardLessons[nextIndex].initial ?? '' : '');
   }
-  function win() { onComplete(id); setReplaying(false); setMessage('You did it! Byte is ready for another discovery.'); setDrag(null); setSelected(false); }
+  function win() { onComplete(id); setReplaying(false); setMessage('You did it! Pip is ready for another discovery.'); setDrag(null); setSelected(false); }
   const places = [{ left: 76, top: 25 }, { left: 65, top: 68 }, { left: 74, top: 66 }, { left: 72, top: 26 }, { left: 25, top: 70 }, { left: 23, top: 28 }, { left: 72, top: 22 }, { left: 78, top: 76 }];
   const destination = places[(index - 2 + places.length) % places.length];
   const origin = { left: 100 - destination.left, top: 100 - destination.top };
   return <section className="computer-basics" aria-label="Computer Explorers">
     <button className="secondary" onClick={onBack}>Back to coding courses</button>
     <div className="basics-heading"><div><h1>Computer Explorers</h1><p>Get comfortable with a mouse, touch and keyboard. Ages 6 and up.</p></div><span>{complete.length} / 20 activities complete</span></div>
+    <div className="lesson-mentor"><CharacterSprite concept="Computer Explorers" labelled /><div><strong>Practise with Pip</strong><p>Click, carry and type. We’ll take it one action at a time.</p></div></div>
     <div className="basics-tabs" aria-label="Computer basics modules">{(['mouse','keyboard'] as const).map(m => <button className={module === m ? 'primary' : 'secondary'} key={m} aria-pressed={module === m} onClick={() => change(m, 0)}>{m === 'mouse' ? <MousePointer2 /> : <Keyboard />}{m === 'mouse' ? 'Mouse & touch' : 'Keyboard'}<span>{complete.filter(item => item.startsWith(m)).length}/10</span></button>)}</div>
     <nav className="basics-activities" aria-label="Activities">{Array.from({ length: 10 }, (_, n) => <button key={n} aria-label={`Activity ${n + 1}${complete.includes(`${module}-${n}`) ? ', complete' : ''}`} aria-current={n === index ? 'step' : undefined} onClick={() => change(module, n)}>{complete.includes(`${module}-${n}`) ? <Check size={18} /> : n + 1}</button>)}</nav>
     <section className="basics-lesson"><h2>{module === 'mouse' ? mouseLessons[index][0] : keyboard.title}</h2><p>{module === 'mouse' ? mouseLessons[index][1] : keyboard.text}</p><ReadAloud text={module === 'mouse' ? mouseLessons[index].join('. ') : `${keyboard.title}. ${keyboard.text}`} label="Listen to activity" />{module === 'mouse' && index >= 2 && <p className="basics-alternative">You can also click the star, then click its home. With a keyboard, Tab to each and press Enter.</p>}</section>

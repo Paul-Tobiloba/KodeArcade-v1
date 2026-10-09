@@ -12,6 +12,8 @@ test('selecting, dragging and dropping a block does not shift the existing stack
   await page.waitForTimeout(200);
   const before = (await start.boundingBox())!;
   const source = (await palette.boundingBox())!;
+  expect(source.width).toBeGreaterThanOrEqual(44);
+  expect(source.height).toBeGreaterThanOrEqual(44);
   const steady = async () => {
     const current = (await start.boundingBox())!;
     expect(Math.abs(current.x - before.x)).toBeLessThan(1);
@@ -46,4 +48,5 @@ test('selecting, dragging and dropping a block does not shift the existing stack
   await steady();
   await expect(start.locator('..').locator('.ka_arrow_down')).toHaveCount(4);
   expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
+  await page.screenshot({ path: '.impeccable/review/three-column-arrows.png', fullPage: true });
 });

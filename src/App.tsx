@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Play, Square, RotateCcw, Lightbulb, Settings, X, ChevronRight, Code2, Sparkles, Trash2, BookOpen, LibraryBig, ShieldCheck, PanelLeftClose, PanelLeftOpen, Star, Check } from 'lucide-react';
 import { missions, same, type Position, type RunResult } from './learning';
 import { modulesFor, moduleFor, missionIndex, nextChallenge } from './curriculum';
@@ -18,7 +18,10 @@ import { needsLesson } from './lessonProgress';
 import ReadAloud from './ReadAloud';
 import VoiceSettings from './VoiceSettings';
 import { challengeStars } from './rewards';
-import { characterFor } from './characters';
+import { characterFor, worldGoals } from './characters';
+import { worldMission } from './worldMission';
+import CommandReference from './CommandReference';
+import ActivityGuide from './ActivityGuide';
 import TopicJourney from './TopicJourneyView';
 import { SEQUENCE_TOPIC, emptyTopicRecord, isSequenceJourney, sequenceCore, sequenceExtras } from './topicJourney';
 
@@ -44,7 +47,7 @@ export default function App() {
   const [notice, setNotice] = useState('');
   const [showLesson, setShowLesson] = useState(needsLesson(loaded.save, missions[loaded.save.current].id));
   const [previewModule, setPreviewModule] = useState<string | null>(null);
-  const [small, setSmall] = useState(() => matchMedia('(max-width: 900px)').matches);
+  const [small, setSmall] = useState(() => matchMedia('(max-width: 950px)').matches);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
   const [systemReduced, setSystemReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -74,8 +77,9 @@ export default function App() {
   const baseMission = missions[save.current];
   const progress = save.progress[baseMission.id] ?? freshProgress(save.current);
   const character = characterFor(baseMission.concept);
-  const adaptCopy = (text: string) => character.name === 'Byte' ? text : text.replaceAll('Byte', character.name).replaceAll('charging station', 'star');
-  const mission = { ...baseMission, end: progress.end ?? baseMission.end, title: adaptCopy(baseMission.title), description: adaptCopy(baseMission.description), goal: adaptCopy(baseMission.goal), hints: baseMission.hints.map(adaptCopy) };
+  const adaptCopy = (text: string) => text.replaceAll('Byte', character.name).replace(/charging station|yellow station|\bstation\b|\bstar\b/gi, worldGoals[character.name]).replace(/\brocks?\b/gi, 'obstacles');
+  const mapMission = useMemo(() => worldMission(baseMission, progress.worldLayout ?? 'open-v1'), [baseMission, progress.worldLayout]);
+  const mission = { ...mapMission, end: progress.end ?? mapMission.end, title: adaptCopy(baseMission.title), description: adaptCopy(baseMission.description), goal: adaptCopy(baseMission.goal), hints: baseMission.hints.map(adaptCopy) };
   const module = previewModule ? courseModules.find(m => m.id === previewModule)! : moduleFor(mission.id);
   const challengeNumber = module.challengeIds.indexOf(mission.id) + 1;
   const extraNumber = sequenceExtras.indexOf(mission.id);
@@ -107,7 +111,7 @@ export default function App() {
   }, [save, storageBlocked]);
   useEffect(() => {
     const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
-    const widthQuery = matchMedia('(max-width: 900px)');
+    const widthQuery = matchMedia('(max-width: 950px)');
     const motion = () => setSystemReduced(motionQuery.matches);
     const width = () => { setSmall(widthQuery.matches); if (widthQuery.matches) setDrawerOpen(false); };
     const connection = () => setOffline(!navigator.onLine);
@@ -209,7 +213,7 @@ export default function App() {
     setStep(0); setResumed(false); setNotice('Session progress reset.'); setShowLesson(true); setPreviewModule(null); settings.current?.close(); focusHeading();
   }
 
-  return <div onPointerDown={() => { if (save.musicEnabled) void sound.unlock(); }} className={`app course-app ${playing ? 'challenge-active' : ''} ${drawing ? 'drawing-active' : ''} ${drawerOpen ? 'drawer-open' : ''} ${save.largeText ? 'large-text' : ''} ${reduced ? 'reduced-motion' : ''}`}>
+  return <div onPointerDown={() => { if (save.musicEnabled) void sound.unlock(); }} className={`app course-app learning-world ${playing ? 'challenge-active' : ''} ${drawing ? 'drawing-active' : ''} ${drawerOpen ? 'drawer-open' : ''} ${save.largeText ? 'large-text' : ''} ${reduced ? 'reduced-motion' : ''}`}>
     <a className="skip-link" href="#workspace" onClick={event => { event.preventDefault(); const workspace = document.getElementById('workspace'); workspace?.focus(); workspace?.scrollIntoView(); }}>Skip to learning</a>
     <header className="topbar">
       <button ref={drawerToggle} className="drawer-toggle" aria-label={drawerOpen ? 'Hide modules' : 'Show modules'} aria-controls="module-drawer" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(open => !open)}>{drawerOpen ? <PanelLeftClose size={22} /> : <PanelLeftOpen size={22} />}</button>
@@ -221,7 +225,7 @@ export default function App() {
     <CourseDrawer basics={basics} open={drawerOpen} small={small} currentModule={module.id} currentMission={previewModule ? '' : mission.id} save={save} onClose={closeDrawer} onModule={id => { openBasics(false); selectModule(id); }} onChallenge={id => { openBasics(false); navigate(id); }} toggle={drawerToggle} />
     <main id="workspace" className={`main course-main ${arrows ? 'arrow-course' : ''}`} tabIndex={-1} inert={small && drawerOpen}>
       <section className="course-picker" aria-label="Current course"><div><strong>{basics ? 'Computer Explorers' : courseFor(save.course).title}</strong><p>{basics ? 'Mouse and keyboard adventures' : courseFor(save.course).description}</p></div><a className="secondary" href="/#/learn">Change course</a></section>
-      {basics ? <ComputerBasics complete={save.basicsComplete} onComplete={id => setSave(s => ({ ...s, basicsComplete: [...new Set([...s.basicsComplete, id])] }))} onBack={() => openBasics(false)} /> : drawing ? <DrawingLab key={save.course} grade={save.course} selected={drawingIndex} reduced={reduced} hint={drawingHint} onSelect={setDrawingIndex} onRunning={setDrawingRunning} onCelebrating={setDrawingCelebrating} onComplete={() => setDrawingRevision(n => n+1)} onSound={cue => { void sound.play(cue); }}/> : <>
+      {basics ? <ComputerBasics complete={save.basicsComplete} onComplete={id => setSave(s => ({ ...s, basicsComplete: [...new Set([...s.basicsComplete, id])] }))} onBack={() => openBasics(false)} /> : drawing ? <DrawingLab key={save.course} grade={save.course} selected={drawingIndex} reduced={reduced} hint={drawingHint} onHint={() => setDrawingHint(n => n+1)} onSelect={setDrawingIndex} onRunning={setDrawingRunning} onCelebrating={setDrawingCelebrating} onComplete={() => setDrawingRevision(n => n+1)} onSound={cue => { void sound.play(cue); }}/> : <>
       {saveWarning && <div className="warning" role="alert">{saveWarning}</div>}
       {offline && <div className="warning" role="status">You’re offline. This loaded session can keep running. Offline reopening is not available in this preview yet.</div>}
       {resumed && <div className="resume-banner"><div><strong>Welcome back{save.nickname ? `, ${save.nickname}` : ''}.</strong> Your progress is saved. You were exploring {moduleFor(mission.id).title.toLowerCase()}.</div><button aria-label="Dismiss welcome back" onClick={() => setResumed(false)}><X size={18} /></button></div>}
@@ -230,14 +234,15 @@ export default function App() {
       <div className="mission-heading"><div><h1 ref={heading} tabIndex={-1}>{showLesson ? module.lesson.title : mission.title}</h1><p>{showLesson ? module.description : mission.description}</p></div></div>
       {showLesson && supportsDrawing && <div className="drawing-entry"><p>Draw patterns and shapes with Dash.</p><button className="secondary" onClick={() => { setDrawingIndex(0); setDrawingHint(0); setDrawing(true); }}>Open drawing lab</button></div>}
       {showLesson ? topicActivity ? <TopicJourney key={editorKey} save={save} onStart={() => openTopicActivity(sequenceCore.find(id => !save.progress[id]?.complete) ?? sequenceCore[0])} onActivity={openTopicActivity} onRecord={patch => setSave(s => ({ ...s, topicRecords: { ...s.topicRecords, [SEQUENCE_TOPIC]: { ...(s.topicRecords[SEQUENCE_TOPIC] ?? emptyTopicRecord()), ...patch } } }))} /> : <LessonArticle module={module} mission={upcoming ? undefined : mission} onStart={startChallenge} previouslySeen={!upcoming && !needsLesson(save, mission.id)} arrows={arrows} /> : <>
-        {hintsOpen && <section className="game-help" aria-label="Hints"><div className="dialog-heading"><h2>A little nudge?</h2><button aria-label="Close hints" onClick={() => setHintsOpen(false)}><X size={20} /></button></div><p className="hint-current" aria-live="polite">{mission.hints[Math.max(0, progress.hints - 1)]}</p><p className="hint-cost">{progress.hints < 4 ? `Next hint: up to ${challengeStars(progress.attempts + 1, progress.hints + 1)} stars. Your saved best stays safe.` : 'You have seen all four hints.'}</p><button className="secondary" disabled={running || progress.hints >= 4} onClick={requestHint}>Show next hint<ChevronRight size={16} /></button></section>}
         <div className="workspace-grid">
+          <ActivityGuide key={mission.id} lesson={{ ...module.lesson, introduction: adaptCopy(module.lesson.introduction), sections: module.lesson.sections.map(s => ({ ...s, text: adaptCopy(s.text) })), takeaway: adaptCopy(module.lesson.takeaway), example: { ...module.lesson.example, explanation: adaptCopy(module.lesson.example.explanation) } }} title={mission.title} instruction={mission.description} goal={mission.goal} first={challengeNumber === 1} hints={mission.hints} hintCount={progress.hints} hintsOpen={hintsOpen} running={running} hintCost={progress.hints < 4 ? `Next hint: up to ${challengeStars(progress.attempts + 1, progress.hints + 1)} stars. Your saved best stays safe.` : 'You have seen all four hints.'} onHint={requestHint} onCloseHints={() => setHintsOpen(false)} />
           <MissionStage stageRef={stage} mission={mission} position={position} step={step} score={runtimeScore} runtimeNote={runtimeNote} result={result} running={running} onChooseEnd={chooseEnd} notice={retryMessage && <div className="retry-toast" role="status"><div><strong>Almost there!</strong><p>{adaptCopy(retryMessage)}</p></div><span aria-hidden="true">3s</span><button aria-label="Dismiss retry message" onClick={() => setRetryMessage('')}><X size={20} /></button></div>}>
-            <div className="run-controls"><button ref={runButton} className="primary run-button" aria-label={running ? 'Stop run' : 'Run code'} onClick={running ? () => { stop(); setNotice('Run stopped. Your code is unchanged.'); } : run}>{running ? <Square size={22} /> : <Play size={22} fill="currentColor" />}{running ? 'Stop' : 'Play'}</button><button className="clear-button" disabled={running || (textMode ? !textCode : !blockCount)} onClick={() => editor.current?.clear()}><RotateCcw size={17} />Clear code</button></div>
+            <div className="run-controls"><button ref={runButton} className="primary run-button" aria-label={running ? 'Stop run' : 'Run code'} onClick={running ? () => { stop(); setNotice('Run stopped. Your code is unchanged.'); } : run}>{running ? <Square size={22} /> : <Play size={22} fill="currentColor" />}{running ? 'Stop' : 'Play'}</button><button className="clear-button" aria-label="Reset position" title="Reset position — keep your code" onClick={() => { stop(); setResult(null); setPosition(mission.start); setStep(0); setRuntimeScore(undefined); setRuntimeNote(''); setRetryMessage(''); }}><RotateCcw size={20} />Reset</button></div>
             <details className="run-log"><summary>Last run</summary><p>{lastClue || 'Your next clue will appear here after a run.'}</p></details>
           </MissionStage>
           <section className="editor" aria-label="Code editor"><div className="editor-title"><h2><Code2 size={20} /> Your code</h2>{supportsText ? <div className="coding-mode" aria-label="Coding mode"><button aria-pressed={!textMode} disabled={running} onClick={() => changeCodingMode('blocks')}>Blocks</button><button aria-pressed={textMode} disabled={running} onClick={() => changeCodingMode('text')}>Text</button></div> : <span>{blockCount} / 24 blocks</span>}</div>
             {textMode ? <TextEditor key={`${mission.id}-${editorKey}`} ref={editor} mission={mission} code={textCode} running={running} onChange={updateText} /> : <BlockEditor key={`${save.course}-${mission.id}-${editorKey}`} ref={editor} mission={mission} initial={progress.workspace} legacy={progress.blocks} running={running} arrows={arrows} onChange={updateWorkspace} onError={setNotice} />}
+            <div className="editor-bottom-tools">{!textMode ? <CommandReference mission={mission} /> : <span>Your code saves on this device.</span>}<button className="editor-clear" aria-label="Clear code" title="Clear code" disabled={running || (textMode ? !textCode : !blockCount)} onClick={() => editor.current?.clear()}><Trash2 size={18} /></button></div>
             <p className="save-note"><ShieldCheck size={14} />{saveWarning ? 'Saving unavailable — see message above' : 'Your code saves on this device'}</p><div className="sr-only" role="status">{notice}</div>{notice && <p className="inline-notice" aria-hidden="true">{notice}</p>}
           </section>
         </div>
@@ -245,7 +250,7 @@ export default function App() {
       <footer className="workspace-footer"><span>Small steps. Big discoveries.</span><span><Sparkles size={14} /> Made for curious minds</span></footer>
       </>}
     </main>
-    <FeedbackDialog open={feedbackOpen && !!result?.success} stars={awardedStars} message={mission.conditionals || mission.variables ? result?.message ?? '' : character.name === 'Byte' ? 'Byte is recharged. Your instructions reached the station!' : `${character.name} reached the star. Your instructions worked!`} reduced={reduced} nextTitle={returnToJourney ? 'Your topic journey' : nextId ? missions[missionIndex(nextId)].title : undefined} onStar={starChime} onClose={dismissFeedback} onNext={() => returnToJourney ? reviewLesson() : nextId && navigate(nextId)} />
+    <FeedbackDialog open={feedbackOpen && !!result?.success} stars={awardedStars} message={mission.conditionals || mission.variables ? adaptCopy(result?.message ?? '') : character.name === 'Byte' ? 'Byte is recharged. Your instructions reached the station!' : `${character.name} reached the ${worldGoals[character.name]}. Your instructions worked!`} reduced={reduced} nextTitle={returnToJourney ? 'Your topic journey' : nextId ? missions[missionIndex(nextId)].title : undefined} onStar={starChime} onClose={dismissFeedback} onNext={() => returnToJourney ? reviewLesson() : nextId && navigate(nextId)} />
     <dialog ref={settings} aria-labelledby="settings-title" className="settings-dialog"><div className="dialog-heading"><h2 id="settings-title">Make yourself comfortable</h2><button aria-label="Close settings" onClick={() => settings.current?.close()}><X size={21} /></button></div><p>These preferences and your progress stay in this browser.</p><label className="nickname-label">Nickname <span>(optional)</span><input maxLength={20} value={save.nickname} placeholder="What should we call you?" autoComplete="off" onChange={e => setSave(s => ({ ...s, nickname: e.target.value }))} /></label><label className="toggle-label"><input type="checkbox" checked={save.largeText} onChange={e => setSave(s => ({ ...s, largeText: e.target.checked }))} /><span>Larger text</span></label><label className="toggle-label"><input type="checkbox" checked={save.reducedMotion} onChange={e => setSave(s => ({ ...s, reducedMotion: e.target.checked }))} /><span>Show steps without sliding animations</span></label>{systemReduced && <p>Your device’s reduced-motion preference is also active. Byte still shows each step before feedback.</p>}<label className="toggle-label"><input type="checkbox" checked={save.soundEnabled} onChange={e => setSave(s => ({ ...s, soundEnabled: e.target.checked }))} /><span>Character sound effects</span></label><label className="toggle-label"><input type="checkbox" checked={save.musicEnabled} onChange={e => { void sound.unlock(); setSave(s => ({ ...s, musicEnabled: e.target.checked })); }} /><span>Background music</span></label><p>Current theme: {soundProfiles[character.name as SoundCharacter].name}. Music is quiet, optional, and pauses for reading and celebrations.</p><VoiceSettings /><details className="reward-settings"><summary>How stars work</summary><p>Every completed challenge earns 1–5 stars. Early attempts keep all five; more retries and stronger hints gradually reduce the available reward. Your highest saved reward never decreases.</p>{progress.stars && <p>Best saved: {progress.stars} / 5</p>}</details><hr /><h3>Your learning so far</h3><p>{completed} of {total.length} challenges complete. {save.progress[courseModules.find(m => (m.topicId ?? m.id) === 'project')!.challengeIds[0]]?.complete ? 'Your project has a working route.' : 'Your project is ready whenever you are.'}</p><ul className="summary-list">{courseModules.filter(m => m.status === 'available').map(m => <li key={m.id}>{m.title}<span>{m.challengeIds.filter(id => save.progress[id]?.complete).length} / {m.challengeIds.length} complete</span></li>)}</ul><p className="privacy-copy">Anyone using this browser may see this progress. Use a nickname, not your real name. Clearing browser data removes your saved work.</p><button className="delete-button" onClick={resetAll}><Trash2 size={17} />Reset saved progress</button><button className="primary dialog-done" onClick={() => settings.current?.close()}>Done</button></dialog>
   </div>;
 }

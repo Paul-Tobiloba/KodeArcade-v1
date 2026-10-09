@@ -66,11 +66,10 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
     ws.scrollbar?.setContainerVisible(false);
     const palette = ws.getFlyout() as Blockly.VerticalFlyout | null;
     if (palette) {
-      palette.getWorkspace().scrollbar?.setContainerVisible(false);
-      const naturalHeight = palette.getWorkspace().getTopBlocks(false).reduce((height, block) => height + block.getHeightWidth().height + 8, mission.loops ? 24 : 16);
-      const naturalWidth = Math.max(...palette.getWorkspace().getTopBlocks(false).map(block => block.getHeightWidth().width)) + 24;
-      // Palette targets stay large when a longer program scales down.
-      palette.getFlyoutScale = () => Math.min(.95, ((element.current?.clientHeight ?? 400) - 12) / naturalHeight, ((element.current?.clientWidth ?? 600) * .43) / naturalWidth);
+      // The palette is an input, not a program preview. Never shrink its
+      // targets to squeeze every option into a temporarily short container.
+      // Blockly's native flyout scrolling exposes longer lists instead.
+      palette.getFlyoutScale = () => .95;
       palette.reflow();
     }
     try {
@@ -95,7 +94,7 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
         // dragging. Do not resize/reposition in that pointer-down window either.
         if (pointerHeld || ws.isDragging()) return;
         const resized = fittedWidth !== element.current?.clientWidth || fittedHeight !== element.current?.clientHeight;
-        if (resized) Blockly.svgResize(ws);
+        if (resized) { Blockly.svgResize(ws); palette?.reflow(); }
         // These empty SVG paths paint connection outlines; the actual block
         // options carry their names. Do not expose them as listbox children.
         element.current?.querySelectorAll('.blocklyHighlightedConnectionPath').forEach(path => path.setAttribute('aria-hidden','true'));

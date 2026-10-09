@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, BookOpen, MousePointer2 } from 'lucide-react';
 import { courses, courseFor } from './courses';
 import { loadSave } from './storage';
+import CharacterSprite from './CharacterSprite';
 
 export default function LearningEntry() {
   const [explore, setExplore] = useState(false);
@@ -10,8 +11,8 @@ export default function LearningEntry() {
     <main className="entry-content"><h1>Where shall we begin?</h1><p>Choose your grade for a starting point, or explore every course. You can change your choice anytime. No birthday or account needed.</p>
       <div className="entry-tabs" role="group" aria-label="Find your course"><button className={!explore ? 'primary' : 'secondary'} aria-pressed={!explore} onClick={() => setExplore(false)}>Choose by grade</button><button className={explore ? 'primary' : 'secondary'} aria-pressed={explore} onClick={() => setExplore(true)}>Explore courses</button></div>
       {resumed && <a className="entry-resume" href={`/#/learn/${save.course}`}>Continue {courseFor(save.course).title}<ArrowRight size={20} /></a>}
-      <section className="entry-options" aria-label={explore ? 'Available courses' : 'Grades'}>{courses.map(course => <a className="entry-option" key={course.id} href={`/#/learn/${course.id}`}><div><h2>{course.title}</h2><p>{course.description}</p><small>Suggested ages {course.ages} · {course.size}×{course.size} board</small>{explore && <small>{course.topics.join(' · ')} · Creative project</small>}</div><ArrowRight size={24} /></a>)}
-        <a className="entry-option" href="/#/learn/computer"><MousePointer2 size={30} /><div><h2>Computer Explorers</h2><p>New to a computer? Practise clicking, dragging and using the keyboard before coding.</p><small>Ages 6+ · 20 activities</small></div><ArrowRight size={24} /></a></section>
+      <section className="entry-options" aria-label={explore ? 'Available courses' : 'Grades'}>{courses.map((course, index) => <a className="entry-option" key={course.id} href={`/#/learn/${course.id}`}><div className="entry-world-art" aria-hidden="true"><CharacterSprite concept={['Sequences','Direction & order','Loops','Debugging','Conditionals','Variables'][index]} /></div><div className="entry-course-copy"><h2>{course.title}</h2><p>{course.description}</p><small>Suggested ages {course.ages} · {course.size}×{course.size} board</small>{explore && <small>{course.topics.join(' · ')} · Creative project</small>}</div><ArrowRight size={24} /></a>)}
+        <a className="entry-option entry-computer" href="/#/learn/computer"><div className="entry-world-art" aria-hidden="true"><CharacterSprite concept="Computer Explorers" /></div><div className="entry-course-copy"><h2><MousePointer2 size={20} /> Computer Explorers</h2><p>New to a computer? Practise clicking, dragging and using the keyboard before coding.</p><small>Ages 6+ · 20 activities</small></div><ArrowRight size={24} /></a></section>
       <p className="entry-note"><BookOpen size={18} /> Grades and ages are a guide, not a gate. Pick the course that feels comfortable.</p>
     </main></div>;
 }
