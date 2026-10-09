@@ -172,7 +172,7 @@ test('Grade 1 drawing is arrow-led and progresses through several activities', a
   await page.getByRole('button', { name: 'Run code' }).click();
   await expect(page.getByRole('dialog', {name:'You made it!'})).toBeVisible();
   await page.getByRole('button', {name:'Next challenge',exact:true}).click();
-  await expect(page.getByRole('heading', { name: 'Turn a corner', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Dash drawing challenge' }).getByRole('heading', { name: 'Turn a corner', exact: true })).toBeVisible();
   await page.getByText('Keyboard helpers', {exact:true}).click();
   await page.getByRole('button', {name:'Add block',exact:true}).click();
   await page.locator('#keyboard-move').selectOption('ka_draw_arrow_left');

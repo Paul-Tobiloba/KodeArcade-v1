@@ -1,7 +1,7 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 import { firstChallenge, isCourse, type CourseId } from './courses';
 import { SEQUENCE_TOPIC, type TopicRecord } from './topicJourney';
-export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text' };
+export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
 export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord> };
 export const SAVE_KEY = 'kodearcade-v1';
@@ -11,7 +11,7 @@ export function switchCourse(save: Save, course: CourseId): Save {
   const target = save.courseProgress[course] ?? { current: missions.findIndex(m => m.id === firstChallenge(course)), progress: {} };
   return { ...save, ...target, course, courseProgress: { ...save.courseProgress, [save.course]: { current: save.current, progress: save.progress } } };
 }
-export function freshProgress(index: number): Progress { return { blocks: initialProgram(missions[index]), attempts: 0, hints: 0, complete: false }; }
+export function freshProgress(index: number): Progress { return { blocks: initialProgram(missions[index]), attempts: 0, hints: 0, complete: false, worldLayout: 'tiles-v1' }; }
 const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 export function parseSave(raw: string | null): Save {
   if (!raw) return emptySave();
@@ -48,6 +48,8 @@ export function parseSave(raw: string | null): Save {
       blocks.push({ id: b.id, kind: b.kind as Block['kind'], direction: directions.includes(b.direction as never) ? b.direction as Block['direction'] : 'right', count: b.kind === 'repeat' ? Number(b.count) : 2 });
     }
     const progress: Progress = { blocks, attempts: Number.isInteger(p.attempts) ? Math.max(0, Math.min(100000, Number(p.attempts))) : 0, hints: Number.isInteger(p.hints) ? Math.max(0, Math.min(4, Number(p.hints))) : 0, complete: p.complete === true };
+    // Old saved programs keep the exact collision map they were written for.
+    if (p.worldLayout === 'tiles-v1' || p.worldLayout === 'open-v1') progress.worldLayout = p.worldLayout;
     if (object(p.workspace) && JSON.stringify(p.workspace).length < 100000) progress.workspace = p.workspace;
     if (typeof p.textCode === 'string' && p.textCode.length <= 10000) progress.textCode = p.textCode;
     if (p.codingMode === 'blocks' || p.codingMode === 'text') progress.codingMode = p.codingMode;
