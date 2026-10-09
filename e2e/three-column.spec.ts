@@ -22,7 +22,29 @@ test('lesson, activity and code use responsive columns without decorative side t
     const widths = await page.locator('.workspace-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').map(parseFloat));
     expect(widths).toHaveLength(3);
     const total = widths.reduce((a,b) => a+b,0);
-    expect(widths.map(w => Math.round(w/total*100))).toEqual([20,35,45]);
+    expect(widths.map(w => Math.round(w/total*100))).toEqual([25,30,45]);
+    const articleFlow = await page.locator('.activity-guide-content').evaluate(el => {
+      const concept = el.querySelector('.activity-concept')!;
+      const article = el.querySelector('.activity-reading')!;
+      const instructions = el.querySelector('.activity-instructions')!;
+      return {
+        conceptOverflow: getComputedStyle(concept).overflowY,
+        columnOverflow: getComputedStyle(el).overflowY,
+        articleBottom: article.getBoundingClientRect().bottom,
+        instructionsTop: instructions.getBoundingClientRect().top,
+        scrolls: el.scrollHeight > el.clientHeight,
+      };
+    });
+    expect(articleFlow.conceptOverflow).toBe('visible');
+    expect(articleFlow.columnOverflow).toBe('auto');
+    expect(articleFlow.instructionsTop).toBeGreaterThanOrEqual(articleFlow.articleBottom);
+    expect(articleFlow.scrolls).toBe(true);
+    const expandedInstructionsTop = articleFlow.instructionsTop;
+    await page.locator('.activity-concept > summary').click();
+    await expect(page.locator('.activity-reading')).toBeHidden();
+    expect((await page.locator('.activity-instructions').boundingBox())!.y).toBeLessThan(expandedInstructionsTop);
+    await page.locator('.activity-concept > summary').click();
+    await page.locator('.activity-guide-content').evaluate(el => { el.scrollTop = 0; });
     expect(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight)).toBe(true);
   } else await expect(page.getByRole('button', { name: 'Lesson & instructions' })).toHaveAttribute('aria-expanded','false');
   await page.evaluate(() => document.fonts.ready);
@@ -31,8 +53,12 @@ test('lesson, activity and code use responsive columns without decorative side t
   await expect(page.locator('.activity-guide .hint-current')).toBeVisible();
   await expect(page.locator('.activity-guide .hint-current')).not.toBeEmpty();
   if (info.project.name === 'desktop') {
-    const listenFits = await page.locator('.activity-concept').evaluate(el => el.querySelector('.read-aloud button')!.getBoundingClientRect().bottom <= el.getBoundingClientRect().bottom);
-    expect(listenFits).toBe(true);
+    // Hints follow the full article now, so the same guide scrollbar must
+    // reach their controls without scrolling the board or code workspace.
+    await expect(page.locator('.activity-hint-heading h2')).toBeInViewport();
+    await page.locator('.activity-guide-content').evaluate(el => { el.scrollTop = el.scrollHeight; });
+    await expect(page.getByRole('button', { name: 'Show next hint', exact: true })).toBeInViewport();
+    expect(await page.locator('.activity-concept').evaluate(el => getComputedStyle(el).overflowY)).toBe('visible');
   }
   await page.getByRole('button', { name: 'Show next hint', exact: true }).click();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('kodearcade-v1')!).progress['grade-3-sequences-1'].hints)).toBe(2);

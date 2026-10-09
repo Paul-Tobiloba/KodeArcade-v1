@@ -151,7 +151,7 @@ The working surface stays legible and task-focused: a quiet lesson or mission he
 
 The approved 9 October learning extension makes each coding activity a playable top-down tile world. Deep purple navigation frames white workspaces on pale lavender ground; the live mascot, walkable path, obstacles and destination share one meaningful map. The same shell carries grade selection, lessons, Blockly and bounded typed practice; drawing changes the stage to smooth white paper with Dash's pencil.
 
-The approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 20/35/45 of the workspace columns to those roles. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.
+The approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 25/30/45 of the workspace columns to those roles. The article expands in normal flow, pushing activity instructions and hints down within one scrollable guide column. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.
 
 **Key Characteristics:**
 
@@ -220,7 +220,7 @@ The base non-challenge course header is sticky and 72px high, shrinking to 64px 
 
 The earlier base stage/editor grid (260px and 430px minimums, .8:1.5 proportions, stacking at a 750px content container) is superseded for active learning challenges. Lesson reading and examples retain their container-responsive stacking. The tagline hides at 1100px to protect header controls.
 
-On viewports wider than 1100px and taller than 600px, active learning fills 100dvh beneath a 68px purple toolbar. The learning main area is at most 1440px wide, with 12px padding and gaps. Three columns use minmax(0,20fr), minmax(0,35fr) and minmax(0,45fr) for the lesson/instructions/hints guide, challenge stage and editor. The guide's concept article scrolls in its own slot with a 200px minimum; the whole guide can also scroll when its instructions and hints exceed the available height. Play stays beneath the stage. The square map fits the smaller of its container's width and height and is centred on a plain white surround; board dimensions follow the mission.
+On viewports wider than 1100px and taller than 600px, active learning fills 100dvh beneath a 68px purple toolbar. The learning main area is at most 1440px wide, with 12px padding and gaps. Three columns use minmax(0,25fr), minmax(0,30fr) and minmax(0,45fr) for the lesson/instructions/hints guide, challenge stage and editor. The concept article expands at its natural height and pushes activity instructions and hints down; only the whole guide content scrolls, never a nested article slot. Play stays beneath the stage. The square map fits the smaller of its container's width and height and is centred on a plain white surround; board dimensions follow the mission.
 
 At widths from 951px through 1100px and heights above 600px, the guide folds into a full-width row with a 44px header and expanded content that scrolls within 180px. The stage/editor row uses 44/56 proportions. The guide starts collapsed at this size. Between 951px and 1250px the challenge wordmark hides to protect controls.
 
