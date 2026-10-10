@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ByteSound, soundProfiles, type SoundCharacter } from './sound';
+import { ByteSound, soundProfiles, characterCalls, type SoundCharacter } from './sound';
 import { emptySave, parseSave } from './storage';
 
 function setup(state = 'running') {
@@ -9,11 +9,29 @@ function setup(state = 'running') {
     state, currentTime: 0, destination: {}, resume: vi.fn(async () => { context.state = 'running'; }), close: vi.fn(async () => {}),
     createOscillator: vi.fn(() => { const voice = { type: '', frequency: param(), connect: vi.fn(), disconnect: vi.fn(), start: vi.fn(), stop: vi.fn(), onended: null }; voices.push(voice); return voice; }),
     createGain: vi.fn(() => ({ gain: param(), connect: vi.fn(), disconnect: vi.fn() })),
+    createBiquadFilter: vi.fn(() => ({ type: '', frequency: param(), Q: { value: 0 }, connect: vi.fn(), disconnect: vi.fn() })),
   };
   const factory = vi.fn(() => context as unknown as AudioContext);
   return { sound: new ByteSound(factory), factory, context, voices };
 }
 describe('Byte sound effects', () => {
+  it('gives every character a bounded run call and Milo a vowel-like chatter', async () => {
+    for (const character of Object.keys(characterCalls) as SoundCharacter[]) {
+      const { sound, context } = setup(); sound.setCharacter(character); await sound.play('start');
+      expect(context.createOscillator).toHaveBeenCalledTimes(characterCalls[character].length);
+      expect(characterCalls[character].every(note => note.delay + note.duration < .7)).toBe(true);
+      expect(context.createBiquadFilter).toHaveBeenCalledTimes(character === 'Milo' ? 3 : 0);
+      sound.dispose();
+    }
+  });
+  it('adds happy chatter to Milo arrival and cancels it when muted', async () => {
+    const { sound, context, voices } = setup(); sound.setCharacter('Milo'); await sound.play('success');
+    expect(context.createOscillator).toHaveBeenCalledTimes(6);
+    expect(context.createBiquadFilter).toHaveBeenCalledTimes(2);
+    sound.setEnabled(false); await sound.play('start');
+    expect(context.createOscillator).toHaveBeenCalledTimes(6);
+    expect(voices.every(v => v.disconnect.mock.calls.length === 1)).toBe(true);
+  });
   it('uses six distinct character movement voices', async () => {
     const pitches: number[] = [];
     for (const character of Object.keys(soundProfiles) as SoundCharacter[]) {
@@ -21,7 +39,7 @@ describe('Byte sound effects', () => {
       sound.setCharacter(character); await sound.play('move');
       const voice = context.createOscillator.mock.results[0].value;
       pitches.push(voice.frequency.setValueAtTime.mock.calls[0][0]);
-      expect(voice.type).toBe(soundProfiles[character].wave);
+      expect(voice.type).toBe(character === 'Milo' ? 'sawtooth' : soundProfiles[character].wave);
       sound.dispose();
     }
     expect(new Set(pitches).size).toBe(6);

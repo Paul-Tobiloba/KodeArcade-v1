@@ -242,6 +242,14 @@ Public-page depth comes primarily from the generated landscape. Step cards use t
 
 Learning tile depth is local: the map has a thin learning-line outline and no map shadow; moving sprites use `drop-shadow(0 3px 2px #14221766)` and destinations `drop-shadow(0 2px 2px #50351766)`. Decorative scenery strips around the map are removed. Help/tools use the existing compact popover shadow. The white editor and lesson containers stay border-led. Tile movement retains the incumbent movement timing, and drawing reveals ink along Dash's motion. Reduced motion removes sliding and celebration confetti.
 
+### Play, movement and arrival motion — 10 October
+
+Keep coordinate translation on the outer robot-position wrapper (360ms); a keyed inner character-motion wrapper performs one 460ms step reaction. Byte bobs mechanically, Dash hops, Gigi scampers, Fix trots, Milo hops with a side-to-side swing and Nova bounds. Ground shadows and brief dust puffs support foot contact without moving the map or editor. During visible runs, the destination sends ring ripples and blocked water has small surface ripples. Success plays a 900ms on-board arrival before the star modal: a three-cycle character dance, destination light pulses and a short four-spark burst. Byte brightens and its charging station lights up; other mascots celebrate their existing named destinations. No new collection or collision rules are implied.
+
+Motion pauses when the stage is offscreen or the tab hidden. Both saved and system reduced-motion preferences remove spatial effects, puffs and spark bursts; a static destination highlight and success status remain. Character calls and happy arrival cues use gesture-unlocked device-local synthesis and obey the existing sound toggle. Milo's rounded oo/ah calls use a bandpass resonance, not a downloaded animal recording. Background music pauses during arrival as well as narration and star feedback. Stop/reset cancels pending arrival and retains the existing attempt/reward semantics. Drawing adds a small pencil-tip-anchored sway without lifting the pencil off the ink.
+
+Initial HTML and the lazy learning-route fallback share a quiet loading screen. The three exact paths from the approved K mark assemble in violet, teal and yellow, with three bounded 1800ms cycles before settling. System reduced motion shows the static mark. The loading screen leaves as soon as the app is ready; no artificial delay, spinning logo, invented progress percentage or new brand geometry is used.
+
 ## Shapes
 
 The identity uses flat, rounded geometric blocks. Controls are gently rounded, workspaces have larger corners, and circular badges identify modules or feedback states. Keep the same three-piece mark geometry in color, reverse and monochrome variants.
@@ -315,6 +323,9 @@ The shared public navigation exposes Courses, How it works and For Parents, with
 - Do preserve the shared white-paper drawing shell and Grade 1–6 entry choices.
 - Do keep native palette blocks at .95 scale and let long flyout lists scroll.
 - Do keep lesson prose, authored instructions and hints reachable within the responsive activity guide.
+- Do use aligned semantic activity lists with number/check, purpose and text status; keep whole rows touch-friendly and allow descriptions to wrap.
+- Do place drawing in the module whose code it practises and return to that module at the end. Preserve stable drawing save IDs and independent practice rewards.
+- Do end module overviews with a named Next module action, or Explore courses at the final module, without adding a perfect-star or drawing gate. See docs/LEARNING_UX_REVIEW.md.
 
 ### Don't:
 

@@ -374,10 +374,37 @@
 .guided-sequence { display: flex; gap: 8px; margin-block: 16px; }
 .guided-sequence>span { display: flex; padding: 12px; color: #08796e; border: 2px solid #08796e; border-radius: 8px; }
 .guided-sequence>span.shown { color: #fff; background: #08796e; }
-.journey-challenges { padding: 0; list-style: none; margin-top: 20px; }
-.journey-challenge { display: grid; width: 100%; gap: 6px; text-align: left; padding: 16px 0; border-radius: 0; border-bottom: 1px solid var(--line); }
-.journey-challenge strong { display: flex; gap: 8px; align-items: center; }
-.journey-challenge span { font-size: .875rem; font-weight: 400; color: var(--muted); }
+.activity-list { list-style: none; padding: 0; margin: 20px 0 0; border-block: 1px solid var(--line); }
+.activity-list li + li { border-top: 1px solid var(--line); }
+.activity-list .activity-row { display: grid; grid-template-columns: 32px minmax(0,1fr) auto; justify-content: stretch; align-items: center; gap: 16px; width: 100%; min-height: 88px; padding: 16px 12px; border-radius: 0; text-align: left; }
+.activity-row:hover:not(:disabled) { background: #f6f3ff; filter: none; }
+.activity-row[aria-current=step] { background: #f6f3ff; }
+.activity-row-number { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #eeebf8; color: #5332a8; font-variant-numeric: tabular-nums; }
+.activity-row-number.is-complete { background: #e0f4eb; color: #146b4e; }
+.activity-row-copy { display: grid; gap: 4px; min-width: 0; }
+.activity-row-copy strong { font-size: .9375rem; line-height: 1.45; }
+.activity-row-copy>span { font-weight: 400; font-size: .875rem; line-height: 1.5; color: var(--muted); }
+.activity-row-action { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: #534768; white-space: nowrap; }
+.journey-complete { display: flex; gap: 8px; align-items: flex-start; color: #146b4e; }
+.journey-complete svg { margin-top: 4px; }
+.module-activities-panel { max-width: 1100px; margin: 24px auto 0; padding: clamp(20px,3vw,40px); background: #fff; border: 1px solid var(--line); border-radius: 16px; }
+.module-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.module-section-heading h2 { display: flex; align-items: center; gap: 8px; font-size: 1.125rem; }
+.module-section-heading p { max-width: 65ch; color: var(--muted); margin-top: 8px; font-size: .9375rem; }
+.module-section-heading>button { flex-shrink: 0; }
+.module-practice>.module-drawing { margin-top: 36px; }
+.module-next { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 28px; margin-top: 32px; border-top: 1px solid var(--line); }
+.module-next p { color: var(--muted); margin-top: 8px; max-width: 65ch; font-size: .9375rem; }
+.module-next>button, .module-next>a { flex-shrink: 0; }
+.guide-back { justify-content: flex-start; padding-inline: 0; color: #5332a8; margin-bottom: 12px; text-align: left; }
+@media(max-width: 600px) {
+  .activity-list .activity-row { grid-template-columns: 32px minmax(0,1fr) 18px; gap: 12px; padding: 16px 4px; }
+  .activity-row-action { display: contents; white-space: normal; }
+  .activity-row-action>span { grid-column: 2; grid-row: 2; }
+  .activity-row-action>svg { grid-column: 3; grid-row: 1; }
+  .module-section-heading, .module-next { flex-direction: column; gap: 16px; align-items: stretch; }
+  .module-next>button, .module-next>a { width: 100%; }
+}
 .journey-badge { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--line); color: #08796e; }
 .mastery-mission { max-width: 70ch; }
 .mastery-mission p { margin-block: 16px; }

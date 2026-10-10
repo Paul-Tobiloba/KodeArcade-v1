@@ -50,3 +50,15 @@ export const drawingActivities: Record<string, DrawingActivity[]> = {
   ],
 };
 export const drawingSaveKey = (grade: string, id: string) => `kodearcade-drawing-v2-${grade}-${id}`;
+
+// Placement follows the instructions actually used, not the scenery or mascot.
+// Stable activity IDs/save keys remain independent of their module placement.
+export function drawingTopic(grade: string, activity: DrawingActivity): string {
+  if (activity.free) return 'project';
+  if (activity.id === 'spiral') return 'variables';
+  if (grade === 'grade-1') return activity.id === 'trail' ? 'sequences' : 'directions';
+  return activity.reference.includes('for ') ? 'loops' : 'directions';
+}
+export function drawingsForTopic(grade: string, topic: string) {
+  return (drawingActivities[grade] ?? []).flatMap((activity, index) => drawingTopic(grade, activity) === topic ? [{ activity, index }] : []);
+}
