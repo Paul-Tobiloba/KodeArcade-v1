@@ -1,10 +1,16 @@
 import * as Blockly from 'blockly/core';
 import * as En from 'blockly/msg/en';
 import { runDynamic } from './dynamicProgram';
+import { instructionLimit, limitMessage } from './programLimits';
 import { directions, labels, runProgram, type Block, type Mission, type RunResult } from './learning';
 
 Blockly.setLocale(Object.fromEntries(Object.entries(En).filter((entry): entry is [string, string] => typeof entry[1] === 'string')));
 Blockly.common.defineBlocksWithJsonArray([
+  { type: 'ka_move_next', message0: 'move to next path tile', previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: 'Follow the next tile of the marked trail, including its turns.' },
+  ...[['gate_locked','gate ahead is locked'],['bridge_missing','bridge ahead is missing']].map(([type,label]) => ({ type: `ka_if_${type}`, message0: `if ${label}`, message1: 'do %1', args1: [{ type: 'input_statement', name: 'DO' }], previousStatement: null, nextStatement: null, colour: '#b85a09' })),
+  ...[['open_gate','open gate with key'],['build_bridge','build bridge']].map(([type,label]) => ({ type: `ka_${type}`, message0: label, previousStatement: null, nextStatement: null, colour: '#08796e' })),
+  ...[false, true].map(otherwise => ({ type: otherwise ? 'ka_if_item_else' : 'ka_if_item', message0: 'if item on this square', message1: 'do %1', args1: [{ type: 'input_statement', name: 'DO' }], ...(otherwise ? { message2: 'else %1', args2: [{ type: 'input_statement', name: 'ELSE' }] } : {}), previousStatement: null, nextStatement: null, colour: '#b85a09', tooltip: 'Check for an uncollected item on the character’s current square.' })),
+  { type: 'ka_pick_item', message0: 'pick up item', previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: 'Collect one item on this square. An empty square is not a valid pickup.' },
   ...[false, true].map(otherwise => ({ type: otherwise ? 'ka_if_else' : 'ka_if', message0: 'if path %1 is clear', args0: [{ type: 'field_dropdown', name: 'DIRECTION', options: directions.map(d => [d, d]) }], message1: 'do %1', args1: [{ type: 'input_statement', name: 'DO' }], ...(otherwise ? { message2: 'else %1', args2: [{ type: 'input_statement', name: 'ELSE' }] } : {}), previousStatement: null, nextStatement: null, colour: '#b85a09', tooltip: 'Check the path from the current square, then choose a branch.' })),
   ...['set', 'change'].map(action => ({ type: `ka_${action}_score`, message0: `${action} score ${action === 'set' ? 'to' : 'by'} %1`, args0: [{ type: 'field_number', name: 'VALUE', value: action === 'set' ? 0 : 1, min: -10, max: 10, precision: 1 }], previousStatement: null, nextStatement: null, colour: '#b53e75', tooltip: action === 'set' ? 'Store a new number named score.' : 'Add this number to the stored score. Negative numbers subtract.' })),
   { type: 'ka_move_score', message0: 'move %1', args0: [{ type: 'field_dropdown', name: 'DIRECTION', options: directions.map(d => [d, d]) }], message1: 'by score steps', previousStatement: null, nextStatement: null, colour: '#b53e75', tooltip: 'Read score now and move that many squares. This does not change score.' },
@@ -26,8 +32,8 @@ export function evaluateWorkspace(workspace: Blockly.Workspace, mission: Mission
   const start = roots.find(b => b.type === 'ka_start');
   if (!start) return failure('Add the start block before running your program.');
   if (roots.length > 1) return failure('Some blocks are not connected. Snap them below the start block, or drag unused blocks to the bin.');
-  if (workspace.getAllBlocks(false).length > 25) return failure('Use up to 24 instruction blocks. Remove a few blocks and try again.');
-  if (mission.conditionals || mission.variables) return runDynamic(start.getNextBlock(), mission);
+  if (workspace.getAllBlocks(false).length - 1 > instructionLimit(mission)) return failure(limitMessage(instructionLimit(mission)));
+  if (mission.conditionals || mission.variables || mission.collectibles || mission.gate || mission.river) return runDynamic(start.getNextBlock(), mission);
   const expanded: Block[] = [];
   let usedLoop = false;
   let error = '';

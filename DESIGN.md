@@ -322,6 +322,8 @@ The shared public navigation exposes Courses, How it works and For Parents, with
 - Do keep Play below the stage, real Blockly geometry, meaningful obstacle tiles and readable board alternatives.
 - Do preserve the shared white-paper drawing shell and Grade 1–6 entry choices.
 - Do keep native palette blocks at .95 scale and let long flyout lists scroll.
+- Do show task-specific instruction budgets with an explanation, excluding the start block. Keep valid at-limit programs neutral and reserve warning color for over-budget drafts.
+- Do render pickups, gates and bridges from real runtime state, with equivalent textual board descriptions. Keep the shared learning shell unchanged; see docs/INTERACTIVE_CHALLENGES.md.
 - Do keep lesson prose, authored instructions and hints reachable within the responsive activity guide.
 - Do use aligned semantic activity lists with number/check, purpose and text status; keep whole rows touch-friendly and allow descriptions to wrap.
 - Do place drawing in the module whose code it practises and return to that module at the end. Preserve stable drawing save IDs and independent practice rewards.

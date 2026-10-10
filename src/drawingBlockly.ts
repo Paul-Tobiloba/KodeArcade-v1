@@ -1,5 +1,6 @@
 import * as Blockly from 'blockly/core';
 import { parseCode, type Statement } from './textCoding';
+import { limitMessage } from './programLimits';
 
 Blockly.common.defineBlocksWithJsonArray([
   ...['forward','left','right'].map(action => ({ type: `ka_draw_arrow_${action}`, message0: '%1 %2', args0: [{ type: 'field_image', src: `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path d="${action === 'forward' ? 'M5 16h22m-9-9 9 9-9 9' : action === 'left' ? 'M26 26V14a8 8 0 0 0-8-8H6m7-5L6 6l7 7' : 'M6 26V14a8 8 0 0 1 8-8h12m-7-5 7 5-7 7'}" fill="none" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`)}`,width:32,height:32,alt: action === 'forward' ? 'Forward' : `Turn ${action}` },{type:'field_number',name:'VALUE',value:action === 'forward' ? 40 : 90,min:1,max:action === 'forward' ? 150 : 360,precision:1}],previousStatement:null,nextStatement:null,colour:'#08796e',tooltip:action === 'forward' ? 'Draw forward in the direction of the pointer.' : `Turn ${action}.` })),
@@ -10,10 +11,10 @@ Blockly.common.defineBlocksWithJsonArray([
 ]);
 
 /** Shared Blockly surface, task-specific instructions. The bounded pen engine runs these commands. */
-export function drawingWorkspaceCode(ws: Blockly.Workspace) {
+export function drawingWorkspaceCode(ws: Blockly.Workspace, maxInstructions = 24) {
   const roots = ws.getTopBlocks(false);
   if (roots.length !== 1 || roots[0].type !== 'ka_start') throw new Error('Snap every drawing block below the start block.');
-  if (ws.getAllBlocks(false).length > 25) throw new Error('Use up to 24 drawing blocks.');
+  if (ws.getAllBlocks(false).length - 1 > maxInstructions) throw new Error(limitMessage(maxInstructions));
   function visit(first: Blockly.Block | null, depth = 0): string[] {
     if (depth > 3) throw new Error('Use no more than three nested repeat groups.');
     const lines: string[] = [], pad = '    '.repeat(depth);

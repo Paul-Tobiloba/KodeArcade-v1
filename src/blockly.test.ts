@@ -3,9 +3,9 @@ import * as Blockly from 'blockly/core';
 import { evaluateWorkspace } from './blockly';
 import { missions } from './learning';
 const chain = (type: string, next?: object) => ({ type, ...(next ? { next: { block: next } } : {}) });
-function evaluate(state: object, index = 0) {
+function evaluate(state: object, index = 0, maxBlocks?: number) {
   const ws = new Blockly.Workspace();
-  try { Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [state] } }, ws); return evaluateWorkspace(ws, missions[index]); }
+  try { Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [state] } }, ws); return evaluateWorkspace(ws, { ...missions[index], ...(maxBlocks ? { maxBlocks } : {}) }); }
   finally { ws.dispose(); }
 }
 describe('Blockly interpreter', () => {
@@ -24,6 +24,7 @@ describe('Blockly interpreter', () => {
   });
   it('bounds repeated execution', () => {
     const loop = (body: object) => ({ type: 'ka_repeat', fields: { COUNT: 5 }, inputs: { DO: { block: body } } });
-    expect(evaluate(chain('ka_start', loop(loop(loop(chain('ka_right'))))), 2).message).toContain('120');
+    // Test the independent execution bound, not the tighter teaching budget.
+    expect(evaluate(chain('ka_start', loop(loop(loop(chain('ka_right'))))), 2, 24).message).toContain('120');
   });
 });

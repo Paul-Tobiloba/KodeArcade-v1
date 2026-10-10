@@ -22,7 +22,7 @@ function referenceRun(mission: Mission) {
 
 /** One semantic map drives painted terrain, movement and conditional checks. */
 export function worldMission(mission: Mission, layout: 'tiles-v1' | 'open-v1' = 'open-v1'): Mission {
-  if (layout !== 'tiles-v1' || mission.id.endsWith('rescue-project')) return mission;
+  if (layout !== 'tiles-v1' || mission.id.endsWith('rescue-project') || mission.replaces) return mission;
   const reference = referenceRun(mission);
   if (reference && !reference.success) return mission;
   // Without an authored reference, do not narrow the routes described by old hints.

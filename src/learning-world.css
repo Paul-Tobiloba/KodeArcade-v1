@@ -62,6 +62,23 @@
 .learning-world .editor-title h2 { font-size: 1.2rem; color: #241259; gap: 10px; }
 .learning-world .editor-title h2>svg { width: 32px; height: 32px; padding: 6px; background: #6237df; color: white; border-radius: 8px; }
 .learning-world .editor-title>span { font-size: .75rem; }
+.program-budget { flex-shrink: 0; display: flex; flex-wrap: wrap; gap: 3px 12px; margin: 0; padding: 8px 16px; border-bottom: 1px solid #e8e2f2; font-size: .75rem; line-height: 1.45; color: #55456e; background: #fff; }
+.program-budget strong { color: #241259; font-variant-numeric: tabular-nums; }
+.program-budget[data-full=true] { background: #fff6df; color: #6b4705; }
+.program-budget[data-full=true] strong { color: #6b4705; }
+.collection-progress { flex-shrink: 0; padding: 6px 16px; background: #f2effb; color: #3e246e; font-size: .8rem; font-weight: 600; text-transform: capitalize; font-variant-numeric: tabular-nums; }
+.collectible, .world-object { position: absolute; width: 68%; height: 68%; z-index: 2; stroke: #613c12; stroke-width: 1.5; filter: drop-shadow(0 2px 1px #291f3633); }
+.collectible-carrot { color: #ff9c25; }
+.collectible-leaf { color: #80ce49; stroke: #285b22; }
+.collectible-acorn { color: #c99a4b; }
+.collectible-key { color: #ffd13a; }
+.gate-locked { color: #8956b6; fill: #c2a3dd; stroke: #422369; }
+.gate-open { color: #24744c; fill: #ddf6d9; stroke: #24744c; }
+.river-bridge { width: 94%; height: 94%; fill: #d9a464; color: #764823; stroke-width: 3; transform: rotate(90deg); }
+.learning-world .tile-scene .character-motion.is-fallen { animation: river-splash 600ms ease-in both; }
+@keyframes river-splash { to { transform: translateY(24%) scale(.65); opacity: .25; } }
+@media(prefers-reduced-motion: reduce) { .learning-world .tile-scene .character-motion.is-fallen { animation: none; opacity: .5; } }
+.reduced-motion .character-motion.is-fallen { animation: none; opacity: .5; }
 .learning-world .coding-mode { margin-right: 2px; }
 .learning-world .coding-mode button { min-height: 36px; }
 .learning-world .editor:has(.coding-mode):has(.blockly-container) .editor-title { padding-right: 102px; }
@@ -234,3 +251,5 @@
   .tile-scene .scene-heading>.world-sprite { width: 44px; height: 44px; flex-basis: 44px; }
   .learning-world .score-display { font-size: .7rem; padding: 4px; }
 }
+.learning-world .path-marker { position: absolute; top: 3%; right: 4%; z-index: 2; min-width: 1.2em; padding: 1px 3px; border-radius: 4px; background: #fff8e8; color: #52310c; font-size: clamp(8px,1vw,12px); font-weight: 800; line-height: 1.2; text-align: center; }
+.learning-world .trail-hole { position: absolute; inset: 25% 12%; z-index: 1; border: 3px solid #996234; border-radius: 50%; background: #24180f; box-shadow: inset 0 5px 6px #090705, 0 2px 0 #e9bb78; }

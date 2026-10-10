@@ -59,10 +59,13 @@ const gradedModules = courses.flatMap(course => [...course.topics, 'project'].ma
   const base = modules.find(m => m.id === topic)!;
   return { ...base, id: `${course.id}-${topic}`, topicId: topic,
     description: `Grade ${course.grade} · ${course.size}×${course.size} board. ${base.description}`,
-    challengeIds: topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: 10 }, (_, i) => `${course.id}-${topic}-${i + 1}`) };
+    challengeIds: topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: 10 }, (_, i) => {
+      const original = `${course.id}-${topic}-${i + 1}`;
+      return missions.find(m => m.replaces === original)?.id ?? original;
+    }) };
 }));
 export function modulesFor(course: CourseId) { return course.startsWith('grade-') ? gradedModules.filter(m => m.id.startsWith(`${course}-`)) : modules; }
-export function moduleFor(missionId: string): LearningModule { return sequenceExtras.includes(missionId) ? gradedModules.find(m => m.id === 'grade-1-sequences')! : [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId))!; }
+export function moduleFor(missionId: string): LearningModule { return sequenceExtras.includes(missionId) ? gradedModules.find(m => m.id === 'grade-1-sequences')! : [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId) || m.challengeIds.some(id => missions.find(task => task.id === id)?.replaces === missionId))!; }
 export const challengeOrder = modules.flatMap(m => m.challengeIds);
 export function nextChallenge(missionId: string) {
   const course = courses.find(c => missionId.startsWith(`${c.id}-`));

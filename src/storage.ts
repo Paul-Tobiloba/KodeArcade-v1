@@ -61,6 +61,10 @@ export function parseSave(raw: string | null): Save {
     }
     save.progress[mission.id] = progress;
   }
+  // Replaced tasks retain their original programs/completions under old IDs.
+  // Resume at the new task, but never award its completion from the old route.
+  const replacement = missions.findIndex(m => m.replaces === missions[save.current].id);
+  if (replacement >= 0) save.current = replacement;
   return save;
 }
 export function loadSave(): { save: Save; warning: string; resumed: boolean } {
