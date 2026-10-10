@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Code2, Flag, Play, RotateCcw, Square, Trash2, X } from 'lucide-react';
-import { drawProgram, drawingMatches, penPath, type PenPoint } from './textCoding';
+import { drawProgram, drawingMatches, parseCode, penPath, type PenPoint } from './textCoding';
+import { instructionLimit, statementCount } from './programLimits';
+import ProgramBudget from './ProgramBudget';
 import { drawingActivities, drawingSaveKey, type DrawingActivity } from './drawingActivities';
 import BlockEditor, { type EditorHandle } from './BlockEditor';
 import TextEditor from './TextEditor';
@@ -48,7 +50,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
   const complete = useRef(saved.complete === true), attempts = useRef(saved.attempts ?? 0), best = useRef(saved.stars ?? 0);
   const editor = useRef<EditorHandle>(null), timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const target = useMemo(() => activity.free ? [] : drawProgram(activity.reference),[activity]);
-  const mission = useMemo<Mission>(() => ({id:`drawing-${grade}-${activity.id}`,title:activity.title,concept:'Drawing',description:activity.objective,goal:activity.objective,size:5,start:{x:0,y:0},end:{x:0,y:0},walls:[],loops:true,starter:[],hints:[],reflection:''}),[grade,activity]);
+  const mission = useMemo<Mission>(() => ({id:`drawing-${grade}-${activity.id}`,title:activity.title,concept:'Drawing',description:activity.objective,goal:activity.objective,size:5,start:{x:0,y:0},end:{x:0,y:0},walls:[],loops:true,starter:[],hints:[],reflection:'',...(activity.reference.includes('for ') ? {maxBlocks:statementCount(parseCode(activity.reference,true)),requireLoop:true} : {})}),[grade,activity]);
   useEffect(() => () => { if (timer.current) clearTimeout(timer.current); onRunning(false); },[onRunning]);
   useEffect(() => { onCelebrating(feedback); return () => onCelebrating(false); },[feedback,onCelebrating]);
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''),3000); return () => clearTimeout(id); },[toast]);
@@ -67,7 +69,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
     attempts.current++; setToast(''); setGuide(false); setArrived(false);
     try {
       const source = mode === 'text' ? code : editor.current?.drawingCode?.() ?? '';
-      const frames = drawProgram(source);
+      const frames = drawProgram(source, instructionLimit(mission), mission.requireLoop);
       if (!frames.some(p => p.draw)) { retry('Add a forward block or command so Dash can draw a line.'); return; }
       // Reveal the ink under the moving pencil, rather than teleporting to
       // each command's endpoint. Bound visual frames independently of code.
@@ -115,7 +117,8 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
         <div className="run-controls"><button className="primary run-button" aria-label={running ? 'Stop run' : 'Run code'} onClick={run}>{running ? <Square size={22}/> : <Play size={22} fill="currentColor"/>}{running ? 'Stop' : 'Play'}</button><button className="clear-button" aria-label="Reset position" title="Reset drawing — keep your code" onClick={() => { stop(); setArrived(false); setPoints([start]); setToast(''); setMessage('Dash is ready for a new plan.'); }}><RotateCcw size={20}/>Reset</button><button className="stage-tool" aria-label="Drawing tools" aria-expanded={tools} onClick={() => setTools(!tools)}>Tools</button></div>
         {tools && <div className="drawing-tools-popover"><div className="dialog-heading"><h3>Pencil tools</h3><button aria-label="Close drawing tools" onClick={() => setTools(false)}><X size={18}/></button></div><div className="drawing-tools" role="group" aria-label="Drawing tools"><span>Ink</span>{[['Violet','#6d4aff'],['Teal','#08796e'],['Berry','#b53e75']].map(([name,color]) => <button key={color} aria-label={`${name} ink`} aria-pressed={ink===color} style={{background:color}} onClick={() => setInk(color)}><Check size={16} style={{visibility:ink===color ? 'visible' : 'hidden'}}/></button>)}<label>Pen<select aria-label="Pen width" value={width} onChange={e => setWidth(Number(e.target.value))}><option value={2}>Fine</option><option value={4}>Medium</option><option value={6}>Bold</option></select></label></div></div>}
       </section>
-      <section className="editor" aria-label="Code editor"><div className="editor-title"><h2><Code2 size={20}/>Your code</h2>{supportsText ? <div className="coding-mode" aria-label="Coding mode"><button aria-pressed={mode==='blocks'} disabled={running} onClick={() => setMode('blocks')}>Blocks</button><button aria-pressed={mode==='text'} disabled={running} onClick={() => setMode('text')}>Text</button></div> : <span>{count} / 24 blocks</span>}</div>
+      <section className="editor" aria-label="Code editor"><div className="editor-title"><h2><Code2 size={20}/>Your code</h2>{supportsText ? <div className="coding-mode" aria-label="Coding mode"><button aria-pressed={mode==='blocks'} disabled={running} onClick={() => setMode('blocks')}>Blocks</button><button aria-pressed={mode==='text'} disabled={running} onClick={() => setMode('text')}>Text</button></div> : <span>{count} / {instructionLimit(mission)} blocks</span>}</div>
+        <ProgramBudget mission={mission} count={count} code={mode === 'text' ? code : undefined} drawing showCount={supportsText} />
         {mode === 'text' ? <TextEditor ref={editor} code={code} mission={mission} drawing={activity.reference || 'forward(40)\nturn(90)'} running={running} onChange={setCode}/> : <BlockEditor ref={editor} mission={mission} initial={workspace} legacy={[]} running={running} drawing={{code:blockCode,step:activity.step,turn:activity.turn,repeats:grade==='grade-1' ? undefined : activity.repeats ?? 4,advanced:activity.advanced,young}} onChange={(state,n) => { setWorkspace(state); setCount(n); try { setBlockCode(editor.current?.drawingCode?.() ?? blockCode); } catch { /* Keep disconnected blocks saved for repair. */ } }} onError={setWarning}/>}
         <div className="editor-bottom-tools"><span>Forward draws. Turn changes direction.</span><button className="editor-clear" aria-label="Clear code" title="Clear code" disabled={running} onClick={() => { if (mode === 'blocks') editor.current?.clear(); else setCode(''); }}><Trash2 size={18} /></button></div>
         <p className="sr-only">Optional drawing practice saves separately. It does not grant core challenge mastery.</p>

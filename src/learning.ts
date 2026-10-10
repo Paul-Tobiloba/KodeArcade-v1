@@ -1,6 +1,7 @@
 import { topicMissions } from './topicMissions';
 import { gradeMissions } from './gradeMissions';
 import { journeyMissions } from './topicJourney';
+import { collectionMissions } from './collectionMissions';
 export type Direction = 'right' | 'down' | 'left' | 'up';
 export type Block = { id: string; kind: Direction | 'repeat'; direction: Direction; count: number };
 export type Position = { x: number; y: number };
@@ -11,6 +12,15 @@ export type Mission = {
   solution?: Direction[];
   conditionals?: boolean; variables?: boolean; targetScore?: number;
   requireElse?: boolean; requireChange?: boolean; requireVariableRead?: boolean;
+  maxBlocks?: number;
+  replaces?: string;
+  countPickups?: boolean;
+  collectOnly?: boolean;
+  trail?: Position[];
+  holes?: Position[];
+  collectibles?: { kind: 'carrot' | 'banana' | 'leaf' | 'acorn' | 'key'; positions: Position[] };
+  gate?: { position: Position; locked: boolean };
+  river?: { position: Position; built: boolean };
 };
 export const directions: Direction[] = ['right', 'down', 'left', 'up'];
 export const labels: Record<Direction, string> = { right: 'Move right', down: 'Move down', left: 'Move left', up: 'Move up' };
@@ -115,12 +125,15 @@ for (const [index, item] of practice.entries()) {
 }
 missions.push(...topicMissions);
 missions.push(...gradeMissions, ...journeyMissions);
+// Append versioned replacements; saved numeric mission indices must never shift.
+missions.push(...collectionMissions);
+for (const [id, limit] of Object.entries({ 'on-repeat': 2, 'loop-corner': 4, 'loop-stairs': 3 })) missions.find(m => m.id === id)!.maxBlocks = limit;
 export const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y;
 export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };
 }
 export function initialProgram(mission: Mission): Block[] { return mission.starter.map(makeBlock); }
-export type Frame = Position & { blockId: string; step: number; score?: number; note?: string };
+export type Frame = Position & { blockId: string; step: number; score?: number; note?: string; collected?: Position[]; gateOpen?: boolean; bridgeBuilt?: boolean; fell?: boolean };
 export type RunResult = { frames: Frame[]; success: boolean; message: string };
 const delta: Record<Direction, Position> = { right: { x: 1, y: 0 }, left: { x: -1, y: 0 }, up: { x: 0, y: -1 }, down: { x: 0, y: 1 } };
 

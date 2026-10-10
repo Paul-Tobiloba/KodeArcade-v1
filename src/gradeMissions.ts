@@ -13,6 +13,7 @@ const read = (d: Direction): State => ({ type: 'ka_move_score', fields: { DIRECT
 const names: Record<string, string> = { sequences: 'Sequences', directions: 'Direction & order', loops: 'Loops', debugging: 'Debugging', conditionals: 'Conditionals', variables: 'Variables' };
 const guides: Record<string, string> = { sequences: 'Byte', directions: 'Dash', loops: 'Gigi', debugging: 'Fix', conditionals: 'Milo', variables: 'Nova' };
 const titles = ['First discovery', 'A different direction', 'Take the corner', 'Choose your path', 'A longer journey', 'Look before moving', 'Patterns on the trail', 'Across the world', 'Put it together', 'Your final mission'];
+const countBlocks = (block: State): number => 1 + Object.values(block.inputs ?? {}).reduce((n, input) => n + (input.block ? countBlocks(input.block) : 0), 0) + (block.next?.block ? countBlocks(block.next.block) : 0);
 export const gradeSolutions: Record<string, State> = {};
 export const gradeMissions: Mission[] = [];
 for (const course of courses) {
@@ -62,6 +63,10 @@ for (const course of courses) {
       goal = `Reach the star with score = ${p.score}. Use Move by score${p.change ? ' and CHANGE' : ''}.`;
       tip = p.steps.map(s => s.type === 'ka_set_score' ? `SET score to ${s.fields!.VALUE}` : s.type === 'ka_change_score' ? `CHANGE score by ${s.fields!.VALUE}` : s.type === 'ka_repeat' ? `Repeat CHANGE +1 ${b} times` : `Move ${s.fields!.DIRECTION} by score`).join('; ') + '.';
     }
+    // Budgets follow a verified compact reference, not its expanded steps.
+    if (topic === 'loops' || (topic === 'variables' && [4,8].includes(i))) {
+      flags.maxBlocks = countBlocks(solution); flags.requireLoop = true;
+    } else if (topic === 'conditionals' && i >= 3) flags.maxBlocks = countBlocks(solution) + 1;
     // Alternate orientation transforms coordinates, commands and conditions together.
     const flipX = i % 2 === 1, flipY = i % 3 === 2;
     const point = (p: Position) => ({ x: flipX ? size - 1 - p.x : p.x, y: flipY ? size - 1 - p.y : p.y });

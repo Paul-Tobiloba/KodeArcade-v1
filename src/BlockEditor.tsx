@@ -4,6 +4,7 @@ import { Undo2, Redo2, ArrowRight, ArrowDown, ArrowLeft, ArrowUp, RotateCw, Tras
 import { evaluateWorkspace, seedWorkspace, theme } from './blockly';
 import { directions, labels, type Block, type Mission, type RunResult } from './learning';
 import { drawingWorkspaceCode, seedDrawingCode } from './drawingBlockly';
+import { instructionLimit, limitMessage } from './programLimits';
 
 export type EditorHandle = { run: (mission: Mission) => RunResult; clear: () => void; highlight: (id: string) => void; drawingCode?: () => string };
 type Props = { mission: Mission; initial: Record<string, unknown> | undefined; legacy: Block[]; running: boolean; arrows?: boolean; drawing?: { code: string; step: number; turn: number; repeats?: number; advanced?: boolean; young?: boolean }; onChange: (state: Record<string, unknown>, count: number) => void; onError: (message: string) => void };
@@ -31,15 +32,15 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
       {selected?.type === 'repeat' && <label>Repeat<input aria-label="Selected repeat count" type="number" min={2} max={repeatMax} value={selected.count} disabled={running} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= 2 && n <= repeatMax) selectedBlock?.setFieldValue(String(n),'COUNT'); }}/></label>}
       {selected?.type.startsWith('ka_') && selectedBlock?.getField('VALUE') && <label>{drawing ? selected.type.includes('forward') ? 'Distance' : 'Angle' : 'Edit value'}<input aria-label="Selected block value" type="number" min={valueMin} max={valueMax} value={Number(selectedBlock.getFieldValue('VALUE') ?? 0)} disabled={running} onChange={e => { const n = Number(e.target.value); if (Number.isInteger(n) && n >= valueMin && n <= valueMax) selectedBlock.setFieldValue(String(n),'VALUE'); }}/></label>}
       {drawingTurn && <select aria-label="Selected turn direction" disabled={running} value={selectedBlock?.getFieldValue('SIDE') ?? 'left'} onChange={e => selectedBlock?.setFieldValue(e.target.value,'SIDE')}><option value="left">Left</option><option value="right">Right</option></select>}
-      {(selected?.type.includes('if') || selected?.type === 'ka_move_score') && <select aria-label="Selected block direction" value={selectedBlock?.getFieldValue('DIRECTION') ?? 'right'} disabled={running} onChange={e => selectedBlock?.setFieldValue(e.target.value,'DIRECTION')}>{directions.map(d => <option key={d} value={d}>{d}</option>)}</select>}
+      {selectedBlock?.getField('DIRECTION') && <select aria-label="Selected block direction" value={selectedBlock?.getFieldValue('DIRECTION') ?? 'right'} disabled={running} onChange={e => selectedBlock?.setFieldValue(e.target.value,'DIRECTION')}>{directions.map(d => <option key={d} value={d}>{d}</option>)}</select>}
     </>;
   }
   useImperativeHandle(ref, () => ({
     run: m => workspace.current ? evaluateWorkspace(workspace.current, m) : { frames: [], success: false, message: 'The block workspace is still loading. Try again in a moment.' },
     clear: () => { if (workspace.current) { workspace.current.clear(); seedWorkspace(workspace.current, [], arrows); } },
     highlight: id => { workspace.current?.highlightBlock(id || null); setHighlighted(id); },
-    drawingCode: () => workspace.current ? drawingWorkspaceCode(workspace.current) : '',
-  }), [arrows]);
+    drawingCode: () => workspace.current ? drawingWorkspaceCode(workspace.current, instructionLimit(mission)) : '',
+  }), [arrows, mission.maxBlocks]);
 
   useEffect(() => {
     if (!element.current) return;
@@ -50,12 +51,16 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
         ...(drawing.repeats ? [{kind:'block',type:'ka_draw_repeat',fields:{COUNT:drawing.repeats}}] : []),
         ...(drawing.advanced ? ['push','pop','pen_up','pen_down'].map(type => ({kind:'block',type:`ka_draw_${type}`})) : []),
       ] : [
+        ...(mission.trail ? [{ kind: 'block', type: 'ka_move_next', gap: 8 }] : []),
         ...directions.map(d => ({ kind: 'block', type: `ka_${arrows ? 'arrow_' : ''}${d}`, gap: 8 })),
         ...(mission.loops ? [{ kind: 'sep', gap: 8 }, { kind: 'block', type: 'ka_repeat', gap: 8 }] : []),
-        ...(mission.conditionals ? ['ka_if', 'ka_if_else'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
+        ...(mission.conditionals && !mission.collectibles && !mission.gate && !mission.river ? ['ka_if', 'ka_if_else'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
         ...(mission.variables ? ['ka_set_score', 'ka_change_score', 'ka_move_score'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
+        ...(mission.collectibles ? [...(mission.conditionals && mission.collectibles.kind !== 'key' ? [mission.requireElse ? 'ka_if_item_else' : 'ka_if_item'] : []),'ka_pick_item'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
+        ...(mission.gate ? ['ka_if_gate_locked','ka_open_gate'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
+        ...(mission.river ? ['ka_if_bridge_missing','ka_build_bridge'].map(type => ({ kind: 'block', type, gap: 8 })) : []),
       ] },
-      theme, renderer: 'geras', media: '/blockly-media/', sounds: false, trashcan: true, maxBlocks: 25,
+      theme, renderer: 'geras', media: '/blockly-media/', sounds: false, trashcan: true, maxBlocks: instructionLimit(mission) + 1,
       grid: { spacing: 24, length: 2, colour: '#d9dfe9', snap: false },
       // Keep Blockly's unbounded coordinate system without exposing scrolling.
       // Disabling scrollbars in its options installs a fixed-edge block bumper.
@@ -178,7 +183,8 @@ export default forwardRef<EditorHandle, Props>(function BlockEditor({ mission, i
   }, [mission.id, arrows]);
 
   function appendKeyboardBlock(direction = keyboardType) {
-    const ws = workspace.current; if (!ws || runningRef.current || ws.remainingCapacity() < 1) return;
+    const ws = workspace.current; if (!ws || runningRef.current) return;
+    if (ws.remainingCapacity() < 1) { error.current(limitMessage(instructionLimit(mission))); return; }
     const root = ws.getBlocksByType('ka_start', false)[0]; if (!root) return;
     let last = root; while (last.getNextBlock()) last = last.getNextBlock()!;
     const b = ws.newBlock(direction.startsWith('ka_') ? direction : `ka_${arrows ? 'arrow_' : ''}${direction}`); b.initSvg();

@@ -18,7 +18,7 @@ describe('Grade 1–6 mapping', () => {
         expect(module.challengeIds.length).toBe(module.topicId === 'project' ? 1 : 10);
         for (const id of module.challengeIds) {
           expect(moduleFor(id).id).toBe(module.id);
-          expect(gradeMissions.find(m => m.id === id)?.size).toBe(course.size);
+          expect(missions.find(m => m.id === id)?.size).toBe(course.size);
         }
       }
       expect(nextChallenge(`${course.id}-rescue-project`)).toBeUndefined();

@@ -1,6 +1,7 @@
 import * as Blockly from 'blockly/core';
 import { evaluateWorkspace } from './blockly';
 import type { Mission, RunResult } from './learning';
+import { limitMessage, statementCount } from './programLimits';
 
 export type Statement = { line: number; type: string; value?: number; direction?: string; body?: Statement[]; otherwise?: Statement[] };
 export class CodeError extends Error {
@@ -29,6 +30,9 @@ export function parseCode(source: string, drawing = false): Statement[] {
       const movement = /^move_(right|left|up|down)\(\)$/.exec(current.text);
       const loop = /^for [a-zA-Z_]\w* in range\((\d+)\):$/.exec(current.text);
       const condition = /^if path_clear\(["'](right|left|up|down)["']\):$/.exec(current.text);
+      const itemCondition = !drawing && current.text === 'if item_here():';
+      const obstacleCondition = !drawing && /^if (gate_locked|bridge_missing)\(\):$/.exec(current.text);
+      const obstacleAction = !drawing && /^(open_gate|build_bridge)\(\)$/.exec(current.text);
       const variable = /^score (\+=|=) (-?\d+)$/.exec(current.text);
       const scoreMove = /^move_by_score\(["'](right|left|up|down)["']\)$/.exec(current.text);
       const pen = /^(forward|turn)\((-?\d+)\)$/.exec(current.text);
@@ -39,6 +43,11 @@ export function parseCode(source: string, drawing = false): Statement[] {
         node.type = 'ka_repeat'; node.value = Number(loop[1]);
         if (node.value < 2 || node.value > (drawing ? 12 : 5)) throw new CodeError(current.line, `Use a repeat count from 2 to ${drawing ? 12 : 5} in this lab.`);
       } else if (condition && !drawing) { node.type = 'ka_if'; node.direction = condition[1]; }
+      else if (itemCondition) node.type = 'ka_if_item';
+      else if (obstacleCondition) node.type = `ka_if_${obstacleCondition[1]}`;
+      else if (obstacleAction) node.type = `ka_${obstacleAction[1]}`;
+      else if (!drawing && current.text === 'pick_up()') node.type = 'ka_pick_item';
+      else if (!drawing && current.text === 'move_next()') node.type = 'ka_move_next';
       else if (variable && !drawing) {
         node.type = variable[1] === '=' ? 'ka_set_score' : 'ka_change_score'; node.value = Number(variable[2]);
         if (Math.abs(node.value) > 10) throw new CodeError(current.line, 'Use a score value from −10 to 10.');
@@ -54,13 +63,13 @@ export function parseCode(source: string, drawing = false): Statement[] {
         if (node.type === 'turn' && Math.abs(node.value) > 360) throw new CodeError(current.line, 'Choose a turn from −360 to 360 degrees.');
       } else throw new CodeError(current.line, drawing ? 'Use forward(60), turn(90), or a for loop. Other Python commands are not supported here.' : 'Check the command and punctuation. This lab supports movement, for loops, path_clear and score only.');
       cursor++;
-      if (loop || condition) {
+      if (loop || condition || itemCondition || obstacleCondition) {
         if (!lines[cursor] || indentation(lines[cursor].raw, lines[cursor].line) !== indent + 4) throw new CodeError(current.line, 'Add instructions below this line, indented by four spaces.');
         node.body = group(indent + 4, depth + 1);
-        if (condition && lines[cursor]?.text === 'else:' && indentation(lines[cursor].raw, lines[cursor].line) === indent) {
+        if ((condition || itemCondition) && lines[cursor]?.text === 'else:' && indentation(lines[cursor].raw, lines[cursor].line) === indent) {
           const elseLine = lines[cursor++].line;
           if (!lines[cursor] || indentation(lines[cursor].raw, lines[cursor].line) !== indent + 4) throw new CodeError(elseLine, 'Add an indented instruction inside else.');
-          node.type = 'ka_if_else'; node.otherwise = group(indent + 4, depth + 1);
+          node.type = itemCondition ? 'ka_if_item_else' : 'ka_if_else'; node.otherwise = group(indent + 4, depth + 1);
         }
       }
       nodes.push(node);
@@ -95,8 +104,10 @@ export function runText(source: string, mission: Mission): RunResult {
 }
 
 export type PenPoint = { x: number; y: number; heading: number; line: number; draw?: boolean };
-export function drawProgram(source: string): PenPoint[] {
+export function drawProgram(source: string, maxInstructions = 24, requireLoop = false): PenPoint[] {
   const nodes = parseCode(source, true);
+  if (statementCount(nodes) > maxInstructions) throw new CodeError(1, limitMessage(maxInstructions));
+  if (requireLoop && !nodes.some(node => node.type === 'ka_repeat')) throw new CodeError(1, 'Use a for loop (Repeat block) to draw the repeating pattern.');
   const points: PenPoint[] = [{ x: 150, y: 260, heading: 0, line: 0 }];
   let operations = 0;
   let distance: number | undefined, penDown = true;
