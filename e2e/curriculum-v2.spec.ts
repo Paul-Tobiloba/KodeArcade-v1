@@ -3,6 +3,11 @@ import AxeBuilder from '@axe-core/playwright';
 import { sequenceCore, sequenceExtras } from '../src/topicJourney';
 import { drawingActivities } from '../src/drawingActivities';
 
+async function openLoopsLesson(page: import('@playwright/test').Page) {
+  await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+  await page.locator('.module-button').filter({ hasText: 'Loops' }).click();
+}
+
 test('Grade 1 topic teaches, assesses and derives its badge without perfect stars', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/#/learn/grade-1');
@@ -65,11 +70,12 @@ test('Grade 5 typed coding stays visible, animates before feedback and preserves
 test('drawing lab teaches exterior turns and remembers code without granting curriculum mastery', async ({ page }, info) => {
   test.setTimeout(60000);
   await page.goto('/#/learn/grade-6');
+  await openLoopsLesson(page);
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   await expect(page.getByRole('img', { name: /White drawing artboard/ })).toHaveCSS('background-color','rgb(255, 255, 255)');
   await expect(page.getByLabel('Your text program')).toHaveAttribute('placeholder',/forward\(40\)/);
-  await expect(page.locator('.topbar .game-context')).toContainText('Drawing · Challenge 1 of 6');
+  await expect(page.locator('.topbar .game-context')).toContainText('Loops · Drawing 1 of 4');
   await expect(page.locator('.drawing-dash image')).toHaveAttribute('href','/images/dash-pencil.png');
   await page.getByRole('button', { name: 'Drawing tools', exact: true }).click();
   await page.getByRole('button', { name: 'Teal ink', exact: true }).click();
@@ -94,9 +100,9 @@ test('drawing lab teaches exterior turns and remembers code without granting cur
   await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({ path: `.impeccable/review/v2-drawing-${info.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Read lesson', exact:true }).click();
-  await page.getByRole('button', { name: 'Open drawing lab' }).click();
+  await page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /Octagon prediction/ }).click();
   await expect(page.getByLabel('Your text program')).toHaveValue(code);
-  await page.getByRole('button', { name: 'Drawing 4: Stellar dendrite', exact:false }).click();
+  await page.getByRole('button', { name: 'Drawing 3: Stellar dendrite', exact:false }).click();
   await page.getByLabel('Your text program').fill(drawingActivities['grade-6'].find(a => a.id === 'dendrite')!.reference);
   await page.getByRole('button', { name: 'Run code' }).click();
   await expect(page.getByRole('dialog', {name:'You made it!'})).toBeVisible({timeout:15000});
@@ -121,6 +127,7 @@ test('long drawing overview preserves repeat scope and real drawing value ranges
     localStorage.setItem('kodearcade-drawing-v2-grade-3-square',JSON.stringify({workspace:{blocks:{languageVersion:0,blocks:[start]}},mode:'blocks'}));
   });
   await page.goto('/#/learn/grade-3');
+  await openLoopsLesson(page);
   await page.getByRole('button',{name:'Open drawing lab'}).click();
   if (info.project.name==='desktop') await page.setViewportSize({width:1308,height:677});
   // Controlled cramped-host fixture exercises the same fallback used whenever
@@ -163,7 +170,7 @@ test('long drawing overview preserves repeat scope and real drawing value ranges
 test('Grade 1 drawing is arrow-led and progresses through several activities', async ({ page }, info) => {
   await page.goto('/#/learn/grade-1');
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
-  await expect(page.getByRole('navigation', {name:'Challenge progress'}).getByRole('button')).toHaveCount(5);
+  await expect(page.getByRole('navigation', {name:'Challenge progress'}).getByRole('button')).toHaveCount(1);
   await expect(page.locator('#drawing-code')).toHaveCount(0);
   await expect(page.locator('.blocklySvg').first()).toBeVisible();
   await page.getByText('Keyboard helpers', {exact:true}).click();
@@ -171,7 +178,9 @@ test('Grade 1 drawing is arrow-led and progresses through several activities', a
   await page.getByRole('button', {name:'Add block',exact:true}).click();
   await page.getByRole('button', { name: 'Run code' }).click();
   await expect(page.getByRole('dialog', {name:'You made it!'})).toBeVisible();
-  await page.getByRole('button', {name:'Next challenge',exact:true}).click();
+  await page.getByRole('button', {name:'Back to module',exact:true}).click();
+  await page.getByRole('button', {name:'Next module',exact:true}).click();
+  await page.getByRole('button', {name:'Open drawing lab',exact:true}).click();
   await expect(page.getByRole('region', { name: 'Dash drawing challenge' }).getByRole('heading', { name: 'Turn a corner', exact: true })).toBeVisible();
   await page.getByText('Keyboard helpers', {exact:true}).click();
   await page.getByRole('button', {name:'Add block',exact:true}).click();
@@ -188,7 +197,8 @@ test('Grade 1 drawing is arrow-led and progresses through several activities', a
   await page.evaluate(() => window.scrollTo(0,0));
   await page.screenshot({ path: `.impeccable/review/v2-young-drawing-${info.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
-  await page.getByRole('button', { name: 'Open drawing lab' }).click();
-  await expect(page.getByRole('button', {name:/Drawing 1: A little trail, completed/})).toHaveClass(/challenge-done/);
-  await expect(page.getByRole('button', {name:/Drawing 2: Turn a corner, completed/})).toHaveClass(/challenge-done/);
+  await expect(page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /Turn a corner/ })).toContainText('Completed');
+  await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+  await page.locator('.module-button').filter({ hasText: 'Sequences' }).click();
+  await expect(page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /A little trail/ })).toContainText('Completed');
 });

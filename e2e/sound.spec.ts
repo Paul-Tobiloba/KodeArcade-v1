@@ -25,14 +25,14 @@ test('sound cues follow runs and mute persists', async ({ page }) => {
   await expect(page.getByText('3 / 24 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();
-  await expect.poll(notes).toBe(11); // Retry's 3 notes, 3 steps, then 5 star chimes.
+  await expect.poll(notes).toBe(17); // Retry 3, startup 2, steps 3, arrival 4 and stars 5.
   await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await page.getByLabel('Byte sound effects').uncheck();
+  await page.getByLabel('Character sound effects', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
-  await expect(page.getByLabel('Byte sound effects')).not.toBeChecked();
+  await expect(page.getByLabel('Character sound effects', { exact: true })).not.toBeChecked();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();

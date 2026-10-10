@@ -1,8 +1,8 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { ArrowRight, Star, X } from 'lucide-react';
 
-type Props = { open: boolean; stars: number; message: string; reduced: boolean; nextTitle?: string; onStar: () => void; onClose: () => void; onNext: () => void };
-export default function FeedbackDialog({ open, stars, message, reduced, nextTitle, onStar, onClose, onNext }: Props) {
+type Props = { open: boolean; stars: number; message: string; reduced: boolean; nextTitle?: string; nextLabel?: string; onStar: () => void; onClose: () => void; onNext: () => void };
+export default function FeedbackDialog({ open, stars, message, reduced, nextTitle, nextLabel, onStar, onClose, onNext }: Props) {
   const titleId = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
@@ -27,7 +27,7 @@ export default function FeedbackDialog({ open, stars, message, reduced, nextTitl
     <button className="celebration-close" aria-label="Close feedback" onClick={onClose}><X size={22} /></button>
     <div className="reward-stars" role="img" aria-label={`You earned ${stars} of 5 stars`}>{Array.from({ length: 5 }, (_, index) => <Star key={index} aria-hidden="true" size={54} className={index < revealed ? 'earned' : 'unearned'} fill={index < revealed ? 'currentColor' : 'none'} />)}</div>
     <h2 id={titleId} ref={title} tabIndex={-1}>You made it!</h2><p className="feedback-message">{message}</p>
-    <button className="primary celebration-next" onClick={nextTitle ? onNext : onClose}>{nextTitle ? 'Next challenge' : 'Keep exploring'}<ArrowRight size={22} /></button>
+    <button className="primary celebration-next" onClick={nextTitle ? onNext : onClose}>{nextTitle ? nextLabel ?? 'Next challenge' : 'Keep exploring'}<ArrowRight size={22} /></button>
     {nextTitle && <p className="next-challenge-label">Up next: {nextTitle}</p>}
   </dialog>;
 }

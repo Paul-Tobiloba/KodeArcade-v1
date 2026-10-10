@@ -28,7 +28,7 @@ test('meadow workspace, star/chime sequence, retry toast and protected best rewa
   await expect(page.locator('.robot-position')).toHaveCSS('--x', '2');
   await expect(page.getByRole('dialog', { name: 'You made it!' })).toBeVisible();
   await expect(page.locator('.reward-stars .earned')).toHaveCount(5);
-  await expect.poll(() => page.evaluate(() => (window as typeof window & { playedNotes: number[] }).playedNotes.length)).toBe(6);
+  await expect.poll(() => page.evaluate(() => (window as typeof window & { playedNotes: number[] }).playedNotes.length)).toBe(12); // Start 2, move 1, arrival 4, stars 5.
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({ path: `.impeccable/review/rewards-success-${testInfo.project.name}.png`, fullPage: true });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);

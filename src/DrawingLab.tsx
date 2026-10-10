@@ -9,6 +9,7 @@ import { challengeStars } from './rewards';
 import type { Mission } from './learning';
 import type { SoundCue } from './sound';
 import ActivityGuide from './ActivityGuide';
+import useStageVisible from './useStageVisible';
 
 const start: PenPoint = { x: 150, y: 260, heading: 0, line: 0 };
 type Work = { code?: string; workspace?: Record<string,unknown>; blockCode?: string; mode?: 'blocks'|'text'; complete?: boolean; ink?: string; width?: number; attempts?: number; stars?: number };
@@ -20,12 +21,13 @@ export function readDrawingWork(grade: string, id: string): Work {
     return { code: typeof v.code === 'string' ? v.code.slice(0,10000) : undefined, blockCode: typeof v.blockCode === 'string' ? v.blockCode.slice(0,10000) : undefined, workspace: v.workspace && typeof v.workspace === 'object' && !Array.isArray(v.workspace) ? v.workspace as Record<string,unknown> : undefined, mode: v.mode === 'text' ? 'text' : 'blocks', complete: v.complete === true, ink: ['#6d4aff','#08796e','#b53e75'].includes(String(v.ink)) ? String(v.ink) : '#6d4aff', width: [2,4,6].includes(Number(v.width)) ? Number(v.width) : 4, attempts: Math.max(0,Math.min(1000,Number(v.attempts)||0)), stars: Math.max(0,Math.min(5,Number(v.stars)||0)) };
   } catch { return {}; }
 }
-type Props = { grade: string; selected: number; reduced: boolean; hint: number; onHint: () => void; onSelect: (index: number) => void; onComplete: () => void; onRunning: (running: boolean) => void; onCelebrating: (open: boolean) => void; onSound: (cue: SoundCue) => void };
+type Props = { grade: string; selected: number; activityIndices: number[]; moduleTitle: string; onBack: () => void; reduced: boolean; hint: number; onHint: () => void; onSelect: (index: number) => void; onComplete: () => void; onRunning: (running: boolean) => void; onCelebrating: (open: boolean) => void; onSound: (cue: SoundCue) => void };
 export default function DrawingLab(props: Props) {
   const activity = drawingActivities[props.grade][props.selected];
   return <DrawingChallenge key={`${props.grade}-${activity.id}`} {...props} activity={activity}/>;
 }
-function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, onSelect, onComplete, onRunning, onCelebrating, onSound }: Props & { activity: DrawingActivity }) {
+function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTitle, onBack, reduced, hint, onHint, onSelect, onComplete, onRunning, onCelebrating, onSound }: Props & { activity: DrawingActivity }) {
+  const nextIndex = activityIndices[activityIndices.indexOf(selected) + 1];
   const supportsText = grade === 'grade-5' || grade === 'grade-6', young = grade === 'grade-1' || grade === 'grade-2';
   const [saved] = useState(() => readDrawingWork(grade,activity.id));
   const [code,setCode] = useState(() => {
@@ -40,6 +42,9 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
   const [points,setPoints] = useState<PenPoint[]>([start]), [running,setRunning] = useState(false), [message,setMessage] = useState('Dash is ready. The small arrow shows which way he will draw.');
   const [toast,setToast] = useState(''), [warning,setWarning] = useState(''), [tools,setTools] = useState(false), [guide,setGuide] = useState(false);
   const [feedback,setFeedback] = useState(false), [reward,setReward] = useState(5);
+  const [arrived,setArrived] = useState(false);
+  const stage = useRef<HTMLElement>(null);
+  const visible = useStageVisible(stage);
   const complete = useRef(saved.complete === true), attempts = useRef(saved.attempts ?? 0), best = useRef(saved.stars ?? 0);
   const editor = useRef<EditorHandle>(null), timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const target = useMemo(() => activity.free ? [] : drawProgram(activity.reference),[activity]);
@@ -59,7 +64,7 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
   function retry(text: string) { setMessage(text); setToast(text); onSound('retry'); }
   function run() {
     if (running) { stop(); setMessage('Drawing stopped. Your code is unchanged.'); return; }
-    attempts.current++; setToast(''); setGuide(false);
+    attempts.current++; setToast(''); setGuide(false); setArrived(false);
     try {
       const source = mode === 'text' ? code : editor.current?.drawingCode?.() ?? '';
       const frames = drawProgram(source);
@@ -72,7 +77,7 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
         const previous = frames[index-1];
         return Array.from({length:pieces},(_,part) => ({...point,x:previous.x+(point.x-previous.x)*(part+1)/pieces,y:previous.y+(point.y-previous.y)*(part+1)/pieces}));
       });
-      let i = 0; setPoints([start]); setRunning(true); onRunning(true); setMessage('Watch Dash draw your instructions.');
+      let i = 0; setPoints([start]); setRunning(true); onRunning(true); onSound('start'); setMessage('Watch Dash draw your instructions.');
       const interval = Math.max(16,Math.min(reduced ? 80 : 70,10000/visual.length));
       function advance() {
         i++; setPoints(visual.slice(0,i+1)); editor.current?.highlight(`line-${visual[i]?.line ?? 1}`);
@@ -82,7 +87,7 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
           stop();
           if (activity.free || drawingMatches(frames,target)) {
             complete.current = true; const stars = challengeStars(attempts.current,0); best.current = Math.max(best.current,stars); setReward(stars);
-            persist(); setMessage(`${activity.title} complete! Dash followed your instructions.`); setFeedback(true); onSound('success'); onComplete();
+            persist(); setArrived(true); setMessage(`${activity.title} complete! Dash followed your instructions.`); setFeedback(true); onSound('success'); onComplete();
           } else retry('Compare Dash’s lines with the dotted target. Change your code and try again.');
         }
       }
@@ -92,8 +97,8 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
   const lastPoint = points[points.length-1];
   return <>
     <div className="workspace-grid drawing-workspace">
-      <ActivityGuide lesson={{ title: 'Drawing with Dash', introduction: 'Dash holds a pencil. Moving forward draws a line; turning changes the direction he faces.', sections: [{ title: 'Follow the target', text: 'The dotted lines show the drawing to aim for. Follow the small arrow to see where Dash will draw next.' }, { title: 'Build, watch, change', text: 'Put your drawing instructions in order. Press Play to watch the pencil, then adjust a step or turn.' }], takeaway: 'Forward draws. Turn changes direction.', example: { title: 'A first corner', steps: ['Move forward', 'Turn left', 'Move forward'], explanation: 'A turn changes the next line, without drawing a line of its own.' } }} title={activity.title} instruction={activity.objective} goal={activity.objective} first={selected === 0} hints={['Forward follows the small arrow. Turn changes the direction.', 'Dotted lines show the target. Compare the first place your drawing differs.', activity.free ? 'Try a pattern of your own, then explain which instructions repeat.' : `Think about the turn after each side. This activity uses ${activity.turn}° turns.`]} hintCount={Math.min(hint, 3)} hintsOpen={guide} running={running} onHint={onHint} onCloseHints={() => setGuide(false)} />
-      <section className="scene drawing-scene" aria-label="Dash drawing challenge" data-character="Dash">
+<ActivityGuide onBack={onBack} backLabel={`Back to ${moduleTitle}`} lesson={{ title: 'Drawing with Dash', introduction: 'Dash holds a pencil. Moving forward draws a line; turning changes the direction he faces.', sections: [{ title: 'Follow the target', text: 'The dotted lines show the drawing to aim for. Follow the small arrow to see where Dash will draw next.' }, { title: 'Build, watch, change', text: 'Put your drawing instructions in order. Press Play to watch the pencil, then adjust a step or turn.' }], takeaway: 'Forward draws. Turn changes direction.', example: { title: 'A first corner', steps: ['Move forward', 'Turn left', 'Move forward'], explanation: 'A turn changes the next line, without drawing a line of its own.' } }} title={activity.title} instruction={activity.objective} goal={activity.objective} first={selected === activityIndices[0]} hints={['Forward follows the small arrow. Turn changes the direction.', 'Dotted lines show the target. Compare the first place your drawing differs.', activity.free ? 'Try a pattern of your own, then explain which instructions repeat.' : `Think about the turn after each side. This activity uses ${activity.turn}° turns.`]} hintCount={Math.min(hint, 3)} hintsOpen={guide} running={running} onHint={onHint} onCloseHints={() => setGuide(false)} />
+      <section ref={stage} className="scene drawing-scene" aria-label="Dash drawing challenge" data-character="Dash" data-state={arrived ? 'success' : running ? 'running' : 'ready'} data-motion-paused={!visible}>
         {toast && <div className="retry-toast" role="status"><div><strong>A little adjustment</strong><p>{toast}</p></div><span aria-hidden="true">3s</span><button aria-label="Dismiss retry message" onClick={() => setToast('')}><X size={20}/></button></div>}
         <div className="scene-heading"><h2><Flag size={17}/>{activity.title}</h2></div><p className="goal">{activity.objective}</p>
         <div className="drawing-artboard">
@@ -107,7 +112,7 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
           </svg>
         </div>
         <p className="position-readout" role="status">{message}</p>
-        <div className="run-controls"><button className="primary run-button" aria-label={running ? 'Stop run' : 'Run code'} onClick={run}>{running ? <Square size={22}/> : <Play size={22} fill="currentColor"/>}{running ? 'Stop' : 'Play'}</button><button className="clear-button" aria-label="Reset position" title="Reset drawing — keep your code" onClick={() => { stop(); setPoints([start]); setToast(''); setMessage('Dash is ready for a new plan.'); }}><RotateCcw size={20}/>Reset</button><button className="stage-tool" aria-label="Drawing tools" aria-expanded={tools} onClick={() => setTools(!tools)}>Tools</button></div>
+        <div className="run-controls"><button className="primary run-button" aria-label={running ? 'Stop run' : 'Run code'} onClick={run}>{running ? <Square size={22}/> : <Play size={22} fill="currentColor"/>}{running ? 'Stop' : 'Play'}</button><button className="clear-button" aria-label="Reset position" title="Reset drawing — keep your code" onClick={() => { stop(); setArrived(false); setPoints([start]); setToast(''); setMessage('Dash is ready for a new plan.'); }}><RotateCcw size={20}/>Reset</button><button className="stage-tool" aria-label="Drawing tools" aria-expanded={tools} onClick={() => setTools(!tools)}>Tools</button></div>
         {tools && <div className="drawing-tools-popover"><div className="dialog-heading"><h3>Pencil tools</h3><button aria-label="Close drawing tools" onClick={() => setTools(false)}><X size={18}/></button></div><div className="drawing-tools" role="group" aria-label="Drawing tools"><span>Ink</span>{[['Violet','#6d4aff'],['Teal','#08796e'],['Berry','#b53e75']].map(([name,color]) => <button key={color} aria-label={`${name} ink`} aria-pressed={ink===color} style={{background:color}} onClick={() => setInk(color)}><Check size={16} style={{visibility:ink===color ? 'visible' : 'hidden'}}/></button>)}<label>Pen<select aria-label="Pen width" value={width} onChange={e => setWidth(Number(e.target.value))}><option value={2}>Fine</option><option value={4}>Medium</option><option value={6}>Bold</option></select></label></div></div>}
       </section>
       <section className="editor" aria-label="Code editor"><div className="editor-title"><h2><Code2 size={20}/>Your code</h2>{supportsText ? <div className="coding-mode" aria-label="Coding mode"><button aria-pressed={mode==='blocks'} disabled={running} onClick={() => setMode('blocks')}>Blocks</button><button aria-pressed={mode==='text'} disabled={running} onClick={() => setMode('text')}>Text</button></div> : <span>{count} / 24 blocks</span>}</div>
@@ -117,6 +122,6 @@ function DrawingChallenge({ grade, selected, activity, reduced, hint, onHint, on
       </section>
     </div>
     {warning && <p className="warning" role="alert">{warning}</p>}
-    <FeedbackDialog open={feedback} stars={reward} message={`${activity.title} complete! Dash followed your instructions.`} reduced={reduced} nextTitle={drawingActivities[grade][selected+1]?.title} onStar={() => onSound('star')} onClose={() => setFeedback(false)} onNext={() => { setFeedback(false); if (selected < drawingActivities[grade].length-1) onSelect(selected+1); }}/>
+    <FeedbackDialog open={feedback} stars={reward} message={`${activity.title} complete! Dash followed your instructions.`} reduced={reduced} nextTitle={nextIndex === undefined ? moduleTitle : drawingActivities[grade][nextIndex].title} nextLabel={nextIndex === undefined ? 'Back to module' : 'Next drawing'} onStar={() => onSound('star')} onClose={() => setFeedback(false)} onNext={() => { setFeedback(false); if (nextIndex === undefined) onBack(); else onSelect(nextIndex); }}/>
   </>;
 }

@@ -48,7 +48,8 @@
 .destination-sprite { position: absolute; inset: -6%; background-position: 100% 100%; z-index: 1; clip-path: inset(1%); filter: drop-shadow(0 2px 2px #50351766); }
 .tile-scene .station::after { content: ''; position: absolute; inset: 1px; border: 2px solid #ffe665; box-shadow: inset 0 0 0 1px #80640a; border-radius: 10%; pointer-events: none; }
 .learning-world .tile-scene .robot-position { z-index: 3; }
-.learning-world .tile-scene .robot-position>.world-sprite { width: 114%; height: 114%; flex-shrink: 0; filter: drop-shadow(0 3px 2px #14221766); }
+.learning-world .tile-scene .character-motion { position: relative; display: flex; width: 114%; height: 114%; flex-shrink: 0; transform-origin: 50% 82%; }
+.learning-world .tile-scene .character-motion>.world-sprite { width: 100%; height: 100%; filter: drop-shadow(0 3px 2px #14221766); }
 .tile-scene .trail-dot { position: relative; z-index: 1; width: 15%; height: 15%; background: #7344ad; border: 2px solid #eee0ff; }
 .cell-coordinate { position: absolute; top: 2px; left: 2px; z-index: 4; font-size: clamp(8px,1vw,12px); line-height: 1.2; color: #231b2e; background: #fffef0e8; border-radius: 2px; padding: 1px 2px; pointer-events: none; }
 .learning-world .world-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 0 12px; min-height: 36px; flex-shrink: 0; font-size: .75rem; color: #5c526f; border-top: 1px solid #e8e2f2; }
@@ -133,6 +134,62 @@
 .activity-hints .hint-current { color: #67500a; }
 .activity-hints .hint-cost { font-size: .75rem; }
 .activity-hints>.secondary { width: 100%; font-size: .8rem; }
+
+/* Motion lives inside the moving coordinate wrapper: the map never reflows. */
+.tile-scene { --arrival-color: #f6c445; }
+.tile-scene[data-character=Byte] { --arrival-color: #39d8e5; }
+.tile-scene[data-character=Dash] { --arrival-color: #ffbc58; }
+.tile-scene[data-character=Gigi] { --arrival-color: #8fde58; }
+.tile-scene[data-character=Milo] { --arrival-color: #ffc54a; }
+.tile-scene[data-character=Nova] { --arrival-color: #edb975; }
+.character-ground-shadow { position: absolute; width: 48%; height: 12%; bottom: 7%; border-radius: 50%; background: #17203340; }
+.tile-scene[data-state=running] .character-ground-shadow { animation: step-shadow 480ms ease-in-out infinite; }
+.character-motion.is-stepping { animation: byte-bounce 460ms ease-in-out both; }
+[data-character=Dash] .character-motion.is-stepping { animation-name: rabbit-hop; }
+[data-character=Milo] .character-motion.is-stepping { animation-name: monkey-hop; }
+[data-character=Gigi] .character-motion.is-stepping { animation-name: gecko-scamper; }
+[data-character=Fix] .character-motion.is-stepping { animation-name: fox-trot; }
+[data-character=Nova] .character-motion.is-stepping { animation-name: squirrel-dash; }
+.step-dust { position: absolute; left: 25%; bottom: 6%; width: 50%; height: 8%; pointer-events: none; }
+.step-dust::before, .step-dust::after { content: ''; position: absolute; width: 22%; aspect-ratio: 1; border-radius: 50%; background: #fff2c4; animation: step-dust 430ms ease-out both; }
+.step-dust::after { right: 0; --dust-direction: 1; }
+.step-dust::before { left: 0; --dust-direction: -1; }
+.goal-beacon { position: absolute; inset: 8%; border-radius: 50%; pointer-events: none; z-index: 2; }
+.goal-beacon::before, .goal-beacon::after { content: ''; position: absolute; inset: 0; border: 2px solid var(--arrival-color); border-radius: 50%; opacity: 0; animation: goal-ripple 1400ms ease-out 2; }
+.goal-beacon::after { animation-delay: 450ms; }
+.tile-scene[data-state=running] .goal-beacon::before, .tile-scene[data-state=running] .goal-beacon::after { animation-iteration-count: infinite; }
+.tile-scene[data-state=running] .terrain-water { overflow: hidden; }
+.tile-scene[data-state=running] .terrain-water::after { content: ''; position: absolute; inset: 12% 20%; border-top: 2px solid #e5feff99; border-bottom: 1px solid #e5feff88; border-radius: 50%; animation: water-ripple 1800ms ease-in-out infinite; }
+.tile-scene[data-state=success] .station { background: #fff4be !important; }
+.tile-scene[data-state=success] .station::after { border: 3px solid var(--arrival-color); }
+.tile-scene[data-state=success] .destination-sprite { filter: brightness(1.25) saturate(1.3) drop-shadow(0 3px 4px #d58a26aa); animation: destination-light 700ms ease-in-out 3; }
+.tile-scene[data-state=success] .goal-beacon { background: #fff5b866; }
+.tile-scene[data-state=success] .goal-beacon::before, .tile-scene[data-state=success] .goal-beacon::after { animation: goal-ripple 800ms ease-out 3; }
+.tile-scene[data-character=Byte][data-state=success] .character-motion>.world-sprite { filter: brightness(1.2) saturate(1.5) hue-rotate(25deg) drop-shadow(0 3px 4px #07877888); }
+.tile-scene[data-state=success] .character-motion { animation: arrival-dance 800ms ease-in-out 3; }
+.tile-scene[data-state=success] .world-toolbar { color: #075c50; background: #e9f9ef; }
+.goal-celebration { position: absolute; inset: -35%; z-index: 4; pointer-events: none; }
+.goal-celebration svg { position: absolute; width: 28%; height: 28%; color: #fff5b0; fill: #f6c445; stroke: #8b5907; stroke-width: 1.5; left: calc(12% + var(--spark) * 18%); top: calc(10% + var(--spark) * 12%); animation: arrival-spark 1100ms cubic-bezier(.16,1,.3,1) calc(var(--spark) * 90ms) 2 both; }
+.drawing-scene[data-state=running] .drawing-dash image { transform-box: fill-box; transform-origin: 100% 100%; animation: pencil-sway 420ms ease-in-out infinite; }
+.drawing-scene[data-state=success] .drawing-ink { filter: drop-shadow(0 1px 2px #6d4aff55); }
+@keyframes byte-bounce { 0%,100% { transform: translateY(0) scale(1); } 18% { transform: translateY(2%) scale(1.04,.94); } 48% { transform: translateY(-9%) scale(.98,1.04); } 78% { transform: translateY(1%) scale(1.03,.97); } }
+@keyframes rabbit-hop { 0%,100% { transform: translateY(0) rotate(0); } 18% { transform: scale(1.08,.88); } 48% { transform: translateY(-22%) rotate(-5deg) scale(.96,1.06); } 80% { transform: scale(1.08,.93); } }
+@keyframes monkey-hop { 0%,100% { transform: translateY(0) rotate(0); } 22% { transform: translateY(-8%) rotate(-9deg); } 52% { transform: translateY(-20%) rotate(7deg); } 80% { transform: translateY(2%) rotate(-3deg) scale(1.06,.94); } }
+@keyframes gecko-scamper { 0%,100% { transform: rotate(0); } 25% { transform: translateY(-7%) rotate(-7deg); } 65% { transform: translateY(-10%) rotate(7deg); } }
+@keyframes fox-trot { 0%,100% { transform: translateY(0); } 25% { transform: translateY(-10%) rotate(-4deg); } 60% { transform: translateY(-3%) rotate(4deg); } }
+@keyframes squirrel-dash { 0%,100% { transform: scale(1); } 25% { transform: translateY(-15%) rotate(-6deg) scale(.96,1.05); } 70% { transform: translateY(-4%) rotate(5deg); } }
+@keyframes step-shadow { 0%,100% { transform: scale(1); opacity: .8; } 50% { transform: scale(.75); opacity: .45; } }
+@keyframes step-dust { from { transform: translateX(0) scale(.6); opacity: .8; } to { transform: translateX(calc(var(--dust-direction) * 180%)) scale(1.3); opacity: 0; } }
+@keyframes goal-ripple { from { transform: scale(.65); opacity: .75; } to { transform: scale(1.45); opacity: 0; } }
+@keyframes water-ripple { 0%,100% { transform: translateY(-7%) scaleX(.8); opacity: .3; } 50% { transform: translateY(7%) scaleX(1.08); opacity: .7; } }
+@keyframes destination-light { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12); filter: brightness(1.6) saturate(1.4) drop-shadow(0 3px 6px #f6c445); } }
+@keyframes arrival-dance { 0%,100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-15%) rotate(-7deg); } 55% { transform: translateY(-6%) rotate(7deg); } 80% { transform: translateY(-10%) rotate(-3deg); } }
+@keyframes arrival-spark { 0% { transform: translateY(12%) scale(.5); opacity: 0; } 20%,60% { opacity: 1; } 100% { transform: translateY(-50%) rotate(25deg) scale(1.15); opacity: 0; } }
+@keyframes pencil-sway { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-2deg); } }
+.scene[data-motion-paused=true] *, .scene[data-motion-paused=true] *::before, .scene[data-motion-paused=true] *::after { animation-play-state: paused !important; }
+.reduced-motion .scene *, .reduced-motion .scene *::before, .reduced-motion .scene *::after { animation: none !important; transition: none !important; }
+.reduced-motion .step-dust, .reduced-motion .goal-celebration { display: none; }
+@media (prefers-reduced-motion: reduce) { .step-dust, .goal-celebration { display: none; } }
 @media (min-width: 1101px) and (min-height: 601px) {
   /* Article, activity and hints flow together in one scrollable column. */
   .activity-guide-content { flex: 1; padding: 12px 16px; }

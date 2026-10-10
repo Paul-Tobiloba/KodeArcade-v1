@@ -4,6 +4,7 @@ import Landing from './Landing';
 import MarketingPages, { type MarketingPage } from './MarketingPages';
 import LearningEntry from './LearningEntry';
 import { isCourse } from './courses';
+import LoadingScreen from './LoadingScreen';
 import './styles.css';
 import './course.css';
 import './brand.css';
@@ -18,6 +19,6 @@ function Router() {
   const route = hash.split('/')[1];
   const marketingPage: MarketingPage = route === 'courses' || route === 'how-it-works' || route === 'parents' ? route : 'home';
   React.useEffect(() => { window.scrollTo(0, 0); }, [learning, marketingPage, courseRoute]);
-  return learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<main className="route-loading" role="status">Opening your learning workspace…</main>}><App key={courseRoute} /></React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
+  return learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<LoadingScreen />}><App key={courseRoute} /></React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
 }
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><Router /></React.StrictMode>);
