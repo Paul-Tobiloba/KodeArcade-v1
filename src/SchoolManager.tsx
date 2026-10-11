@@ -94,7 +94,7 @@ export default function SchoolManager({ route, account, refresh }: { route: stri
         if (await mutate(`schools/${workspace.id}/classes/${room.id}/staff`, { userIds, previous: room.staffIds, confirm: true })) { refresh(); }
       }} /><a href={workspaceHref(`classroom?id=${room.id}`, workspace.id)}>Open class and reports<ArrowRight size={16} /></a></details>) : <p>No school classes yet. <a href={workspaceHref('class-new', workspace.id)}>Create a school class</a>; your personal classes will not be moved.</p>}</section>
     </>}
-    <section className="account-school-section"><details><summary><Building2 size={18} />Create a separate school workspace</summary><p>Only create this if you are authorized to administer the school. You will become its initial administrator. This does not verify the school’s identity or transfer your existing classes.</p><form className="account-management-form" aria-busy={busy} onSubmit={async event => {
+    <section className="account-school-section"><details open={new URLSearchParams(location.hash.split('?')[1]).get('setup') === '1' || undefined}><summary><Building2 size={18} />Create a separate school workspace</summary><p>Only create this if you are authorized to administer the school. You will become its initial administrator. This does not verify the school’s identity or transfer your existing classes.</p><form className="account-management-form" aria-busy={busy} onSubmit={async event => {
       event.preventDefault(); const form = new FormData(event.currentTarget);
       const result = await mutate<{ id: string }>('schools', { name: form.get('name'), confirmAuthority: true }, true);
       if (result) { refresh(); location.hash = `/schools?workspace=${result.id}`; }

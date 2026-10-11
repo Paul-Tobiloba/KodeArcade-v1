@@ -22,7 +22,7 @@ function Router() {
   const courseRoute = hash.split('/')[2];
   const courseSelected = isCourse(courseRoute) || courseRoute === 'computer';
   const route = hash.split('/')[1];
-  const marketingPage: MarketingPage = route === 'courses' || route === 'how-it-works' || route === 'parents' ? route : 'home';
+  const marketingPage: MarketingPage = route === 'courses' || route === 'how-it-works' || route === 'parents' || route === 'for-schools' ? route : 'home';
   React.useEffect(() => { window.scrollTo(0, 0); }, [learning, marketingPage, courseRoute, account]);
   return studentActivity ? <React.Suspense fallback={<LoadingScreen />}><StudentActivity key={courseRoute} course={courseRoute} /></React.Suspense> : account ? <React.Suspense fallback={<LoadingScreen />}><AccountPortal key={hash} route={account} /></React.Suspense> : learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<LoadingScreen />}><App key={courseRoute} /></React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
 }

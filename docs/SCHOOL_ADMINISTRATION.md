@@ -1,5 +1,13 @@
 # School administration
 
+## Public starting point
+
+The landing header and footer include **For schools**, and its account-entry row includes **Schools**. These open the public `/#/for-schools` feature page, separate from authenticated `/#/schools` management.
+
+**Sign up your school** opens `/#/signup?role=school`. The adult creates their own account, verifies their email and signs in before reaching `/#/schools?setup=1`, where the school creation form is expanded. Existing adults can use the feature page’s sign-in link. This query records navigation intent only: it does not create a school, grant school access or bypass recent-authentication checks. School creation remains explicit and requires the authority confirmation. Invited staff should use their private invitation instead of creating another school.
+
+The school intent is retained through verification, password recovery and MFA. Ordinary teacher and parent entry paths remain unchanged. Development verification emails still require the configured test inbox; a production sender and school policies remain prerequisites for rollout.
+
 ## Ownership and roles
 
 An adult keeps one Better Auth account and may belong to a personal teaching workspace and multiple school workspaces. The workspace selector scopes the class list and navigation. Creating or joining a school does not convert a personal workspace or move its classes, pupils or saved work.
@@ -32,6 +40,8 @@ Limits: five school creation attempts per adult/day, thirty invitation generatio
 Migrations `0003_class_archival` and `0004_school_invitations` are additive and applied to the configured development database. Other environments must run the guarded migration workflow before using these routes. Better Auth remains self-managed; this increment does not introduce the Better Auth organization plugin or Neon Auth.
 
 ## Verification and remaining scope
+
+Public entry checks cover landing/header navigation, the feature page, school signup/verification intent, MFA, existing-adult sign-in and password-recovery destinations at desktop, phone and tablet sizes. These use mocked API responses and do not establish live email delivery or production readiness.
 
 Backend integration tests use actual Better Auth/Hono with isolated PGlite. Mocked Playwright checks cover school creation/join, role confirmations, invitations, workspace context, archive/restore and existing teacher workflows at desktop, phone and tablet sizes. Run `RUN_LIVE_SCHOOL_E2E=1 npx playwright test e2e/schools-live.spec.ts --project=desktop` only against the configured localhost development environment. It creates synthetic identities, exercises API/database boundaries and deletes its exact fixture IDs; traces/screenshots are disabled to avoid recording private tokens.
 
