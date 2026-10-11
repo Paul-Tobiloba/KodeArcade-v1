@@ -29,5 +29,5 @@ export default function ReadAloud({ text, label = 'Listen' }: { text: string; la
     speech.onerror = () => { if (utterance.current === speech) { utterance.current = null; setSpeaking(false); announce(false); setMessage('Reading stopped. You can try Listen again.'); } };
     setSpeaking(true); announce(true); synth.speak(speech);
   }
-  return <div className="read-aloud"><button className="secondary" disabled={!supported} onClick={toggle}>{speaking ? <Square size={17} /> : <Volume2 size={19} />}{speaking ? 'Stop reading' : label}</button><span role="status">{!supported ? 'Read-aloud is not available in this browser.' : message}</span></div>;
+  return <div className="read-aloud"><button type="button" className="secondary" disabled={!supported} onClick={toggle}>{speaking ? <Square size={17} /> : <Volume2 size={19} />}{speaking ? 'Stop reading' : label}</button><span role="status">{!supported ? 'Read-aloud is not available in this browser.' : message}</span></div>;
 }

@@ -43,11 +43,11 @@ The primary audience is young learners aged 6–14 who are new to programming, p
 
 A local React/TypeScript prototype covers four modules of ten Byte challenges and a creative route project, with separate progress for each coding course, plus twenty computer-introduction activities. Informal testing with the owner's children informed the age-labelled courses and fixed-screen workspace. The submission deadline is Friday, 9 October 2026; formal curriculum validation remains pending.
 
-The [spiral curriculum brief](docs/SPIRAL_CURRICULUM.md) records the expanded curriculum, 1–5-star rewards and age-specific assessments. The current implementation adds challenge stars, sequential success chimes and three-second retry notices; the expanded worlds, quizzes, mastery missions and badges remain planned. See [workspace reward notes](docs/WORKSPACE_REWARDS.md).
+The [spiral curriculum brief](docs/SPIRAL_CURRICULUM.md) records the expanded curriculum, 1–5-star rewards and age-specific assessments. Five-question topic quizzes now end every shipped coding module, with age-banded questions, explanations, retries and protected best results. Quiz results are separate from challenge stars. See [workspace reward notes](docs/WORKSPACE_REWARDS.md).
 
 ## Run locally
 
-The root page is the KodeArcade landing page. Public pages at `/#/courses`, `/#/how-it-works` and `/#/parents` provide the searchable course catalog, learning guide and parent information. Choose **Start learning** to enter the workspace, or open `/#/learn` directly. Course links open `/#/learn/arrows`, `/#/learn/words`, `/#/learn/builder` and `/#/learn/computer`. See [illustrated public pages](docs/ILLUSTRATED_PAGES.md) for the approved artwork extension and [landing page notes](docs/LANDING_PAGE.md) for social-sharing metadata and the required deployment origin. Hash routes share one social preview.
+The root page is the KodeArcade landing page. Public pages at `/#/courses`, `/#/how-it-works` and `/#/parents` provide the searchable course catalog, learning guide and parent information. Choose **Try an activity** to enter the public workspace, or open `/#/learn` directly. **Log in** opens the Student / Teacher / Parent account entry points. See [illustrated public pages](docs/ILLUSTRATED_PAGES.md) for the approved artwork extension and [landing page notes](docs/LANDING_PAGE.md) for social-sharing metadata and the required deployment origin. Hash routes share one social preview.
 
 Requires Node.js 22.12+ or 24 and npm. From this folder:
 
@@ -55,6 +55,8 @@ Requires Node.js 22.12+ or 24 and npm. From this folder:
 npm install
 npm run dev
 ```
+
+Account flows also require `npm run dev:server` in a second terminal and a configured local `.env`; see [backend setup](docs/BACKEND_SETUP.md). The browser uses port 5173 and proxies `/api` to the loopback API on port 3001. Teacher class/student management, generated credentials, private PDF cards, student login, cloud progress/resume and teacher reports are connected in development. The public learning preview does not require the API.
 
 Open the local address printed in the terminal. The screen has a robot stage, a Blockly block palette, and a code canvas. Drag movement blocks from the palette and snap them below the start block. Drag connected stacks to rearrange them; drag unwanted blocks to the bin. Run code to watch Byte follow the instructions. Repeat blocks contain other blocks. Mouse and touch dragging are supported by Blockly. Keyboard helpers can append simple movements; full keyboard and screen-reader editing needs further evaluation.
 
@@ -65,7 +67,7 @@ npm run preview
 npm run test:e2e
 ```
 
-Browser tests require Playwright Chromium (`npx playwright install chromium`). The prototype stores only an optional nickname, preferences, programs, and progress under `kodearcade-v1` in this browser's local storage. Settings includes a reset control. No backend, account, analytics, remote fonts, or learner-facing AI is used.
+Browser tests require Playwright Chromium (`npx playwright install chromium`). Public-preview saves remain independent in browser localStorage. Signed-in students restore scoped cloud snapshots, including quiz drafts and results. Unsynced work also has an encrypted, best-effort device recovery copy when storage is available; the key is acquired only after authenticated online loading. A single compact “Saved to your account” confirmation disappears after three seconds without moving content or taking focus; errors remain visible. Use one activity tab per learner/course and wait for that confirmation before leaving. See [backend setup and implementation status](docs/BACKEND_SETUP.md) for recovery limits. No analytics, remote fonts, or learner-facing AI is used.
 
 Offline reopening, curriculum review, a human-reviewed translation, external resource cards, and real-device/screen-reader checks are still pending. Blockly programs are interpreted directly without eval or JavaScript generation, with at most 24 instruction blocks, three levels of repeat nesting, and 120 executed steps. Conditions are outside this sprint. The platform is not yet deployed.
 

@@ -12,12 +12,13 @@ import type { Mission } from './learning';
 import type { SoundCue } from './sound';
 import ActivityGuide from './ActivityGuide';
 import useStageVisible from './useStageVisible';
+import { activityStorage } from './activityStorage';
 
 const start: PenPoint = { x: 150, y: 260, heading: 0, line: 0 };
 type Work = { code?: string; workspace?: Record<string,unknown>; blockCode?: string; mode?: 'blocks'|'text'; complete?: boolean; ink?: string; width?: number; attempts?: number; stars?: number };
 export function readDrawingWork(grade: string, id: string): Work {
   try {
-    const value: unknown = JSON.parse(localStorage.getItem(drawingSaveKey(grade,id)) ?? '{}');
+    const value: unknown = JSON.parse(activityStorage.getItem(drawingSaveKey(grade,id)) ?? '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
     const v = value as Record<string,unknown>;
     return { code: typeof v.code === 'string' ? v.code.slice(0,10000) : undefined, blockCode: typeof v.blockCode === 'string' ? v.blockCode.slice(0,10000) : undefined, workspace: v.workspace && typeof v.workspace === 'object' && !Array.isArray(v.workspace) ? v.workspace as Record<string,unknown> : undefined, mode: v.mode === 'text' ? 'text' : 'blocks', complete: v.complete === true, ink: ['#6d4aff','#08796e','#b53e75'].includes(String(v.ink)) ? String(v.ink) : '#6d4aff', width: [2,4,6].includes(Number(v.width)) ? Number(v.width) : 4, attempts: Math.max(0,Math.min(1000,Number(v.attempts)||0)), stars: Math.max(0,Math.min(5,Number(v.stars)||0)) };
@@ -35,7 +36,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
   const [code,setCode] = useState(() => {
     if (saved.code !== undefined) return saved.code;
     const previous = ({'grade-3':'square','grade-4':'triangle','grade-5':'hexagon','grade-6':'octagon'} as Record<string,string>)[grade];
-    try { return previous === activity.id ? localStorage.getItem(`kodearcade-drawing-v1-${grade}`)?.slice(0,10000) ?? '' : ''; } catch { return ''; }
+    try { return previous === activity.id ? activityStorage.getItem(`kodearcade-drawing-v1-${grade}`)?.slice(0,10000) ?? '' : ''; } catch { return ''; }
   });
   const [mode,setMode] = useState<'blocks'|'text'>(supportsText && !saved.workspace && saved.blockCode === undefined ? 'text' : supportsText ? saved.mode ?? 'text' : 'blocks');
   const [workspace,setWorkspace] = useState(saved.workspace);
@@ -56,7 +57,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''),3000); return () => clearTimeout(id); },[toast]);
   useEffect(() => { if (hint) setGuide(true); },[hint]);
   function persist() {
-    try { localStorage.setItem(drawingSaveKey(grade,activity.id),JSON.stringify({code,workspace,blockCode,mode,ink,width,complete:complete.current,attempts:attempts.current,stars:best.current})); setWarning(''); }
+    try { activityStorage.setItem(drawingSaveKey(grade,activity.id),JSON.stringify({code,workspace,blockCode,mode,ink,width,complete:complete.current,attempts:attempts.current,stars:best.current})); setWarning(''); }
     catch { setWarning('Your drawing cannot save in this browser. Keep this tab open.'); }
   }
   useEffect(() => { persist(); /* Persist tool-only choices as well as code changes. */

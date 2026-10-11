@@ -1,11 +1,13 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 import { firstChallenge, isCourse, type CourseId } from './courses';
 import { SEQUENCE_TOPIC, type TopicRecord } from './topicJourney';
+import { activityStorage } from './activityStorage';
+import { quizRecord, type QuizRecord } from '../shared/quizzes';
 export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
-export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord> };
+export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord>; quizzes: Record<string, QuizRecord> };
 export const SAVE_KEY = 'kodearcade-v1';
-export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [], topicRecords: {} });
+export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [], topicRecords: {}, quizzes: {} });
 export function switchCourse(save: Save, course: CourseId): Save {
   if (save.course === course) return save;
   const target = save.courseProgress[course] ?? { current: missions.findIndex(m => m.id === firstChallenge(course)), progress: {} };
@@ -18,6 +20,10 @@ export function parseSave(raw: string | null): Save {
   const value: unknown = JSON.parse(raw);
   if (!object(value) || value.version !== 1 || !object(value.progress)) throw new Error('Unsupported save');
   const save = emptySave();
+  if (object(value.quizzes)) for (const [id, record] of Object.entries(value.quizzes).slice(0, 60)) {
+    const parsed = quizRecord.safeParse(record);
+    if (/^(grade-[1-6]-)?(sequences|directions|loops|debugging|conditionals|variables|project)$/.test(id) && parsed.success) save.quizzes[id] = parsed.data;
+  }
   // Existing learners keep their text-block work; each course has its own progress.
   save.course = isCourse(value.course) ? value.course : 'words';
   save.basicsComplete = Array.isArray(value.basicsComplete) ? [...new Set(value.basicsComplete.filter((id): id is string => typeof id === 'string' && /^(mouse|keyboard)-[0-9]$/.test(id)))] : [];
@@ -69,7 +75,7 @@ export function parseSave(raw: string | null): Save {
 }
 export function loadSave(): { save: Save; warning: string; resumed: boolean } {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = activityStorage.getItem(SAVE_KEY);
     return { save: parseSave(raw), warning: '', resumed: !!raw };
   } catch {
     return { save: emptySave(), warning: 'Saved progress could not be read. You can play this session. Your previous save will stay untouched until you choose Reset saved progress in Settings.', resumed: false };

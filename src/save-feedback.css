@@ -1,0 +1,8 @@
+.save-feedback-slot { position: relative; }
+.save-feedback-routine { height: 0; z-index: 15; }
+.save-feedback-routine .student-cloud-status { position: fixed; inset: auto 16px 16px auto; width: fit-content; max-width: min(420px, calc(100% - 32px)); padding: 10px 16px; border: 1px solid #c6b6e8; border-radius: 8px; pointer-events: none; transition: transform 180ms ease-out, opacity 180ms ease-out, visibility 0s; }
+.save-feedback-routine .save-feedback-hidden { transform: translateY(12px); opacity: 0; visibility: hidden; pointer-events: none; transition: transform 180ms ease-out, opacity 180ms ease-out, visibility 0s 180ms; }
+.reduced-motion .save-feedback-routine .student-cloud-status { transition: none; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .save-feedback-routine .student-cloud-status { transition: none; transform: none; }
+}

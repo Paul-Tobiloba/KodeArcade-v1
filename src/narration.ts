@@ -1,3 +1,4 @@
+import { activityStorage } from './activityStorage';
 export const VOICE_KEY = 'kodearcade-narration-voice';
 export function localEnglishVoices(voices: SpeechSynthesisVoice[]) {
   return voices.filter(v => v.localService && /^en(?:-|$)/i.test(v.lang));
@@ -11,5 +12,5 @@ export function chooseNarrationVoice(voices: SpeechSynthesisVoice[], preferred =
     ?? available[0];
 }
 export function savedNarrationVoice() {
-  try { return localStorage.getItem(VOICE_KEY) ?? ''; } catch { return ''; }
+  try { return activityStorage.getItem(VOICE_KEY) ?? ''; } catch { return ''; }
 }

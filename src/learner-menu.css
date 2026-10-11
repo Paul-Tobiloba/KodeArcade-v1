@@ -1,0 +1,28 @@
+.learner-account-tools { display: flex; align-items: center; gap: 12px; }
+.learner-courses-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 8px 12px; border: 1px solid #9381bb; border-radius: 10px; color: #fff; text-decoration: none; font-size: .85rem; white-space: nowrap; }
+.learner-courses-link:hover { background: #4d338d; }
+.learner-account-menu { position: relative; }
+.learner-account-menu summary { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; min-width: 52px; list-style: none; cursor: pointer; border-radius: 10px; }
+.learner-account-menu summary::-webkit-details-marker { display: none; }
+.learner-account-menu summary:hover, .learner-account-menu[open] summary { background: #4d338d; }
+.learner-avatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #dcd1ff; color: #372066; }
+.learner-account-dropdown { position: absolute; z-index: 70; right: 0; top: calc(100% + 12px); width: min(280px, calc(100vw - 32px)); padding: 16px; border-radius: 14px; background: #fff; color: #181339; box-shadow: 0 12px 32px #18133930; }
+.learner-account-dropdown > strong { display: block; overflow-wrap: anywhere; }
+.learner-account-dropdown > p { font-size: .8rem; line-height: 1.5; margin: 6px 0 12px; color: #575472; }
+.learning-world .topbar .learner-account-dropdown button, .learner-account-dropdown button, .learner-account-dropdown a { display: flex; gap: 12px; align-items: center; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; background: transparent; color: #372066; font-size: .9rem; text-decoration: none; border-radius: 8px; }
+.learning-world .topbar .learner-account-dropdown button:hover, .learner-account-dropdown button:hover, .learner-account-dropdown a:hover { background: #f2edff; }
+.learner-account-dropdown > p[role=alert] { color: #8c2c25; margin-bottom: 0; }
+.student-learning .topbar { position: relative; z-index: 51; }
+.student-learning .header-actions { margin-left: auto; }
+@media (max-width: 700px) {
+  .student-learning .brand-wordmark, .student-learning .tagline { display: none; }
+  .learner-account-tools { gap: 8px; }
+  .learner-courses-link { font-size: .8rem; padding-inline: 10px; }
+  .learner-courses-link > svg { display: none; }
+}
+@media (max-width: 700px) and (orientation: portrait) {
+  .course-app.student-learning.challenge-active .topbar { grid-template-columns: 44px minmax(0, 1fr) auto; }
+  .student-learning.challenge-active .topbar > .brand { grid-column: 2; grid-row: 1; }
+  .student-learning.challenge-active .header-actions { grid-column: 3; grid-row: 1; }
+  .student-learning.challenge-active .game-context { grid-column: 1 / -1; grid-row: 2; }
+}

@@ -252,3 +252,18 @@
 .marketing-page-heading::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url('/images/question-island.png') right center / cover no-repeat; mask-image: linear-gradient(to right,transparent,#000 7%,#000 93%,transparent),linear-gradient(to bottom,#000 70%,transparent); mask-composite: intersect; }
 @media(max-width: 900px) { .learning-intro,.support-section { --scene-height: 500px; } }
 @media(max-width: 600px) { .learning-intro { --scene-height: 480px; }.support-section { --scene-height: 500px; }.landing-final { --scene-height: 370px; }.marketing-page-heading::before { opacity: .5; } }
+
+/* Account entry extends the established illustrated landing page. */
+.landing-account-entries { margin-block: 20px 32px; padding: 26px 0; border-block: 1px solid #ded7ef; }
+.landing-account-entries h2 { font-size: 1.45rem; margin: 0 0 5px; }
+.landing-account-entries > div > p { color: #575472; font-size: .9rem; margin: 0 0 18px; }
+.landing .landing-account-entries nav { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; }
+.landing .landing-account-entries nav > a { display: flex; align-items: center; gap: 13px; min-height: 64px; color: #372066; text-decoration: none; border-radius: 8px; padding: 8px; }
+.landing-account-entries nav > a:hover { background: #eee8fc; }
+.landing-account-entries nav > a > span { flex: 1; font-weight: 700; }
+.landing-account-entries small { display: block; font-weight: 400; color: #575472; font-size: .82rem; margin-top: 4px; }
+.landing-account-entries nav > a > svg { flex-shrink: 0; }
+@media (max-width: 600px) {
+  .landing .landing-account-entries nav { grid-template-columns: 1fr; gap: 4px; }
+  .landing-account-entries { margin-block: 0 24px; }
+}

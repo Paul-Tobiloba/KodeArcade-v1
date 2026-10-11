@@ -1,0 +1,233 @@
+import { expect, test } from '@playwright/test';
+import { loadEnvFile } from 'node:process';
+import { randomUUID } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
+import { hashPassword } from 'better-auth/crypto';
+import { eq, inArray } from 'drizzle-orm';
+import { connectDatabase } from '../server/db/client';
+import * as s from '../server/db/schema';
+import { missions } from '../src/learning';
+import { moduleQuiz } from '../shared/quizzes';
+
+// Opt-in: creates only synthetic development fixtures, then removes their exact IDs.
+// The owner separately verified the real email signup/verification journey.
+test.use({ trace: 'off', video: 'off', screenshot: 'off', actionTimeout: 15_000 });
+test('live teacher → PDF credentials → student courses', async ({ page }, info) => {
+  test.skip(process.env.RUN_LIVE_CLASSROOM_E2E !== '1', 'Requires explicit development database opt-in');
+  test.setTimeout(180_000);
+  loadEnvFile('.env');
+  if (process.env.NODE_ENV === 'production' || process.env.APP_ORIGIN !== 'http://127.0.0.1:5173') throw new Error('Development localhost only');
+  if (!process.env.PDF_TEST_PYTHON) throw new Error('Set PDF_TEST_PYTHON to a Python executable with pypdf');
+  const { db, pool } = connectDatabase(process.env.DATABASE_URL!);
+  const teacher = randomUUID(), email = `${teacher}@example.test`, password = `Synthetic-${randomUUID()}`;
+  const post = async (path: string, data: object) => page.request.post(`/api/${path}`, { data, headers: { Origin: 'http://127.0.0.1:5173' } });
+  const noOverflow = async () => expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const getCard = async () => {
+    const download = page.waitForEvent('download', { timeout: 15_000 });
+    await page.getByRole('link', { name: 'Download PDF card' }).click();
+    const path = await (await download).path();
+    // Never print or attach live fixture passwords to the test report.
+    const text = execFileSync(process.env.PDF_TEST_PYTHON!, ['-c', 'import sys; from pypdf import PdfReader; print("\\n".join(p.extract_text() for p in PdfReader(sys.argv[1]).pages))', path!], { encoding: 'utf8' });
+    const username = text.match(/Username\s+([a-z0-9]{1,60})/)?.[1];
+    const classCode = text.match(/Classroom code\s+([A-Z2-9]{8})/)?.[1];
+    const pictures = [...text.matchAll(/[1-4]\. (Sun|Moon|Star|Flower|Fish|Bird|Tree|Apple|Rocket|Heart|Cat|Dog|Ball|Leaf|Bug|Robot)/g)].map(match => match[1]);
+    const credential = text.match(/Text password \(three words, with spaces\)\s+([a-z]+ [a-z]+ [a-z]+)/)?.[1];
+    if (!username || !classCode || (!credential && pictures.length !== 4)) throw new Error('Generated card fields are incomplete');
+    return { username, classCode, pictures, credential };
+  };
+  const studentLogin = async (card: Awaited<ReturnType<typeof getCard>>) => {
+    await page.goto('/#/student-login');
+    await expect(page.getByLabel('Classroom code', { exact: true })).toBeEnabled();
+    await page.getByLabel('Classroom code', { exact: true }).fill(card.classCode);
+    await page.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page.getByLabel('Student username', { exact: true }).fill(card.username);
+    if (card.credential) {
+      await page.getByRole('button', { name: /Text password/ }).click();
+      await page.getByLabel('Password', { exact: true }).fill(card.credential);
+    } else for (const picture of card.pictures) await page.getByRole('button', { name: picture, exact: true }).click();
+    await noOverflow();
+    // Picture selections are credentials; do not capture screenshots at this step.
+    await page.getByRole('button', { name: 'Start learning', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Your assigned courses' })).toBeVisible();
+    await expect(page.locator('.account-assigned-course')).toHaveCount(1);
+  };
+  let pictureCard: Awaited<ReturnType<typeof getCard>> | undefined;
+  let textCard: Awaited<ReturnType<typeof getCard>> | undefined;
+  let classId = '';
+  try {
+    await db.insert(s.user).values({ id: teacher, name: 'Synthetic QA Teacher', email, emailVerified: true, principalKind: 'adult' });
+    await db.insert(s.account).values({ id: randomUUID(), userId: teacher, accountId: teacher, providerId: 'credential', password: await hashPassword(password) });
+    await page.goto('/#/adult-login?role=teacher');
+    await page.getByLabel('Email address').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Welcome, Synthetic QA Teacher' })).toBeVisible();
+    await page.getByRole('link', { name: 'Set up my workspace' }).click();
+    await page.getByLabel('Teaching workspace name').fill('Synthetic QA workspace');
+    await page.getByRole('button', { name: 'Create workspace' }).click();
+    await page.getByRole('link', { name: 'Manage classes', exact: true }).click();
+    await page.getByLabel('Confirm adult password', { exact: true }).fill(password);
+    await page.getByRole('button', { name: 'Unlock management', exact: true }).click();
+    await expect(page.getByText('Management unlocked for five minutes')).toBeVisible();
+    await page.getByRole('link', { name: 'Create class', exact: true }).click();
+    await page.getByLabel('Class name', { exact: true }).fill('Synthetic Grade 2A');
+    await page.getByRole('combobox', { name: 'Grade', exact: true }).selectOption('2');
+    await page.getByRole('button', { name: 'Create class', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Synthetic Grade 2A' })).toBeVisible({ timeout: 20_000 });
+    classId = new URLSearchParams(page.url().split('?')[1]).get('id')!;
+    for (const [name, grade] of [['Synthetic Picture Student', '2'], ['Synthetic Text Student', '5']]) {
+      await page.getByRole('button', { name: 'Add student', exact: true }).click();
+      const form = page.locator('.account-roster .account-management-form');
+      await form.getByLabel('Student display name').fill(name);
+      await form.getByRole('combobox', { name: 'Grade', exact: true }).selectOption(grade);
+      await form.getByRole('button', { name: 'Add student & generate PDF' }).click();
+      await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
+      const card = await getCard();
+      if (grade === '2') pictureCard = card; else textCard = card;
+      await page.getByRole('button', { name: 'Dismiss private card' }).click();
+    }
+    await expect(page.locator('.account-roster').getByRole('row')).toHaveCount(3);
+    await page.getByText('Import students from CSV', { exact: true }).click();
+    await page.getByLabel('Student CSV file').setInputFiles({ name: 'synthetic.csv', mimeType: 'text/csv', buffer: Buffer.from('name,grade,login_method\nSynthetic Batch Alex,2,picture\nSynthetic Batch Sam,4,text') });
+    await page.getByLabel('I reviewed these students.', { exact: false }).check();
+    await page.getByRole('button', { name: 'Import 2 students & generate cards' }).click();
+    await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
+    const checkBooklet = async () => {
+      const download = page.waitForEvent('download');
+      await page.getByRole('link', { name: 'Download PDF card' }).click();
+      const path = await (await download).path();
+      const count = execFileSync(process.env.PDF_TEST_PYTHON!, ['-c', 'import sys; from pypdf import PdfReader; print(len(PdfReader(sys.argv[1]).pages))', path!], { encoding: 'utf8' });
+      expect(count.trim()).toBe('2');
+      await page.getByRole('button', { name: 'Dismiss private card' }).click();
+    };
+    await checkBooklet();
+    await expect(page.locator('.account-roster').getByRole('row')).toHaveCount(5);
+    await page.getByLabel('Select Synthetic Batch Alex', { exact: true }).check();
+    await page.getByLabel('Select Synthetic Batch Sam', { exact: true }).check();
+    page.once('dialog', dialog => dialog.accept());
+    await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+    await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
+    await checkBooklet();
+    const assignments = page.locator('.account-assignment-list');
+    await assignments.getByRole('checkbox').nth(2).check();
+    expect((await (await page.request.get(`/api/manage/classes/${classId}`)).json()).assignments).toHaveLength(1);
+    await assignments.getByRole('button', { name: 'Save assignments', exact: true }).click();
+    await expect.poll(async () => (await (await page.request.get(`/api/manage/classes/${classId}`)).json()).assignments.length).toBe(2);
+    await assignments.getByRole('checkbox').nth(2).uncheck();
+    page.once('dialog', dialog => dialog.accept());
+    await assignments.getByRole('button', { name: 'Save assignments', exact: true }).click();
+    await expect.poll(async () => (await (await page.request.get(`/api/manage/classes/${classId}`)).json()).assignments.length).toBe(1);
+    await noOverflow();
+    await page.screenshot({ path: `.impeccable/review/classroom-live-${info.project.name}.png`, fullPage: true });
+    expect((await post('auth/sign-out', {})).ok()).toBe(true);
+    await studentLogin(pictureCard!);
+    await page.screenshot({ path: `.impeccable/review/student-courses-live-${info.project.name}.png`, fullPage: true });
+    await page.locator('.account-assigned-course').click();
+    await expect(page).toHaveURL(/student-play\/grade-2/);
+    await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+    await expect(page.getByRole('region', { name: 'Byte challenge board' }).getByRole('heading', { name: 'Byte: First discovery', exact: true })).toBeVisible();
+    await page.getByText('Keyboard helpers', { exact: true }).click();
+    const firstMission = missions.find(mission => mission.id === 'grade-2-sequences-1')!;
+    for (const direction of firstMission.solution ?? ['right']) {
+      await page.getByLabel('Instruction', { exact: true }).selectOption(direction);
+      await page.getByRole('button', { name: 'Add block', exact: true }).click();
+    }
+    await page.getByRole('button', { name: 'Run code', exact: true }).click();
+    await expect(page.getByRole('dialog').filter({ hasText: /stars|recharged|worked/ })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
+    await expect.poll(async () => { const result = await page.request.get('/api/student/progress/grade-2'); return (await result.json()).document?.progress['grade-2-sequences-1']?.complete; }).toBe(true);
+    await page.reload();
+    await expect(page.getByRole('button', { name: /Challenge 1:.*completed/ })).toBeVisible();
+    await expect(page.locator('.blocklyWorkspace').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+    await page.locator('.module-button').filter({ hasText: 'Loops' }).click();
+    await page.getByRole('button', { name: 'Start quiz', exact: true }).click();
+    for (const [index, question] of moduleQuiz('grade-2-loops').entries()) await page.locator('.quiz-question').nth(index).getByRole('radio').nth(question.correct).check();
+    await page.getByRole('button', { name: 'Submit quiz' }).click();
+    await expect(page.getByRole('heading', { name: 'You answered 5 of 5 correctly' })).toBeVisible();
+    await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
+    // Return to the earlier challenge so the subsequent resume assertions keep their meaning.
+    await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+    await page.locator('.module-button').filter({ hasText: 'Sequences' }).click();
+    await page.getByRole('button', { name: /Continue to challenge|Start challenge|Practise challenge 1 again/ }).first().click();
+    await page.getByRole('link', { name: 'My courses', exact: true }).first().click();
+    await expect(page.getByText('1 of 41 challenges complete', { exact: true })).toBeVisible();
+    await expect(page.getByText('Continue learning', { exact: true })).toBeVisible();
+    await page.screenshot({ path: `.impeccable/review/cloud-dashboard-${info.project.name}.png`, fullPage: true });
+    await page.locator('.account-assigned-course').click();
+    await expect(page.getByRole('region', { name: 'Byte challenge board' })).toBeVisible();
+    const avatar = page.getByLabel('Open account options');
+    await expect(page.locator('.topbar').getByRole('link', { name: 'My courses', exact: true })).toBeVisible();
+    await expect(page.locator('.game-tools')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'KodeArcade student dashboard' })).toHaveAttribute('href', '/#/student-courses');
+    await avatar.click();
+    await expect(page.locator('.learner-account-dropdown').getByText('Synthetic Picture Student', { exact: true })).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(avatar).toBeFocused();
+    await avatar.click();
+    await page.getByRole('button', { name: 'Settings', exact: true }).click();
+    const settings = page.getByRole('dialog', { name: 'Make yourself comfortable' });
+    await expect(settings.getByText('Synthetic Picture Student', { exact: true })).toBeVisible();
+    await expect(settings.getByPlaceholder('What should we call you?')).toHaveCount(0);
+    await expect(settings.getByText(/save to your student account/)).toBeVisible();
+    await noOverflow();
+    await page.screenshot({ path: `.impeccable/review/student-settings-live-${info.project.name}.png`, fullPage: true });
+    await page.getByRole('button', { name: 'Close settings' }).click();
+    await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
+    await avatar.click();
+    await page.screenshot({ path: `.impeccable/review/student-header-live-${info.project.name}.png`, fullPage: true });
+    await noOverflow();
+    await page.keyboard.press('Escape');
+    await page.getByRole('link', { name: 'KodeArcade student dashboard' }).click();
+    await expect(page.getByRole('heading', { name: 'Your assigned courses' })).toBeVisible();
+    await page.getByLabel('Open account options').click();
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await expect(page).toHaveURL(/student-login/);
+    await studentLogin(pictureCard!);
+    await expect(page.getByText('Continue learning', { exact: true })).toBeVisible();
+    await page.getByLabel('Open account options').click();
+    await page.getByRole('button', { name: 'Sign out', exact: true }).click();
+    await expect(page).toHaveURL(/student-login/);
+    await studentLogin(textCard!);
+    expect((await page.request.get('/api/account')).status()).toBe(403);
+    expect((await post('auth/sign-out', {})).ok()).toBe(true);
+    await page.goto('/#/adult-login?role=teacher');
+    await page.getByLabel('Email address').fill(email);
+    await page.getByLabel('Password', { exact: true }).fill(password);
+    await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Welcome, Synthetic QA Teacher' })).toBeVisible();
+    await page.goto(`/#/classroom?id=${classId}`);
+    const reports = page.getByRole('region', { name: 'Learning progress', exact: true });
+    await expect(reports.getByRole('rowheader', { name: 'Synthetic Picture Student' })).toBeVisible();
+    await expect(reports.getByRole('row').filter({ hasText: 'Synthetic Picture Student' }).getByRole('cell').filter({ hasText: '1 / 41' })).toContainText('1 / 5 quizzes');
+    await reports.screenshot({ path: `.impeccable/review/cloud-teacher-${info.project.name}.png` });
+    await reports.getByRole('button', { name: 'View progress for Synthetic Picture Student' }).click();
+    await expect(reports.getByRole('region', { name: 'Synthetic Picture Student quiz results' })).toContainText('5 / 5');
+    await expect(reports.getByRole('region', { name: 'Challenge results for Synthetic Picture Student' }).getByRole('cell', { name: 'Complete', exact: true })).toBeVisible();
+    await noOverflow();
+  } finally {
+    const memberships = await db.select().from(s.organizationMember).where(eq(s.organizationMember.userId, teacher));
+    const organizations = memberships.map(row => row.organizationId);
+    let authUsers = [teacher];
+    if (organizations.length) {
+      const rooms = await db.select().from(s.classroom).where(inArray(s.classroom.organizationId, organizations));
+      const pupils = await db.select().from(s.learner).where(inArray(s.learner.organizationId, organizations));
+      authUsers.push(...pupils.map(row => row.authUserId));
+      await db.delete(s.session).where(inArray(s.session.userId, authUsers));
+      await db.delete(s.auditEvent).where(inArray(s.auditEvent.organizationId, organizations));
+      await db.delete(s.managementOperation).where(eq(s.managementOperation.actorId, teacher));
+      if (rooms.length) {
+        const roomIds = rooms.map(row => row.id);
+        await db.delete(s.courseAssignment).where(inArray(s.courseAssignment.classroomId, roomIds));
+        await db.delete(s.enrollment).where(inArray(s.enrollment.classroomId, roomIds));
+        await db.delete(s.classroomStaff).where(inArray(s.classroomStaff.classroomId, roomIds));
+      }
+      await db.delete(s.learner).where(inArray(s.learner.organizationId, organizations));
+      await db.delete(s.classroom).where(inArray(s.classroom.organizationId, organizations));
+      await db.delete(s.organizationMember).where(inArray(s.organizationMember.organizationId, organizations));
+      await db.delete(s.organization).where(inArray(s.organization.id, organizations));
+    }
+    await db.delete(s.user).where(inArray(s.user.id, authUsers));
+    await pool.end();
+  }
+});

@@ -3,6 +3,9 @@ dist/
 test-results/
 playwright-report/
 .impeccable/review/*.png
+.impeccable/build/
+.impeccable/mocks/
+output/
 *.tsbuildinfo
 .env
 .env.*

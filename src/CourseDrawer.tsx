@@ -4,9 +4,10 @@ import { modulesFor } from './curriculum';
 import { missions } from './learning';
 import type { Save } from './storage';
 import { courseFor } from './courses';
-type Props = { basics?: boolean; open: boolean; small: boolean; currentModule: string; currentMission: string; save: Save; onClose: () => void; onModule: (id: string) => void; onChallenge: (id: string) => void; toggle: React.RefObject<HTMLButtonElement | null> };
+import { quizScore } from '../shared/quizzes';
+type Props = { basics?: boolean; open: boolean; small: boolean; currentModule: string; currentMission: string; save: Save; onClose: () => void; onModule: (id: string) => void; onChallenge: (id: string) => void; onQuiz: (id: string) => void; toggle: React.RefObject<HTMLButtonElement | null> };
 
-export default function CourseDrawer({ basics, open, small, currentModule, currentMission, save, onClose, onModule, onChallenge, toggle }: Props) {
+export default function CourseDrawer({ basics, open, small, currentModule, currentMission, save, onClose, onModule, onChallenge, onQuiz, toggle }: Props) {
   const drawer = useRef<HTMLElement>(null);
   useEffect(() => {
     if (!open || !small) return;
@@ -36,7 +37,7 @@ export default function CourseDrawer({ basics, open, small, currentModule, curre
         const count = module.challengeIds.filter(id => save.progress[id]?.complete).length;
         return <li key={module.id} className={selected ? 'current-module' : ''}>
           <button className="module-button" aria-expanded={selected && module.status === 'available'} onClick={() => onModule(module.id)}><span className="module-symbol">{(module.topicId ?? module.id) === 'project' ? <Flag size={16} /> : count && count === module.challengeIds.length ? <Check size={16} /> : index + 1}</span><span><strong>{module.title}</strong><small>{module.status === 'upcoming' ? 'Coming next' : (module.topicId ?? module.id) === 'project' ? 'Create your own route' : `${count} / ${module.challengeIds.length} challenges`}</small></span>{selected ? <ChevronDown size={16} /> : <ChevronRight size={16} />}</button>
-          {selected && module.status === 'available' && <ol className="challenge-list">{module.challengeIds.map((id, challengeIndex) => <li key={id}><button className={currentMission === id ? 'selected-challenge' : ''} aria-current={currentMission === id ? 'step' : undefined} onClick={() => onChallenge(id)}><span>{save.progress[id]?.complete ? <Check size={14} /> : challengeIndex + 1}</span>{missions.find(m => m.id === id)!.title}</button></li>)}</ol>}
+          {selected && module.status === 'available' && <ol className="challenge-list">{module.challengeIds.map((id, challengeIndex) => <li key={id}><button className={currentMission === id ? 'selected-challenge' : ''} aria-current={currentMission === id ? 'step' : undefined} onClick={() => onChallenge(id)}><span>{save.progress[id]?.complete ? <Check size={14} /> : challengeIndex + 1}</span>{missions.find(m => m.id === id)!.title}</button></li>)}<li><button aria-current={!currentMission ? 'step' : undefined} onClick={() => onQuiz(module.id)}>{module.title} quiz{save.quizzes[module.id]?.bestAnswers && ` · ${quizScore(module.id, save.quizzes[module.id].bestAnswers)} / 5`}</button></li></ol>}
         </li>;
       })}</ul></nav>}
       <div className="drawer-note"><Lightbulb size={19} /><p>Learn a new idea, then practise. Reopen a lesson whenever you need it.</p></div>

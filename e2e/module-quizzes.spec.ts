@@ -1,0 +1,54 @@
+import { expect, test } from '@playwright/test';
+import { moduleQuiz } from '../shared/quizzes';
+import type { ProgressDocument } from '../shared/progress';
+const identity = { learnerId: 'synthetic-quiz-learner', classroomId: 'synthetic-quiz-class' };
+test('quiz drafts, feedback, retries and best results survive authenticated reloads', async ({ page }, info) => {
+  let value: ProgressDocument = { version: 1, currentId: 'grade-5-loops-10', view: 'quiz', quizModuleId: 'grade-5-loops', progress: {}, drawings: {}, preferences: { reducedMotion: true, largeText: false, soundEnabled: false, musicEnabled: false }, basicsComplete: [], topicRecords: {} };
+  let revision = 0;
+  await page.route('**/api/capabilities', route => route.fulfill({ json: {} }));
+  await page.route('**/api/student/courses', route => route.fulfill({ json: { ...identity, displayName: 'Sample Learner', classroomName: 'Sample Class', assignments: [{ id: 'sample', courseKey: 'grade-5' }] } }));
+  await page.route('**/api/student/progress/grade-5', route => {
+    if (route.request().method() === 'POST') { value = route.request().postDataJSON().document; return route.fulfill({ json: { revision: ++revision } }); }
+    return route.fulfill({ json: { ...identity, document: value, revision, updatedAt: null } });
+  });
+  await page.goto('/#/student-play/grade-5');
+  await expect(page.getByRole('heading', { name: 'Loops quiz', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Submit quiz' }).click();
+  await expect(page.getByRole('alert')).toContainText('remaining questions');
+  const questions = moduleQuiz('grade-5-loops');
+  const firstWrong = (questions[0].correct + 1) % 3;
+  await page.locator('.quiz-question').nth(0).getByRole('radio').nth(firstWrong).check();
+  await expect.poll(() => value.quizzes?.['grade-5-loops']?.answers[0]).toBe(firstWrong);
+  await page.reload();
+  await expect(page.locator('.quiz-question').nth(0).getByRole('radio').nth(firstWrong)).toBeChecked();
+  for (let i = 1; i < questions.length; i++) await page.locator('.quiz-question').nth(i).getByRole('radio').nth(questions[i].correct).check();
+  await expect(page.getByText('Saved to your account', { exact: true })).toBeVisible();
+  await page.evaluate(() => scrollTo(0, 0));
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/quiz-draft-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Submit quiz' }).click();
+  await expect(page.getByRole('heading', { name: 'You answered 4 of 5 correctly' })).toBeFocused();
+  await expect(page.locator('.quiz-explanation')).toHaveCount(5);
+  await expect.poll(() => value.quizzes?.['grade-5-loops']?.attempts).toBe(1);
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'You answered 4 of 5 correctly' })).toBeVisible();
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: `.impeccable/review/quiz-result-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Try quiz again' }).click();
+  for (let i = 0; i < questions.length; i++) await page.locator('.quiz-question').nth(i).getByRole('radio').nth((questions[i].correct + 1) % 3).check();
+  await page.getByRole('button', { name: 'Submit quiz' }).click();
+  await expect(page.getByRole('heading', { name: 'You answered 0 of 5 correctly' })).toBeVisible();
+  await expect(page.locator('.quiz-result')).toContainText('Best result: 4 / 5');
+  expect(await page.evaluate(() => localStorage.getItem('kodearcade-v1'))).toBeNull();
+  await page.getByRole('button', { name: 'Next module: Debugging' }).click();
+  await expect(page.getByRole('heading', { name: 'A bug is a clue' })).toBeVisible();
+});
+test('young learner quiz is discoverable at the end of the module and in the drawer', async ({ page }) => {
+  await page.route('**/api/capabilities', route => route.fulfill({ json: {} }));
+  await page.goto('/#/learn/grade-1');
+  await expect(page.getByRole('region', { name: 'Sequences end-of-module quiz' })).toBeVisible();
+  await page.getByRole('button', { name: 'Start quiz', exact: true }).click();
+  await expect(page.locator('.quiz-question').first()).toContainText('What is a sequence?');
+  await page.getByRole('button', { name: 'Show modules', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Sequences quiz', exact: true })).toBeVisible();
+});
