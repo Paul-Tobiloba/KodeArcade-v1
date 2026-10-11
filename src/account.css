@@ -367,3 +367,28 @@
 .account-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; width: min(100%, 600px); min-height: 300px; padding: 40px 24px; margin: 0 auto; background: #fff; border-radius: 24px; text-align: center; }
 .account-loading img { flex-shrink: 0; }
 .account-loading h2 { margin: 0; font-size: 1.5rem; }
+.account-class-list { margin-top: 24px; }
+.account-class-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.account-class-filters button[aria-pressed="true"] { background: #ede7ff; border-color: #7956cd; color: #372066; }
+.account-class-list > p { margin-bottom: 16px; }
+.account-class-lifecycle { margin: 20px 0 28px; padding: 20px; background: #f7f4ff; border: 1px solid #ddd3f5; border-radius: 12px; }
+.account-class-lifecycle summary, .account-class-lifecycle h2 { display: flex; align-items: center; gap: 10px; font-size: 1rem; }
+.account-class-lifecycle summary { cursor: pointer; min-height: 44px; }
+.account-class-lifecycle p { max-width: 70ch; margin: 12px 0; }
+.account-class-lifecycle .account-checkbox { align-items: flex-start; }
+.account-class-editing { min-width: 0; margin: 0; padding: 0; border: 0; }
+.account-class-editing:disabled { color: #575472; }
+.account-workspace-switch { font-size: .85rem; }
+.account-workspace-switch select { min-width: 0; font-weight: 400; }
+.account-school-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--account-line); }
+.account-school-section > p { max-width: 70ch; }
+.account-school-section summary { min-height: 44px; cursor: pointer; padding: 10px 0; }
+.account-school-section summary svg { vertical-align: middle; margin-right: 8px; }
+.account-school-section .account-table-wrap { margin-top: 20px; }
+.account-school-section table { min-width: 580px; }
+.account-school-section td details { min-width: 230px; max-width: 320px; }
+.account-school-section td details form { padding: 12px 0; }
+.account-staff-email { display: block; font-weight: 400; font-size: .8rem; overflow-wrap: anywhere; margin-top: 6px; }
+.account-school-staff-options { border: 1px solid var(--account-line); border-radius: 12px; padding: 16px; margin: 16px 0; }
+.account-school-staff-options legend { padding: 0 6px; }
+.account-school-join-back { margin-top: 16px; }

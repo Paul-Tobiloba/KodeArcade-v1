@@ -116,8 +116,8 @@ Opt-in live test: set `RUN_LIVE_CLASSROOM_E2E=1` and `PDF_TEST_PYTHON` to Python
 ## Remaining work before a hosted pilot
 
 1. Trusted versioned server completion replay/validation and durable offline synchronization. Client-reported stars remain non-authoritative.
-2. Family profiles, guardian approval/linking and broader school administration policies.
-3. Broader school administration (staff lifecycle, class transfers/archival and retention policy), beyond the completed classroom workflows above. Do not store plaintext credentials for card reprints; reset and issue a new card.
+2. Family profiles and guardian approval/linking.
+3. Remaining school policies: verified institutional identity, class/pupil transfers, academic-year rollover, school deletion and retention. Staff lifecycle, scoped school workspaces and reversible class archival are implemented; see SCHOOL_ADMINISTRATION.md. Do not store plaintext credentials for card reprints; reset and issue a new card.
 4. Production domain/sender verification, durable mail delivery, bounce/complaint operations and operational alerting.
 5. Consent/retention, expired throttle/token cleanup and audit retention jobs.
 6. Production hosting/proxy trust, runtime DB role, secrets isolation, consent/retention, backup/restore tests, incident ownership and an end-to-end pilot verification.

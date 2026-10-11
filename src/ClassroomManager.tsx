@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Download, KeyRound, Plus, ShieldCheck } from 'lucide-react';
-import { accountErrorMessage, accountPdf, accountRequest, type Account } from './account-api';
+import { accountErrorMessage, accountPdf, accountRequest, workspaceHref, type Account } from './account-api';
 import { Notice, Password, Submit } from './AccountUI';
 import { CourseAssignments, CsvImport } from './TeacherBatch';
 import LoadingScreen from './LoadingScreen';
 import ClassProgress from './ClassProgress';
+import ClassLifecycle, { ClassList } from './ClassLifecycle';
 
 type Pupil = { id: string; displayName: string; username: string; grade: number; loginMethod: 'picture' | 'text'; active: boolean };
-type Classroom = { room: { id: string; name: string; code: string; grade: number }; learners: Pupil[]; assignments: { id: string; courseKey: string }[] };
-const classUrl = (id: string) => `/#/classroom?id=${encodeURIComponent(id)}`;
+type Classroom = { room: { id: string; name: string; code: string; grade: number; archivedAt?: string | null }; learners: Pupil[]; assignments: { id: string; courseKey: string }[] };
 const currentClassId = () => new URLSearchParams(location.hash.split('?')[1]).get('id') ?? '';
 
 export default function ClassroomManager({ route, account, refresh }: { route: string; account: Account; refresh: () => void }) {
@@ -46,22 +46,27 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
     finally { setBusy(false); }
   }
   if (!workspace) return <><h1>Set up a teaching workspace</h1><p>Classes and student credentials are managed by teachers. Family profiles are a separate feature.</p><a className="account-button" href="/#/onboarding">Workspace setup<ArrowRight size={18} /></a></>;
-  const classList = <div className="account-table-wrap"><table><caption>Select a class to manage students and assigned courses</caption><thead><tr><th>Class</th><th>Grade</th><th>Classroom code</th><th>Manage</th></tr></thead><tbody>{account.classes.map(room => <tr key={room.id}><td>{room.name}</td><td>{room.grade}</td><td><code>{room.code}</code></td><td><a className="account-button" href={classUrl(room.id)}>Open class<ArrowRight size={17} /></a></td></tr>)}</tbody></table></div>;
   return <>
-    <a className="account-back" href="/#/classes"><ArrowLeft size={17} />Your classes</a>
+    <a className="account-back" href={workspaceHref('classes', workspace.id)}><ArrowLeft size={17} />Your classes</a>
     <h1>{route === 'class-new' ? 'Create a class' : data?.room.name ?? (route === 'learners' || route === 'learner-new' ? 'Your students' : 'Your classes')}</h1>
     {error && <Notice error>{error}</Notice>}
     {card && <section className="account-private-card" aria-label="Private login card ready"><h2>Login card ready</h2><p>Download this private PDF now. It is only available here until you leave or dismiss it. Existing passwords cannot be reprinted—reset a lost card to issue a new one.</p><a className="account-button primary" href={card} download="kodearcade-private-login-card.pdf"><Download size={18} />Download PDF card</a><button className="account-button" onClick={() => setCard('')}>Dismiss private card</button></section>}
     <ManagementUnlock mfa={account.profile.twoFactorEnabled === true} />
     {route === 'class-new' ? <form className="account-management-form" aria-busy={busy} onSubmit={async event => {
       event.preventDefault(); const form = new FormData(event.currentTarget); setBusy(true); setError('');
-      try { const result = await accountRequest<{ id: string }>('manage/classes', { name: form.get('name'), grade: Number(form.get('grade')), organizationId: workspace.id, operationKey: createKey }); refresh(); location.hash = `/classroom?id=${result.id}`; }
+      try { const result = await accountRequest<{ id: string }>('manage/classes', { name: form.get('name'), grade: Number(form.get('grade')), organizationId: workspace.id, operationKey: createKey }); refresh(); location.hash = `/classroom?id=${result.id}&workspace=${workspace.id}`; }
       catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); }
     }}><label className="account-field">Class name<input name="name" maxLength={60} required placeholder="e.g. Grade 2A" /></label><GradeField /><p>The class starts with its grade’s course assigned. You can change the assignments after creation.</p><Submit busy={busy}>Create class</Submit></form>
-      : !id ? <><p>Open a class to add students, choose password methods and assign courses.</p><a className="account-button primary" href="/#/class-new"><Plus size={18} />Create class</a>{account.classes.length ? classList : <section className="account-empty"><h2>Your first class starts here</h2><p>Create a class, then add a student to receive their generated login card.</p></section>}</>
+      : !id ? <><p>{workspace.kind === 'school' ? `School workspace: ${workspace.name}. ${workspace.role === 'school_admin' ? 'You can manage every class in this school.' : 'Only your assigned school classes appear here.'}` : 'These classes belong to your personal teaching workspace.'} Open a class to manage students and courses.</p><a className="account-button primary" href={workspaceHref('class-new', workspace.id)}><Plus size={18} />Create class</a><ClassList classes={account.classes} workspaceId={workspace.id} /></>
         : !data ? error ? <button className="account-button" onClick={() => { setError(''); reload(); }}>Try loading this class again</button> : <LoadingScreen embedded label="Opening your classroom…" /> : <>
           <div className="account-class-meta"><span>Grade {data.room.grade}</span><span>Classroom code <code>{data.room.code}</code></span><span>{data.learners.length} students</span></div>
+          <ClassLifecycle key={String(data.room.archivedAt)} archivedAt={data.room.archivedAt} busy={busy} onChange={async archived => {
+            const saved = await mutate(`manage/classes/${id}/archive`, { archived, previousArchived: Boolean(data.room.archivedAt), confirm: true });
+            if (saved) { setAdding(false); setChecked([]); setCard(''); refresh(); }
+            return saved;
+          }} />
           <ClassProgress classroomId={id} assignments={data.assignments} />
+          <fieldset className="account-class-editing" disabled={Boolean(data.room.archivedAt) || busy} aria-label="Classroom editing">
           <details className="account-help"><summary>Edit class details</summary><form aria-busy={busy} onSubmit={async event => { event.preventDefault(); const form = new FormData(event.currentTarget); await mutate(`manage/classes/${id}/update`, { name: form.get('name'), grade: Number(form.get('grade')) }); }}><label className="account-field">Class name<input name="name" defaultValue={data.room.name} maxLength={60} required /></label><GradeField initial={data.room.grade} /><Submit busy={busy}>Save class details</Submit></form></details>
           <section className="account-roster"><div className="account-section-heading"><h2>Students</h2><button className="account-button primary" onClick={() => { setAdding(!adding); setSelected(undefined); }}><Plus size={18} />{adding ? 'Close student form' : 'Add student'}</button></div>
             <CsvImport busy={busy} existingNames={data.learners.map(student => student.displayName)} remaining={100 - data.learners.length} onImport={csv => mutate(`manage/classes/${id}/students/import`, { csv }, true)} />
@@ -71,6 +76,7 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
             {selected && <section className="account-student-management"><div className="account-section-heading"><h3>{selected.displayName}</h3><button className="account-text-button" onClick={() => setSelected(undefined)}>Close student details</button></div><StudentForm key={selected.id} grade={selected.grade} student={selected} busy={busy} onSubmit={body => mutate(`manage/classes/${id}/students/${selected.id}/update`, body)} /><form aria-busy={busy} onSubmit={async event => { event.preventDefault(); const form = new FormData(event.currentTarget); if (confirm('Reset this password? The old card will stop working and the student will be signed out.')) await mutate(`manage/classes/${id}/students/${selected.id}/reset`, { loginMethod: form.get('loginMethod') }, true); }}><label className="account-field">New password method<select name="loginMethod" defaultValue={selected.loginMethod}><option value="picture">Picture password</option><option value="text">Text password</option></select></label><p>A reset generates a new credential and PDF. It never reveals the existing password.</p><Submit busy={busy}>Reset credential & generate PDF</Submit></form></section>}
           </section>
           <CourseAssignments key={JSON.stringify(data.assignments)} assigned={data.assignments.map(item => item.courseKey)} busy={busy} onSave={(courses, previous) => mutate(`manage/classes/${id}/assignments/save`, { courses, previous })} />
+          </fieldset>
         </>}
   </>;
 }
@@ -81,7 +87,7 @@ function StudentForm({ grade, busy, student, onSubmit }: { grade: number; busy: 
   const [method, setMethod] = useState(student?.loginMethod ?? (grade <= 2 ? 'picture' : 'text'));
   return <form className="account-management-form" aria-busy={busy} onSubmit={async event => { event.preventDefault(); const data = new FormData(event.currentTarget); await onSubmit({ displayName: data.get('displayName'), grade: Number(data.get('grade')), ...(student ? { active: data.get('active') === 'on' } : { loginMethod: method }) }); }}><label className="account-field">Student display name<input name="displayName" maxLength={60} required defaultValue={student?.displayName} placeholder="First name or classroom alias" /></label><GradeField initial={grade} onChange={grade => { if (!student) setMethod(grade <= 2 ? 'picture' : 'text'); }} />{student ? <label className="account-checkbox"><input type="checkbox" name="active" defaultChecked={student.active} />Active student (uncheck to disable login and sign out)</label> : <label className="account-field">Login method<select name="loginMethod" value={method} onChange={event => setMethod(event.target.value as 'picture' | 'text')}><option value="picture">Picture password (usually Grades 1–2)</option><option value="text">Generated text password (usually Grades 3–6)</option></select></label>}<Submit busy={busy}>{student ? 'Save student details' : 'Add student & generate PDF'}</Submit></form>;
 }
-function ManagementUnlock({ mfa }: { mfa: boolean }) {
+export function ManagementUnlock({ mfa }: { mfa: boolean }) {
   const [until, setUntil] = useState(0), [busy, setBusy] = useState(false), [error, setError] = useState('');
   useEffect(() => { const controller = new AbortController(); accountRequest<{ unlockedForSeconds: number }>('manage/management/status', undefined, controller.signal).then(value => { if (value.unlockedForSeconds > 0) setUntil(Date.now() + value.unlockedForSeconds * 1000); }).catch(() => {}); return () => controller.abort(); }, []);
   useEffect(() => { if (!until) return; const timer = setTimeout(() => setUntil(0), Math.max(0, until - Date.now())); return () => clearTimeout(timer); }, [until]);

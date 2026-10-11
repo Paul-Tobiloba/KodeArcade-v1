@@ -8,6 +8,7 @@ import { createAccountRoutes } from './account.js';
 import { createClassroomRoutes } from './classrooms.js';
 import { createStudentRoutes } from './student.js';
 import { createProgressRoutes } from './progress.js';
+import { createSchoolRoutes } from './schools.js';
 
 export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig, 'APP_ORIGIN'> & Partial<Pick<ServerConfig, 'BETTER_AUTH_SECRET'>>, accounts?: { auth: Auth; db: Database }) {
   const app = new Hono();
@@ -51,6 +52,7 @@ export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig
     if (config.BETTER_AUTH_SECRET) {
       const classroomConfig = { APP_ORIGIN: config.APP_ORIGIN, BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET };
       app.route('/api/manage', createClassroomRoutes(accounts.auth, accounts.db, classroomConfig));
+      app.route('/api/schools', createSchoolRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/student', createStudentRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/student/progress', createProgressRoutes(accounts.auth, accounts.db, classroomConfig));
     }

@@ -18,10 +18,19 @@ export const organizationMember = pgTable('organization_member', {
   role: text('role', { enum: ['parent', 'teacher', 'school_admin'] }).notNull(), createdAt: createdAt(),
 }, t => [primaryKey({ columns: [t.organizationId, t.userId] }), check('organization_member_role', sql`${t.role} in ('parent', 'teacher', 'school_admin')`)]);
 
+// Invitation secrets are shown once; only their digest is retained.
+export const schoolInvitation = pgTable('school_invitation', {
+  id: text('id').primaryKey(), organizationId: text('organization_id').notNull().references(() => organization.id),
+  email: text('email').notNull(), role: text('role', { enum: ['teacher', 'school_admin'] }).notNull(),
+  tokenDigest: text('token_digest').notNull().unique(), createdBy: text('created_by').notNull().references(() => user.id),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  closedAt: timestamp('closed_at', { withTimezone: true }), createdAt: createdAt(),
+}, t => [check('school_invitation_role', sql`${t.role} in ('teacher', 'school_admin')`)]);
+
 export const classroom = pgTable('classroom', {
   id: text('id').primaryKey(), organizationId: text('organization_id').notNull().references(() => organization.id),
   name: text('name').notNull(), code: text('code').notNull().unique(),
-  grade: integer('grade').notNull(), createdAt: createdAt(),
+  grade: integer('grade').notNull(), archivedAt: timestamp('archived_at', { withTimezone: true }), createdAt: createdAt(),
 }, t => [unique('classroom_org_id').on(t.organizationId, t.id), check('classroom_grade', sql`${t.grade} between 1 and 6`)]);
 
 export const classroomStaff = pgTable('classroom_staff', {

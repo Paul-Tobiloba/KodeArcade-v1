@@ -22,6 +22,20 @@
       "when": 1791718940891,
       "tag": "0002_wakeful_the_hood",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791742651215,
+      "tag": "0003_class_archival",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791744017837,
+      "tag": "0004_school_invitations",
+      "breakpoints": true
     }
   ]
 }

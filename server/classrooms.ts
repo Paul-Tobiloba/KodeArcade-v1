@@ -14,6 +14,7 @@ import * as s from './db/schema.js';
 import { assignedCourseKeys, budget, credentialPassword, CURRICULUM_VERSION, generateCredential, randomCode, stepCookie, stepGrant, validStepGrant, usernameBases } from './classroom-policy.js';
 import { loginCard, loginCards, type Card } from './login-card.js';
 import { parseClassroomCsv, type ImportedStudent } from '../shared/classroom-import.js';
+import { classroomAccess } from './staff-access.js';
 
 const name = z.string().trim().min(1).max(60);
 const grade = z.number().int().min(1).max(6);
@@ -37,12 +38,20 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
   }
   async function manages(c: Context, classId: string, step = false) {
     const actor = await adult(c, step);
-    const [room] = await db.select({ id: s.classroom.id, organizationId: s.classroom.organizationId, name: s.classroom.name, code: s.classroom.code, grade: s.classroom.grade })
-      .from(s.classroom).innerJoin(s.classroomStaff, and(eq(s.classroomStaff.classroomId, s.classroom.id), eq(s.classroomStaff.organizationId, s.classroom.organizationId)))
-      .innerJoin(s.organizationMember, and(eq(s.organizationMember.organizationId, s.classroom.organizationId), eq(s.organizationMember.userId, s.classroomStaff.userId)))
-      .where(and(eq(s.classroom.id, classId), eq(s.classroomStaff.userId, actor.user.id), sql`${s.organizationMember.role} in ('teacher', 'school_admin')`));
+    const room = await classroomAccess(db, actor.user.id, classId);
     if (!room) return fail(404, 'NOT_FOUND');
     return { actor, room };
+  }
+  async function activeClass(tx: Transaction, classId: string, actorId: string, allowArchived = false) {
+    const [scope] = await tx.select({ organizationId: s.classroom.organizationId }).from(s.classroom).where(eq(s.classroom.id, classId));
+    if (!scope) return fail(404, 'NOT_FOUND');
+    // Serialize with school staff removal/reassignment and recheck authorization.
+    await tx.select().from(s.organization).where(eq(s.organization.id, scope.organizationId)).for('update');
+    if (!await classroomAccess(tx, actorId, classId)) return fail(404, 'NOT_FOUND');
+    const [room] = await tx.select().from(s.classroom).where(eq(s.classroom.id, classId)).for('update');
+    if (!room) return fail(404, 'NOT_FOUND');
+    if (!allowArchived && room.archivedAt) return fail(409, 'CLASS_ARCHIVED');
+    return room;
   }
   async function operation(tx: Transaction, actorId: string, key: string, payload: unknown, resourceId: string) {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${JSON.stringify([actorId, key])}))`);
@@ -98,8 +107,10 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     if (!member || !['teacher', 'school_admin'].includes(member.role)) return fail(403, 'FORBIDDEN');
     const id = randomUUID(), code = randomCode(8);
     await db.transaction(async tx => {
-      await operation(tx, actor.user.id, body.operationKey, body, id);
       await tx.execute(sql`select id from organization where id = ${body.organizationId} for update`);
+      await operation(tx, actor.user.id, body.operationKey, body, id);
+      const [currentMember] = await tx.select().from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, body.organizationId), eq(s.organizationMember.userId, actor.user.id)));
+      if (!currentMember || !['teacher', 'school_admin'].includes(currentMember.role)) return fail(403, 'FORBIDDEN');
       const [total] = await tx.select({ total: count() }).from(s.classroom).where(eq(s.classroom.organizationId, body.organizationId));
       if (total.total >= 100) return fail(409, 'CLASS_LIMIT');
       await tx.insert(s.classroom).values({ id, organizationId: body.organizationId, name: body.name, grade: body.grade, code });
@@ -148,9 +159,28 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const { actor, room } = await manages(c, c.req.param('id'), true);
     const body = await input(c, z.object({ name, grade, operationKey }));
     await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, body, room.id);
       await tx.update(s.classroom).set({ name: body.name, grade: body.grade }).where(eq(s.classroom.id, room.id));
       await audit(tx, actor.user.id, room.organizationId, 'class.updated', room.id);
+    });
+    return c.json({ saved: true });
+  });
+
+  app.post('/classes/:id/archive', async c => {
+    const { actor, room } = await manages(c, c.req.param('id'), true);
+    const body = await input(c, z.object({ archived: z.boolean(), previousArchived: z.boolean(), confirm: z.literal(true), operationKey }).strict());
+    await db.transaction(async tx => {
+      const current = await activeClass(tx, room.id, actor.user.id, true);
+      await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, room.id);
+      if (Boolean(current.archivedAt) !== body.previousArchived || body.archived === body.previousArchived) return fail(409, 'CLASS_STATE_CONFLICT');
+      await tx.update(s.classroom).set({ archivedAt: body.archived ? new Date() : null }).where(eq(s.classroom.id, room.id));
+      if (body.archived) {
+        // Revoke only sessions bound to this class, never another enrolled class.
+        const sessions = await tx.select({ id: s.learnerSession.sessionId }).from(s.learnerSession).where(eq(s.learnerSession.classroomId, room.id));
+        if (sessions.length) await tx.delete(s.session).where(inArray(s.session.id, sessions.map(item => item.id)));
+      }
+      await audit(tx, actor.user.id, room.organizationId, body.archived ? 'class.archived' : 'class.restored', room.id);
     });
     return c.json({ saved: true });
   });
@@ -163,6 +193,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const context = await auth.$context;
     const hash = await context.password.hash(credentialPassword(config.BETTER_AUTH_SECRET, body.loginMethod, credential));
     const buffer = await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, id);
       await tx.execute(sql`select id from classroom where id = ${room.id} for update`);
       const [total] = await tx.select({ total: count() }).from(s.enrollment).where(eq(s.enrollment.classroomId, room.id));
@@ -207,6 +238,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       prepared.push({ ...student, id: randomUUID(), authUserId: randomUUID(), credential, hash: await password.hash(credentialPassword(config.BETTER_AUTH_SECRET, student.loginMethod, credential)) });
     }
     const buffer = await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, room.id);
       await tx.execute(sql`select id from classroom where id = ${room.id} for update`);
       const [total] = await tx.select({ total: count() }).from(s.enrollment).where(eq(s.enrollment.classroomId, room.id));
@@ -236,6 +268,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'student-bulk', actor.user.id, 10, 3600)) return fail(429, 'LIMIT');
     const password = (await auth.$context).password;
     const buffer = await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, room.id);
       const students = await tx.select({ learner: s.learner, username: s.user.username }).from(s.enrollment)
         .innerJoin(s.learner, and(eq(s.learner.id, s.enrollment.learnerId), eq(s.learner.organizationId, s.enrollment.organizationId)))
@@ -274,6 +307,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const card: Card = { name: student.learner.displayName, username: student.username!, className: room.name, classCode: room.code, grade: student.learner.grade, method: body.loginMethod, credential, origin: config.APP_ORIGIN };
     const buffer = await loginCard(card);
     await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id, studentId: student.learner.id }, student.learner.id);
       await tx.execute(sql`select id from learner where id = ${student.learner.id} for update`);
       await tx.update(s.account).set({ password: hash }).where(and(eq(s.account.userId, student.learner.authUserId), eq(s.account.providerId, 'credential')));
@@ -288,6 +322,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const student = await enrolled(room.id, c.req.param('studentId'));
     const body = await input(c, z.object({ displayName: name, grade, active: z.boolean(), operationKey }));
     await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id, studentId: student.learner.id }, student.learner.id);
       await tx.execute(sql`select id from learner where id = ${student.learner.id} for update`);
       await tx.update(s.learner).set({ displayName: body.displayName, grade: body.grade, active: body.active }).where(eq(s.learner.id, student.learner.id));
@@ -302,6 +337,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const { actor, room } = await manages(c, c.req.param('id'), true);
     const body = await input(c, z.object({ courseKey: z.enum(assignedCourseKeys), assigned: z.boolean(), operationKey }));
     await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, room.id);
       await tx.execute(sql`select id from classroom where id = ${room.id} for update`);
       if (body.assigned) await tx.insert(s.courseAssignment).values({ id: randomUUID(), classroomId: room.id, courseKey: body.courseKey, curriculumVersion: CURRICULUM_VERSION }).onConflictDoNothing();
@@ -314,6 +350,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     const { actor, room } = await manages(c, c.req.param('id'), true);
     const body = await input(c, z.object({ courses: z.array(z.enum(assignedCourseKeys)).max(6).refine(keys => new Set(keys).size === keys.length), previous: z.array(z.enum(assignedCourseKeys)).max(6), operationKey }).strict());
     await db.transaction(async tx => {
+      await activeClass(tx, room.id, actor.user.id);
       await operation(tx, actor.user.id, body.operationKey, { ...body, classId: room.id }, room.id);
       await tx.execute(sql`select id from classroom where id = ${room.id} for update`);
       const previous = await tx.select().from(s.courseAssignment).where(and(eq(s.courseAssignment.classroomId, room.id), eq(s.courseAssignment.curriculumVersion, CURRICULUM_VERSION)));

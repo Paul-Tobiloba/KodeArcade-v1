@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, or } from 'drizzle-orm';
 import { z } from 'zod';
 import { Hono } from 'hono';
 import type { Auth } from './auth.js';
@@ -16,9 +16,11 @@ export function createAccountRoutes(auth: Auth, db: Database) {
     const workspaces = await db.select({ id: organization.id, name: organization.name, kind: organization.kind, role: organizationMember.role })
       .from(organizationMember).innerJoin(organization, eq(organization.id, organizationMember.organizationId))
       .where(eq(organizationMember.userId, session.user.id));
-    const classes = await db.select({ id: classroom.id, name: classroom.name, code: classroom.code, grade: classroom.grade })
-      .from(classroomStaff).innerJoin(classroom, and(eq(classroom.id, classroomStaff.classroomId), eq(classroom.organizationId, classroomStaff.organizationId)))
-      .where(eq(classroomStaff.userId, session.user.id));
+    const classes = await db.select({ id: classroom.id, organizationId: classroom.organizationId, name: classroom.name, code: classroom.code, grade: classroom.grade, archivedAt: classroom.archivedAt })
+      .from(classroom).innerJoin(organization, eq(organization.id, classroom.organizationId))
+      .innerJoin(organizationMember, and(eq(organizationMember.organizationId, classroom.organizationId), eq(organizationMember.userId, session.user.id)))
+      .leftJoin(classroomStaff, and(eq(classroomStaff.classroomId, classroom.id), eq(classroomStaff.organizationId, classroom.organizationId), eq(classroomStaff.userId, session.user.id)))
+      .where(or(and(eq(organization.kind, 'school'), eq(organizationMember.role, 'school_admin')), and(eq(organizationMember.role, 'teacher'), eq(classroomStaff.userId, session.user.id))));
     return c.json({ profile: { name: session.user.name, email: session.user.email, twoFactorEnabled: session.user.twoFactorEnabled }, workspaces, classes });
   });
   app.post('/onboarding', async c => {
@@ -31,8 +33,8 @@ export function createAccountRoutes(auth: Auth, db: Database) {
     const { sql } = await import('drizzle-orm');
     const created = await db.transaction(async tx => {
       await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${session.user.id}))`);
-      const existing = await tx.select().from(organizationMember).where(eq(organizationMember.userId, session.user.id));
-      if (existing.length) return false;
+      const existing = await tx.select({ kind: organization.kind }).from(organizationMember).innerJoin(organization, eq(organization.id, organizationMember.organizationId)).where(eq(organizationMember.userId, session.user.id));
+      if (existing.some(workspace => workspace.kind !== 'school')) return false;
       const id = randomUUID();
       await tx.insert(organization).values({ id, name: input.data.name, kind: input.data.role === 'teacher' ? 'teacher_workspace' : 'family' });
       await tx.insert(organizationMember).values({ organizationId: id, userId: session.user.id, role: input.data.role });

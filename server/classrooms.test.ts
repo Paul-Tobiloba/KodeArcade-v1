@@ -10,6 +10,7 @@ import type { Card } from './login-card.js';
 import { createAuth } from './auth.js';
 import { createApp } from './app.js';
 import { loadConfig } from './config.js';
+import { curriculumVersion, type ProgressDocument } from '../shared/progress.js';
 
 const cards = vi.hoisted(() => [] as Card[]);
 const pdfFailure = vi.hoisted(() => ({ enabled: false }));
@@ -190,3 +191,66 @@ it('saves all assignments atomically and refuses a stale teacher selection', asy
   expect((await request(path, { courses: [], previous: ['grade-3', 'grade-6'], operationKey: randomUUID() }, teacher)).status).toBe(200);
   expect((await (await request(`manage/classes/${room.id}`, undefined, teacher)).json()).assignments).toEqual([]);
 });
+
+it('archives/restores an authorized class without deleting records and revokes only its learner sessions', async () => {
+  const created = await request('manage/classes', { name: 'Archive sample', grade: 2, organizationId, operationKey: randomUUID() }, teacher);
+  expect(created.status).toBe(201);
+  const archiveRoom = await created.json(), path = `manage/classes/${archiveRoom.id}`;
+  expect((await request(`${path}/students`, { displayName: 'Archive Pupil', grade: 2, loginMethod: 'text', operationKey: randomUUID() }, teacher)).status).toBe(200);
+  const card = cards.at(-1)!;
+  const roster = await (await request(path, undefined, teacher)).json(), pupil = roster.learners[0];
+  const login = { classCode: archiveRoom.code, username: card.username, method: 'text', password: card.credential };
+  const signed = await request('student/login', login); expect(signed.status).toBe(200);
+  const cookie = cookies(signed);
+  const document: ProgressDocument = { version: 1, currentId: 'grade-2-sequences-1', view: 'challenge', progress: { 'grade-2-sequences-1': { blocks: [], hints: 0, attempts: 1, complete: true, stars: 5, textCode: 'move_right()' } }, drawings: {}, topicRecords: {}, basicsComplete: [], preferences: { reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false } };
+  const payload = { learnerId: pupil.id, classroomId: archiveRoom.id, revision: 0, document };
+  expect((await request('student/progress/grade-2', payload, cookie)).status).toBe(200);
+  const [learner] = await db.select().from(s.learner).where(eq(s.learner.id, pupil.id));
+  // Same child in a different class: that class session must not be revoked.
+  await db.insert(s.enrollment).values({ organizationId, classroomId: room.id, learnerId: pupil.id });
+  const secondLogin = await request('student/login', { ...login, classCode: room.code });
+  expect(secondLogin.status).toBe(200); const secondCookie = cookies(secondLogin);
+  const body = { archived: true, previousArchived: false, confirm: true, operationKey: randomUUID() };
+  expect((await request(`${path}/archive`, body)).status).toBe(401);
+  expect((await request(`${path}/archive`, body, other)).status).toBe(403);
+  expect((await request(`${path}/archive`, body, parent)).status).toBe(403);
+  const foreignUnlock = await request('manage/management/unlock', { password }, other);
+  expect(foreignUnlock.status).toBe(200);
+  expect((await request(`${path}/archive`, body, `${other}; ${cookies(foreignUnlock)}`)).status).toBe(404);
+  expect((await request(`${path}/archive`, { ...body, confirm: false }, teacher)).status).toBe(400);
+  expect((await request(`${path}/archive`, body, teacher)).status).toBe(200);
+  expect((await request(`${path}/archive`, body, teacher)).status).toBe(409);
+  expect((await request('student/classroom', { classCode: archiveRoom.code })).status).toBe(404);
+  expect((await request('student/login', login)).status).toBe(401);
+  expect((await request('student/courses', undefined, cookie)).status).toBe(401);
+  expect((await request('student/progress/grade-2', undefined, cookie)).status).toBe(401);
+  expect((await request('student/progress/grade-2', { ...payload, revision: 1 }, cookie)).status).toBe(401);
+  expect((await request('student/courses', undefined, secondCookie)).status).toBe(200);
+  const after = await (await request(path, undefined, teacher)).json();
+  expect(after.room.archivedAt).toBeTruthy(); expect(after.learners).toEqual(roster.learners); expect(after.assignments).toEqual(roster.assignments);
+  const report = await request(`${path}/progress?course=grade-2`, undefined, teacher);
+  expect(report.status).toBe(200); expect((await report.json()).students[0]).toMatchObject({ completed: 1, stars: 5 });
+  expect((await (await request('account', undefined, teacher)).json()).classes.find((item: { id: string }) => item.id === archiveRoom.id).archivedAt).toBeTruthy();
+  const mutations = [
+    ['update', { name: 'Forbidden edit', grade: 3 }],
+    ['students', { displayName: 'Blocked', grade: 2, loginMethod: 'picture' }],
+    ['students/import', { csv: 'name,grade,login_method\nBlocked Import,2,picture' }],
+    ['students/reset-cards', { studentIds: [pupil.id], confirmReset: true }],
+    [`students/${pupil.id}/reset`, { loginMethod: 'picture' }],
+    [`students/${pupil.id}/update`, { displayName: 'Blocked rename', grade: 2, active: false }],
+    ['assignments', { courseKey: 'grade-3', assigned: true }],
+    ['assignments/save', { courses: [], previous: ['grade-2'] }],
+  ] as const;
+  for (const [suffix, data] of mutations) {
+    const response = await request(`${path}/${suffix}`, { ...data, operationKey: randomUUID() }, teacher);
+    expect(response.status, suffix).toBe(409); expect(await response.json()).toEqual({ code: 'CLASS_ARCHIVED' });
+  }
+  expect((await db.select().from(s.learner).where(eq(s.learner.id, pupil.id)))[0]).toEqual(learner);
+  expect((await request(`${path}/archive`, { archived: false, previousArchived: false, confirm: true, operationKey: randomUUID() }, teacher)).status).toBe(409);
+  expect((await request(`${path}/archive`, { archived: false, previousArchived: true, confirm: true, operationKey: randomUUID() }, teacher)).status).toBe(200);
+  expect((await request('student/courses', undefined, cookie)).status).toBe(401); // Never resurrect revoked sessions.
+  const restored = await request('student/login', login); expect(restored.status).toBe(200);
+  const saved = await (await request('student/progress/grade-2', undefined, cookies(restored))).json();
+  expect(saved).toMatchObject({ revision: 1, document });
+  expect((await db.select().from(s.auditEvent)).filter(event => event.resourceId === archiveRoom.id).map(event => event.action)).toEqual(['class.created', 'class.archived', 'class.restored']);
+}, 30_000);

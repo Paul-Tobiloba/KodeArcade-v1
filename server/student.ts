@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { z } from 'zod';
 import type { Auth } from './auth.js';
@@ -18,7 +18,7 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'class-lookup-global', 'all', 60, 900)) return c.json({ code: 'LIMIT' }, 429);
     const input = z.object({ classCode: z.string().trim().toUpperCase().regex(/^[A-Z2-9]{8}$/) }).safeParse(await c.req.json().catch(() => null));
     if (!input.success) return c.json({ code: 'CLASS_NOT_FOUND' }, 404);
-    const [room] = await db.select({ id: s.classroom.id }).from(s.classroom).where(eq(s.classroom.code, input.data.classCode));
+    const [room] = await db.select({ id: s.classroom.id }).from(s.classroom).where(and(eq(s.classroom.code, input.data.classCode), isNull(s.classroom.archivedAt)));
     // No names, avatars, password methods or roster are disclosed before individual login.
     return room ? c.json({ found: true }) : c.json({ code: 'CLASS_NOT_FOUND' }, 404);
   });
@@ -36,7 +36,7 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
       .innerJoin(s.learner, eq(s.learner.authUserId, s.user.id))
       .innerJoin(s.enrollment, and(eq(s.enrollment.learnerId, s.learner.id), eq(s.enrollment.organizationId, s.learner.organizationId)))
       .innerJoin(s.classroom, and(eq(s.classroom.id, s.enrollment.classroomId), eq(s.classroom.organizationId, s.learner.organizationId)))
-      .where(and(eq(s.user.username, body.username), eq(s.user.principalKind, 'learner'), eq(s.classroom.code, body.classCode)));
+      .where(and(eq(s.user.username, body.username), eq(s.user.principalKind, 'learner'), eq(s.classroom.code, body.classCode), isNull(s.classroom.archivedAt)));
     const identity = JSON.stringify([body.classCode, body.username, student?.learner.credentialVersion ?? 0]);
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'student-account-daily', identity, student?.learner.loginMethod === 'picture' ? 5 : 30, 86400)) return c.json({ code: 'LIMIT' }, 429);
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'student-account-short', identity, 5, 900)) return c.json({ code: 'LIMIT' }, 429);
@@ -55,6 +55,8 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
       token = data.token;
       if (data.user.id !== student.learner.authUserId) throw new Error('Identity mismatch');
       await db.transaction(async tx => {
+        const [room] = await tx.select().from(s.classroom).where(eq(s.classroom.id, student.classroomId)).for('share');
+        if (!room || room.archivedAt) throw new Error('Class unavailable');
         const [current] = await tx.select().from(s.learner).where(eq(s.learner.id, student.learner.id)).for('update');
         if (!current?.active || current.credentialVersion !== student.learner.credentialVersion) throw new Error('Credential changed');
         const [session] = await tx.select().from(s.session).where(and(eq(s.session.token, data.token), eq(s.session.userId, current.authUserId)));

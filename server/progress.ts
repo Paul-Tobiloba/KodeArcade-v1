@@ -39,6 +39,9 @@ export function createProgressRoutes(auth: Auth, db: Database, config: Pick<Serv
     return db.transaction(async tx => {
       // Serializes first insert and revision checks, even before the row exists.
       await tx.execute(sql`select pg_advisory_xact_lock(hashtext(${JSON.stringify(['progress', context.learnerId, context.classroomId, course.data])}))`);
+      // Class first, then learner: matches management/login lock ordering.
+      const [room] = await tx.select().from(s.classroom).where(eq(s.classroom.id, context.classroomId)).for('share');
+      if (!room || room.archivedAt) return c.json({ code: 'UNAUTHORIZED' }, 401);
       await tx.select().from(s.learner).where(eq(s.learner.id, context.learnerId)).for('share');
       const live = await studentContext(auth, tx, c.req.raw.headers, actor);
       if (!live || live.learnerId !== context.learnerId || live.classroomId !== context.classroomId) return c.json({ code: 'UNAUTHORIZED' }, 401);

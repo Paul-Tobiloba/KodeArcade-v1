@@ -43,6 +43,15 @@ it('requires an enrolled learner session and an assigned course', async () => {
   expect((await request(pupil, undefined, 'grade-6')).status).toBe(403);
   expect(await (await request()).json()).toMatchObject({ ...scope, revision: 0, document: null, updatedAt: null });
 });
+it('checks archived class state even if a signed learner session still exists', async () => {
+  await db.update(s.classroom).set({ archivedAt: new Date() }).where(eq(s.classroom.id, 'class-a'));
+  try {
+    expect((await request()).status).toBe(401);
+    expect((await request(pupil, { ...scope, revision: 0, document: document() })).status).toBe(401);
+    expect((await app.request('/api/student/courses', { headers: { Cookie: pupil } })).status).toBe(401);
+  } finally { await db.update(s.classroom).set({ archivedAt: null }).where(eq(s.classroom.id, 'class-a')); }
+  expect((await request()).status).toBe(200);
+});
 it('issues course/student/version-bound recovery keys only to the authenticated assigned student', async () => {
   const own = (await (await request()).json()).recovery;
   const second = (await (await request()).json()).recovery;
