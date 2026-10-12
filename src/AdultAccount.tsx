@@ -8,7 +8,7 @@ export default function AdultAccount({ route, capabilities }: { route: string; c
   const parent = callbackParameter('', location.hash, 'role') === 'parent';
   const school = callbackParameter(location.search, location.hash, 'role') === 'school';
   const roleQuery = school ? '?role=school' : parent ? '?role=parent' : '?role=teacher';
-  const destination = school ? '/schools?setup=1' : '/dashboard';
+  const destination = school ? '/schools?setup=1' : parent ? '/family' : '/dashboard';
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
@@ -16,7 +16,7 @@ export default function AdultAccount({ route, capabilities }: { route: string; c
   const [token] = useState(() => reset ? callbackParameter(location.search, location.hash, 'token') : null);
   const [callbackError] = useState(() => callbackParameter(location.search, location.hash, 'error'));
   useEffect(() => {
-    if ((reset && token) || callbackError) history.replaceState(null, '', `${location.pathname}#/${route}${school ? '?role=school' : ''}`);
+    if ((reset && token) || callbackError) history.replaceState(null, '', `${location.pathname}#/${route}${school ? '?role=school' : parent ? '?role=parent' : ''}`);
   }, [reset, token, callbackError, route]);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setError(''); setBusy(true);

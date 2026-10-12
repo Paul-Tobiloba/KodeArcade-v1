@@ -63,7 +63,8 @@ export const enrollment = pgTable('enrollment', {
   foreignKey({ columns: [t.organizationId, t.learnerId], foreignColumns: [learner.organizationId, learner.id] }),
 ]);
 
-// A home context is separate from class enrollment; no name-based automatic linking.
+// Home learners use a private single-child context in a family organization, never
+// a school class. Guardian links do not grant cross-organization access.
 export const guardianLink = pgTable('guardian_link', {
   learnerId: text('learner_id').notNull().references(() => learner.id),
   guardianUserId: text('guardian_user_id').notNull().references(() => user.id),

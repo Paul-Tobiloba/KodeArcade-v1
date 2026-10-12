@@ -17,7 +17,7 @@ export function AdultGuide({ parent = false }: { parent?: boolean }) {
     <h2>{parent ? 'A little support. A big adventure.' : 'Make room for bright ideas.'}</h2>
     <p>{parent ? 'Explore coding together, one small discovery at a time.' : 'Explore coding activities made for curious minds in Grades 1–6.'}</p>
     <ul><li><Check size={19} />Try activities without signing in</li><li><ShieldCheck size={19} />Keep your adult account private</li><li><LockKeyhole size={19} />Children won’t need an email</li></ul>
-    <p className="account-guide-note">Teachers can manage classes and issue private login cards. Student cloud saving and teacher reports are connected. Family learner profiles are coming next. Public activity progress stays on this device.</p>
+    <p className="account-guide-note">Teachers manage classes and parents manage home profiles, each with private child login cards, cloud saves and progress reports. Public activity progress stays on this device.</p>
   </aside>;
 }
 export function LoginCardExample() {

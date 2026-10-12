@@ -17,7 +17,7 @@ The account rejected a custom auto-suspend interval. Its default is `0` (no auto
 
 Three applied migrations create 19 application tables: the original 15 plus learner session context, management-operation idempotency, audit events and learner progress. Learners have active state and versioned credentials.
 
-Composite foreign keys reject cross-organization enrollment and staff/class membership combinations. Grade/login-method constraints are enforced in PostgreSQL. Management routes additionally check verified adult identity, organization membership and class staff authority. Writes require recent password proof and an authenticator code when enabled. Guardian linking/family services remain pending. RLS is not implemented or claimed.
+Composite foreign keys reject cross-organization enrollment and staff/class membership combinations. Grade/login-method constraints are enforced in PostgreSQL. Management routes additionally check verified adult identity, organization membership and class staff authority. Writes require recent password proof and an authenticator code when enabled. Family services now support separately created home learners; linking existing school pupils remains pending. RLS is not implemented or claimed.
 
 Better Auth stores opaque database sessions; cookie caching is disabled. HTTPS uses Secure, HttpOnly, SameSite=Lax, host-only cookies. Identity kind is server-controlled, not a signup input. With valid email configuration, an explicit allowlist exposes adult registration, email verification, login, recovery and two-factor authentication. Learner principals cannot use those adult email flows. Without email configuration, only session read and sign-out are available and adult signup remains disabled.
 
@@ -73,7 +73,7 @@ npm test
 npm run build
 ```
 
-100 backend tests passed, including migration/schema/auth/email/authorization/budget checks, real Better Auth credential verification, username collision allocation, reset/session invalidation, atomic CSV/bulk-card operations, assignment concurrency, progress isolation/revisions, encrypted-recovery scope, quiz validation and teacher report scope. Isolated tests use synthetic PGlite records and mocked mail. The owner separately verified live signup/email verification/sign-in.
+117 backend tests passed, including migration/schema/auth/email/authorization/budget checks, real Better Auth credential verification, username collision allocation, reset/session invalidation, atomic CSV/bulk-card operations, assignment concurrency, progress isolation/revisions, encrypted-recovery scope, quiz validation, teacher report scope and family ownership/home-learning isolation. Isolated tests use synthetic PGlite records and mocked mail. The owner separately verified live signup/email verification/sign-in.
 
 1,019 frontend tests and the frontend production build passed; the existing large Blockly chunk warning remains. Server TypeScript checking passed. This is not production security certification.
 

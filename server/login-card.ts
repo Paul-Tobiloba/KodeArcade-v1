@@ -6,7 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { pictures } from '../shared/pictures.js';
 const brandMark = readFileSync(new URL('../public/brand/mark-email.png', import.meta.url));
 
-export type Card = { name: string; username: string; className: string; classCode: string; grade: number; method: 'picture' | 'text'; credential: string | readonly string[]; origin: string };
+export type Card = { name: string; username: string; className: string; classCode: string; grade: number; method: 'picture' | 'text'; credential: string | readonly string[]; origin: string; context?: 'home' };
 
 // Returned directly to an authorized manager. Never persisted, cached or publicly hosted.
 export function loginCard(card: Card): Promise<Buffer> {
@@ -31,8 +31,8 @@ export function loginCards(cards: readonly Card[]): Promise<Buffer> {
       doc.font('Helvetica').fontSize(11).fillColor('#575472').text(label, 64, y);
       doc.font('Helvetica-Bold').fontSize(16).fillColor('#181053').text(value, 64, y + 18, { width: 465, height: 40, ellipsis: true });
     };
-    row('Website', `${card.origin}/#/student-login`, 250);
-    row('Classroom code', card.classCode, 316);
+    row('Website', `${card.origin}/#/${card.context === 'home' ? 'home-login' : 'student-login'}`, 250);
+    row(card.context === 'home' ? 'Home code' : 'Classroom code', card.classCode, 316);
     row('Username', card.username, 378);
     doc.font('Helvetica').fontSize(11).fillColor('#575472').text(card.method === 'picture' ? 'Tap these four pictures in order (repeats are allowed)' : 'Text password (three words, with spaces)', 64, 441);
     if (typeof card.credential === 'string') {
@@ -48,8 +48,8 @@ export function loginCards(cards: readonly Card[]): Promise<Buffer> {
       });
     }
     doc.font('Helvetica-Bold').fontSize(18).fillColor('#181053').text('How to sign in', 64, 565);
-    doc.font('Helvetica').fontSize(13).text('1. Open the website above.\n2. Enter your classroom code and username.\n3. Choose your password method, then enter your password.\n4. Open an assigned course and start learning.', 64, 600, { width: 465, lineGap: 9 });
-    doc.fontSize(11).fillColor('#575472').text('Keep this card private. Do not share your password.\nOn a shared computer, always sign out when you finish.\nLost your card? Ask your teacher to reset it and print a new one.', 64, 730, { width: 465, lineGap: 5 });
+    doc.font('Helvetica').fontSize(13).text(`1. Open the website above.\n2. Enter your ${card.context === 'home' ? 'home' : 'classroom'} code and username.\n3. Choose your password method, then enter your password.\n4. Open a course and start learning.`, 64, 600, { width: 465, lineGap: 9 });
+    doc.fontSize(11).fillColor('#575472').text(`Keep this card private. Do not share your password.\nOn a shared computer, always sign out when you finish.\nLost your card? Ask your ${card.context === 'home' ? 'parent' : 'teacher'} to reset it and print a new one.`, 64, 730, { width: 465, lineGap: 5 });
     });
     doc.end();
   });

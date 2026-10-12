@@ -9,6 +9,7 @@ import { createClassroomRoutes } from './classrooms.js';
 import { createStudentRoutes } from './student.js';
 import { createProgressRoutes } from './progress.js';
 import { createSchoolRoutes } from './schools.js';
+import { createFamilyRoutes } from './family.js';
 
 export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig, 'APP_ORIGIN'> & Partial<Pick<ServerConfig, 'BETTER_AUTH_SECRET'>>, accounts?: { auth: Auth; db: Database }) {
   const app = new Hono();
@@ -25,7 +26,7 @@ export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig
   });
   app.get('/api/health', c => c.json({ status: 'ok', phase: 'foundation' }));
   const classrooms = Boolean(accounts && config.BETTER_AUTH_SECRET);
-  app.get('/api/capabilities', c => c.json({ adultAccounts: Boolean(accounts), classroomLogin: classrooms, classManagement: classrooms, learnerManagement: classrooms, pdfCards: classrooms, cloudProgress: classrooms }));
+  app.get('/api/capabilities', c => c.json({ adultAccounts: Boolean(accounts), classroomLogin: classrooms, classManagement: classrooms, learnerManagement: classrooms, pdfCards: classrooms, cloudProgress: classrooms, homeLearning: classrooms }));
   // Deliberate allowlist. Do not mount all Better Auth routes before adult/learner guards,
   // mail delivery and persistent classroom throttling are integrated and tested.
   app.get('/api/auth/get-session', async c => {
@@ -53,6 +54,7 @@ export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig
       const classroomConfig = { APP_ORIGIN: config.APP_ORIGIN, BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET };
       app.route('/api/manage', createClassroomRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/schools', createSchoolRoutes(accounts.auth, accounts.db, classroomConfig));
+      app.route('/api/family', createFamilyRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/student', createStudentRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/student/progress', createProgressRoutes(accounts.auth, accounts.db, classroomConfig));
     }

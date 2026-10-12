@@ -16,14 +16,14 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
   const denied = () => Response.json({ code: 'INVALID_STUDENT_LOGIN' }, { status: 401 });
   app.post('/classroom', async c => {
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'class-lookup-global', 'all', 60, 900)) return c.json({ code: 'LIMIT' }, 429);
-    const input = z.object({ classCode: z.string().trim().toUpperCase().regex(/^[A-Z2-9]{8}$/) }).safeParse(await c.req.json().catch(() => null));
+    const input = z.object({ classCode: z.string().trim().toUpperCase().regex(/^[A-Z2-9]{8}$/), scope: z.enum(['home', 'classroom']).default('classroom') }).strict().safeParse(await c.req.json().catch(() => null));
     if (!input.success) return c.json({ code: 'CLASS_NOT_FOUND' }, 404);
-    const [room] = await db.select({ id: s.classroom.id }).from(s.classroom).where(and(eq(s.classroom.code, input.data.classCode), isNull(s.classroom.archivedAt)));
+    const [room] = await db.select({ id: s.classroom.id }).from(s.classroom).innerJoin(s.organization, eq(s.organization.id, s.classroom.organizationId)).where(and(eq(s.classroom.code, input.data.classCode), isNull(s.classroom.archivedAt), input.data.scope === 'home' ? eq(s.organization.kind, 'family') : sql`${s.organization.kind} <> 'family'`));
     // No names, avatars, password methods or roster are disclosed before individual login.
     return room ? c.json({ found: true }) : c.json({ code: 'CLASS_NOT_FOUND' }, 404);
   });
   app.post('/login', async c => {
-    const input = z.object({ classCode: z.string().trim().toUpperCase().regex(/^[A-Z2-9]{8}$/), username: z.string().trim().toLowerCase().regex(/^[a-z0-9]{1,60}$/), method: z.enum(['picture', 'text']), password: z.string().min(1).max(128).optional(), pictures: z.array(z.string().refine(id => pictureIds.includes(id))).length(4).optional() }).safeParse(await c.req.json().catch(() => null));
+    const input = z.object({ classCode: z.string().trim().toUpperCase().regex(/^[A-Z2-9]{8}$/), scope: z.enum(['home', 'classroom']).default('classroom'), username: z.string().trim().toLowerCase().regex(/^[a-z0-9]{1,60}$/), method: z.enum(['picture', 'text']), password: z.string().min(1).max(128).optional(), pictures: z.array(z.string().refine(id => pictureIds.includes(id))).length(4).optional() }).strict().safeParse(await c.req.json().catch(() => null));
     if (!input.success) return denied();
     if (await auth.api.getSession({ headers: c.req.raw.headers })) return c.json({ code: 'SIGN_OUT_FIRST' }, 409);
     const body = input.data;
@@ -36,7 +36,8 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
       .innerJoin(s.learner, eq(s.learner.authUserId, s.user.id))
       .innerJoin(s.enrollment, and(eq(s.enrollment.learnerId, s.learner.id), eq(s.enrollment.organizationId, s.learner.organizationId)))
       .innerJoin(s.classroom, and(eq(s.classroom.id, s.enrollment.classroomId), eq(s.classroom.organizationId, s.learner.organizationId)))
-      .where(and(eq(s.user.username, body.username), eq(s.user.principalKind, 'learner'), eq(s.classroom.code, body.classCode), isNull(s.classroom.archivedAt)));
+      .innerJoin(s.organization, eq(s.organization.id, s.classroom.organizationId))
+      .where(and(eq(s.user.username, body.username), eq(s.user.principalKind, 'learner'), eq(s.classroom.code, body.classCode), isNull(s.classroom.archivedAt), body.scope === 'home' ? eq(s.organization.kind, 'family') : sql`${s.organization.kind} <> 'family'`));
     const identity = JSON.stringify([body.classCode, body.username, student?.learner.credentialVersion ?? 0]);
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'student-account-daily', identity, student?.learner.loginMethod === 'picture' ? 5 : 30, 86400)) return c.json({ code: 'LIMIT' }, 429);
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'student-account-short', identity, 5, 900)) return c.json({ code: 'LIMIT' }, 429);

@@ -1,0 +1,137 @@
+import { randomUUID } from 'node:crypto';
+import { afterAll, beforeAll, beforeEach, expect, it, vi } from 'vitest';
+import { PGlite } from '@electric-sql/pglite';
+import { drizzle } from 'drizzle-orm/pglite';
+import { migrate } from 'drizzle-orm/pglite/migrator';
+import { eq } from 'drizzle-orm';
+import * as s from './db/schema.js';
+import type { Database } from './db/client.js';
+import type { Card } from './login-card.js';
+import type { Family, HomeChild } from '../shared/family.js';
+import { createAuth } from './auth.js';
+import { createApp } from './app.js';
+import { loadConfig } from './config.js';
+import type { ProgressDocument } from '../shared/progress.js';
+import { emptyQuiz, moduleQuiz } from '../shared/quizzes.js';
+
+const fixture = vi.hoisted(() => ({ cards: [] as Card[], fail: false }));
+vi.mock('./login-card.js', () => ({ loginCard: async (card: Card) => { if (fixture.fail) throw new Error('Synthetic PDF failure'); fixture.cards.push(card); return Buffer.from('%PDF-1.3 synthetic home card'); }, loginCards: async () => Buffer.from('%PDF-1.3') }));
+const client = new PGlite(), db = drizzle(client, { schema: s });
+const config = loadConfig({ NODE_ENV: 'test', APP_ORIGIN: 'https://learn.example.com', BETTER_AUTH_SECRET: 'synthetic-family-only-secret-392749aacf981', DATABASE_URL: 'postgresql://test:test@localhost/test' });
+const send = vi.fn().mockResolvedValue(undefined), auth = createAuth(db, config, { send }, { adultAccounts: true }), app = createApp(auth, config, { auth, db: db as unknown as Database });
+const password = 'Synthetic-parent-only-passphrase-93';
+const cookies = (r: Response) => r.headers.getSetCookie().map(value => value.split(';')[0]).join('; ');
+const request = (path: string, body?: unknown, cookie = '') => app.request(`${config.APP_ORIGIN}/api/${path}`, { method: body === undefined ? 'GET' : 'POST', headers: { Origin: config.APP_ORIGIN, Cookie: cookie, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+let parent: string, other: string, locked: string, teacher: string, familyId: string, otherId: string, child: HomeChild, card: Card, childCookie: string;
+async function adult(email: string) {
+  send.mockClear(); expect((await request('auth/sign-up/email', { name: 'Synthetic Adult', email, password })).status).toBe(200);
+  const link = send.mock.calls[0][0].text.split('\n').find((line: string) => line.startsWith('https://'));
+  expect((await app.request(link)).status).toBe(302);
+  const cookie = cookies(await request('auth/sign-in/email', { email, password, rememberMe: false }));
+  return { cookie, unlocked: `${cookie}; ${cookies(await request('manage/management/unlock', { password }, cookie))}` };
+}
+const report = async (cookie = parent, id = familyId): Promise<Family> => (await request(`family/${id}`, undefined, cookie)).json();
+const create = (displayName = 'Alex Example', loginMethod = 'text', cookie = parent, id = familyId, key = randomUUID()) => request(`family/${id}/children`, { displayName, grade: 2, loginMethod, authority: true, operationKey: key }, cookie);
+const login = (value = card, scope = 'home', cookie = '') => request('student/login', { classCode: value.classCode, username: value.username, scope, method: value.method, ...(value.method === 'text' ? { password: value.credential } : { pictures: value.credential }) }, cookie);
+beforeAll(async () => {
+  await migrate(db, { migrationsFolder: './drizzle' });
+  const a = await adult('parent@example.test'), b = await adult('other@example.test'), t = await adult('teacher@example.test');
+  locked = a.cookie; parent = a.unlocked; other = b.unlocked; teacher = t.unlocked;
+  familyId = (await (await request('family/setup', { name: 'Synthetic Family', authority: true }, parent)).json()).id;
+  otherId = (await (await request('family/setup', { name: 'Other Family', authority: true }, other)).json()).id;
+  expect((await request('account/onboarding', { name: 'Personal Teaching', role: 'teacher' }, teacher)).status).toBe(201);
+}, 60000);
+beforeEach(async () => { await db.delete(s.rateLimit); await db.delete(s.loginThrottle); });
+afterAll(() => client.close());
+it('requires verified adult ownership and recent password proof; setup is idempotent and separate from teaching', async () => {
+  expect((await request(`family/${familyId}`)).status).toBe(401);
+  expect((await request(`family/${familyId}`, undefined, other)).status).toBe(404);
+  expect((await create('Unauthorised', 'text', locked)).status).toBe(403);
+  expect((await create('Unauthorised', 'text', other)).status).toBe(404);
+  expect((await request('family/setup', { name: 'Again', authority: true }, parent)).status).toBe(200);
+  expect((await request('family/setup', { name: 'No consent', authority: false }, parent)).status).toBe(400);
+  expect((await (await request('account', undefined, parent)).json()).workspaces).toHaveLength(1);
+  const setup = await request('family/setup', { name: 'Teacher’s Family', authority: true }, teacher);
+  expect(setup.status).toBe(200);
+  const workspaces = (await (await request('account', undefined, teacher)).json()).workspaces;
+  expect(workspaces.map((w: { kind: string }) => w.kind).sort()).toEqual(['family', 'teacher_workspace']);
+});
+it('creates one private child, enrollment, guardian and grade course atomically with one-time PDF', async () => {
+  const key = randomUUID(), response = await create('Alex Example', 'text', parent, familyId, key);
+  expect(response.status).toBe(200); expect(response.headers.get('content-type')).toBe('application/pdf'); expect(response.headers.get('cache-control')).toContain('no-store');
+  card = fixture.cards.at(-1)!; expect(card).toMatchObject({ username: 'alex', context: 'home' }); expect(card.credential).toMatch(/^[a-z]+ [a-z]+ [a-z]+$/);
+  child = (await report()).children[0]; expect(child.courses).toMatchObject([{ course: 'grade-2', completed: 0 }]);
+  expect((await create('Alex Example', 'text', parent, familyId, key)).status).toBe(409);
+  expect((await report()).children).toHaveLength(1);
+  expect((await (await request('account', undefined, parent)).json()).classes).toEqual([]);
+  const [record] = await db.select().from(s.learner).where(eq(s.learner.id, child.id));
+  const [credential] = await db.select().from(s.account).where(eq(s.account.userId, record.authUserId));
+  expect(credential.password).not.toContain(card.credential);
+  expect(JSON.stringify(await db.select().from(s.auditEvent))).not.toContain(card.username);
+  expect((await request(`manage/classes/${child.contextId}`, undefined, parent)).status).toBe(404);
+  expect((await request(`manage/classes/${child.contextId}`, undefined, teacher)).status).toBe(404);
+});
+it('rolls back creation if PDF rendering fails and allocates sibling collision-safe usernames', async () => {
+  fixture.fail = true; expect((await create('PDF failure')).status).toBe(500); fixture.fail = false;
+  expect((await report()).children).toHaveLength(1);
+  expect((await create('Alex Example', 'picture')).status).toBe(200); expect(fixture.cards.at(-1)!.username).toBe('alexexample');
+  expect(fixture.cards.at(-1)!.credential).toHaveLength(4);
+  expect((await create('Alex Example')).status).toBe(200); expect(fixture.cards.at(-1)!.username).toMatch(/^alexexample\d+$/);
+});
+it('uses separate home sign-in and child identity; no public roster or parent impersonation', async () => {
+  expect(await (await request('student/classroom', { classCode: card.classCode, scope: 'home' })).json()).toEqual({ found: true });
+  expect((await request('student/classroom', { classCode: card.classCode })).status).toBe(404);
+  expect((await login(card, 'classroom')).status).toBe(401); expect((await login(card, 'home', parent)).status).toBe(409);
+  const signed = await login(); expect(signed.status).toBe(200); childCookie = cookies(signed);
+  expect((await request('account', undefined, childCookie)).status).toBe(403);
+  expect((await request(`family/${familyId}`, undefined, childCookie)).status).toBe(403);
+  expect((await (await request('student/courses', undefined, childCookie)).json())).toMatchObject({ displayName: 'Alex Example', learningContext: 'home', assignments: [{ courseKey: 'grade-2' }] });
+});
+it('saves code, achievements and position across sessions and returns real parent reports without drafts', async () => {
+  const answers = moduleQuiz('grade-2-sequences').map(q => q.correct);
+  const document: ProgressDocument = { version: 1, currentId: 'grade-2-sequences-2', view: 'challenge', progress: { 'grade-2-sequences-1': { blocks: [], attempts: 1, hints: 0, complete: true, stars: 5, textCode: 'private child draft' }, 'grade-2-sequences-2': { blocks: [], attempts: 3, hints: 2, complete: false } }, drawings: {}, quizzes: { 'grade-2-sequences': { ...emptyQuiz(), answers, submittedAnswers: answers, bestAnswers: answers, attempts: 1 } }, preferences: { reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false }, basicsComplete: [], topicRecords: {} };
+  const body = { learnerId: child.id, classroomId: child.contextId, revision: 0, document };
+  const response = await request('student/progress/grade-2', body, childCookie); expect(response.status).toBe(200);
+  await request('auth/sign-out', {}, childCookie); childCookie = cookies(await login());
+  expect(await (await request('student/progress/grade-2', undefined, childCookie)).json()).toMatchObject({ revision: 1, document });
+  const result = await report(); const course = result.children.find(c => c.id === child.id)!.courses[0];
+  expect(course).toMatchObject({ completed: 1, stars: 5, checkIns: 1, currentId: 'grade-2-sequences-2', quizCompleted: 1 });
+  expect(JSON.stringify(result)).not.toContain('private child draft'); expect(JSON.stringify(result)).not.toContain('recovery'); expect(JSON.stringify(result)).not.toContain('workspace');
+  const siblingCard = fixture.cards[1]; const siblingCookie = cookies(await login(siblingCard));
+  expect(await (await request('student/progress/grade-2', undefined, siblingCookie)).json()).toMatchObject({ document: null });
+  expect((await request('student/progress/grade-2', body, siblingCookie)).status).toBe(401);
+});
+it('retains progress when removing/re-adding courses and rejects stale edits', async () => {
+  const path = `family/${familyId}/children/${child.id}/courses`;
+  expect((await request(path, { courses: [], previous: ['grade-2'], operationKey: randomUUID() }, other)).status).toBe(404);
+  expect((await request(path, { courses: [], previous: ['grade-2'], operationKey: randomUUID() }, parent)).status).toBe(200);
+  expect((await request('student/progress/grade-2', undefined, childCookie)).status).toBe(403);
+  expect((await request(path, { courses: ['grade-2'], previous: ['grade-2'], operationKey: randomUUID() }, parent)).status).toBe(409);
+  expect((await request(path, { courses: ['grade-2'], previous: [], operationKey: randomUUID() }, parent)).status).toBe(200);
+  expect(await (await request('student/progress/grade-2', undefined, childCookie)).json()).toMatchObject({ revision: 1 });
+});
+it('renames, pauses/resumes and resets without losing progress; old sessions and cards stop working', async () => {
+  const path = `family/${familyId}/children/${child.id}`;
+  const previous = { displayName: child.displayName, grade: child.grade, active: true }, next = { ...previous, displayName: 'Alex Home', active: false };
+  expect((await request(`${path}/profile`, { profile: next, previous, operationKey: randomUUID() }, parent)).status).toBe(200);
+  expect((await request('student/courses', undefined, childCookie)).status).toBe(401); expect((await login()).status).toBe(401);
+  expect((await request(`${path}/profile`, { profile: next, previous, operationKey: randomUUID() }, parent)).status).toBe(409);
+  expect((await request(`${path}/profile`, { profile: { ...next, active: true }, previous: next, operationKey: randomUUID() }, parent)).status).toBe(200);
+  expect((await request(`${path}/reset`, { loginMethod: 'picture', operationKey: randomUUID() }, other)).status).toBe(404);
+  expect((await request(`${path}/reset`, { loginMethod: 'picture', operationKey: randomUUID() }, parent)).status).toBe(200);
+  expect((await login()).status).toBe(401);
+  const newCard = fixture.cards.at(-1)!; expect(newCard.name).toBe('Alex Home'); expect(newCard.username).toBe(card.username);
+  const signed = await login(newCard); expect(signed.status).toBe(200);
+  expect(await (await request('student/progress/grade-2', undefined, cookies(signed))).json()).toMatchObject({ revision: 1 });
+});
+it('never grants school-pupil access even with a forged guardian link', async () => {
+  const [parentUser] = await db.select().from(s.user).where(eq(s.user.email, 'parent@example.test'));
+  await db.insert(s.organization).values({ id: 'school-boundary', kind: 'school', name: 'Synthetic School' });
+  await db.insert(s.user).values({ id: 'school-pupil-user', email: 'pupil@learners.invalid', name: 'School Pupil', principalKind: 'learner', username: 'schoolpupil' });
+  await db.insert(s.learner).values({ id: 'school-pupil', organizationId: 'school-boundary', authUserId: 'school-pupil-user', displayName: 'School Pupil', grade: 2, loginMethod: 'text' });
+  await db.insert(s.guardianLink).values({ learnerId: 'school-pupil', guardianUserId: parentUser.id, approvedAt: new Date() });
+  expect((await report()).children.some(c => c.id === 'school-pupil')).toBe(false);
+  expect((await request(`family/${familyId}/children/school-pupil/reset`, { loginMethod: 'text', operationKey: randomUUID() }, parent)).status).toBe(404);
+  expect((await request('family/school-boundary', undefined, parent)).status).toBe(404);
+  expect((await report(other, otherId)).children).toEqual([]);
+});
