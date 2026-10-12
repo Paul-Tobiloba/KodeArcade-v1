@@ -6,7 +6,7 @@ The learning guide includes **Ask Byte** on movement and drawing activities. Chi
 
 The **adult-only private lab** is at `/#/byte-lab`, linked from adult Account & security. It is disabled by default and rejected for learner sessions on the server, including direct API requests. Enabling the pilot never enables student AI. There is deliberately no learner free-text input.
 
-## Private development setup (not yet performed on the VPS)
+## Private development setup
 
 Do not change n8n, its compose project, Traefik routing or Ollama's loopback binding. No ports need to be opened in the firewall. The standalone gateway uses Node 22+ and has no npm dependencies. Review `scripts/byte-gateway.mjs`, copy that file to a separate VPS directory and run it with a dedicated unprivileged OS account. It binds only `127.0.0.1:11435` and calls Ollama only at `127.0.0.1:11434`.
 
@@ -27,6 +27,32 @@ Do not change n8n, its compose project, Traefik routing or Ollama's loopback bin
 6. Return `BYTE_PILOT_ENABLED=false`, restart the API and stop the tunnel/gateway when testing is finished. Existing Ollama Docker CPU/memory caps remain necessary. `ollama stop` unloads a model; it need not be deleted.
 
 Production startup rejects an enabled pilot. Vercel cannot reach this computer's SSH tunnel or the VPS loopback address. A future production deployment needs a separately reviewed private connection or authenticated TLS gateway, model evaluations and child-safety/privacy controls—not a public Ollama port.
+
+### VPS without Node: separate Docker pilot
+
+Use `deploy/byte-gateway.compose.yml` as a **separate** Compose project, never inside the n8n project. Upload it as `compose.yml` alongside `scripts/byte-gateway.mjs` and `scripts/prepare-byte-pilot.sh` to a private directory owned by a dedicated, non-admin SSH user. Run the preparation script as that user. It creates a random token in a mode-600 `gateway.env`, records the user's UID/GID in `.env`, validates Compose configuration without starting a container, and never prints credentials. Repeated preparation preserves both files and the token. Do not commit or share either generated file.
+
+The administrator can then start only this project:
+
+```sh
+docker compose --env-file /home/bytepilot/kodearcade-byte-pilot/.env --project-directory /home/bytepilot/kodearcade-byte-pilot -f /home/bytepilot/kodearcade-byte-pilot/compose.yml up -d --wait
+```
+
+This pulls `node:22-alpine` if needed; it does not install host Node, restart n8n, alter Ollama or edit Traefik/firewall settings. The image tag is not immutable: record the resolved image digest after startup, and deliberately review future updates. The gateway runs as the dedicated user's UID/GID, with a read-only filesystem and bind mounts, all capabilities dropped, no-new-privileges, 128 MiB RAM/no swap, 0.25 CPU and 64 PIDs. The token is read from a protected mounted file rather than Docker's configured environment. Logs are rotated and contain no prompt bodies. Restart is intentionally disabled for the development pilot, so a VPS reboot requires an administrator to start it again.
+
+Linux host networking is necessary here to reach Ollama's existing loopback binding. **It does not provide network isolation from host services.** The gateway code fixes its sole provider URL and binds its listener to `127.0.0.1:11435`; it has no Docker socket mount, host filesystem mount beyond its two read-only files, or public port mapping. Do not change the listener to `0.0.0.0`. Verify `ss -ltn` after startup and expect an unauthenticated HTTP request to return 401. The health check does the same without invoking the model. Existing Ollama CPU/memory caps remain separate and essential; gateway limits do not guarantee n8n performance.
+
+Privately transfer `gateway.env` back over the verified SSH connection, then copy its token into the server-only local configuration. Never paste it in chat or use it as a command-line argument. Use a dedicated SSH key outside the repository; verify the host fingerprint through the provider's web console first. A key can have `restrict,port-forwarding,permitopen="127.0.0.1:11435"` authorized-key options; it needs neither sudo nor Docker-group membership. Retain strict host-key checking and bind the local tunnel explicitly to loopback, with `ExitOnForwardFailure=yes`. This key still permits commands as its non-admin account, so protect it and revoke it after the pilot.
+
+To stop only the gateway, the administrator can run:
+
+```sh
+docker compose --env-file /home/bytepilot/kodearcade-byte-pilot/.env --project-directory /home/bytepilot/kodearcade-byte-pilot -f /home/bytepilot/kodearcade-byte-pilot/compose.yml stop gateway
+```
+
+Stop the development SSH tunnel and disable the local pilot separately. Do not run `docker compose down` from the n8n directory or delete Ollama models/volumes. Container support is preparation, not evidence of a live connection or successful model evaluation.
+
+References: [Docker Compose service controls](https://docs.docker.com/reference/compose-file/services/), [Linux host networking](https://docs.docker.com/engine/network/drivers/host/), [Node environment-file loading](https://nodejs.org/api/cli.html#--env-filefile).
 
 ## Boundaries and limits
 
