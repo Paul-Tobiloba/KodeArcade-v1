@@ -25,7 +25,7 @@ function useStudentContext() {
     let hasContext = false;
     const check = () => {
       const request = ++latestCheck;
-      return accountRequest<Context>('student/courses', undefined, controller.signal).then(value => { if (!controller.signal.aborted && request === latestCheck) { hasContext = true; offlineOwner = value.offlineOwner; setContext(value); setError(''); } }).catch(failure => { if (!controller.signal.aborted && request === latestCheck) { if (hasContext && failure instanceof AccountError && (failure.status === 0 || failure.status >= 500)) return; hasContext = false; clearStudentStorage(); setContext(undefined); setError(accountErrorMessage(failure)); } });
+      return accountRequest<Context>('student/courses', undefined, controller.signal).then(value => { if (!controller.signal.aborted && request === latestCheck) { hasContext = true; offlineOwner = value.offlineOwner; setContext(value); setError(''); } }).catch(failure => { if (!controller.signal.aborted && request === latestCheck) { if (hasContext && failure instanceof AccountError && (failure.status === 0 || failure.status === 401 || failure.status >= 500)) return; hasContext = false; clearStudentStorage(); setContext(undefined); setError(accountErrorMessage(failure)); } });
     };
     void check(); const interval = setInterval(() => { void check(); }, 30_000);
     const visible = () => { if (!document.hidden) void check(); };

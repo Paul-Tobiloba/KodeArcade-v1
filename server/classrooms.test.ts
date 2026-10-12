@@ -68,6 +68,7 @@ it('generates a picture credential in a private PDF without storing plaintext', 
   const body = { displayName: 'Synthetic Pupil', grade: 2, loginMethod: 'picture', operationKey: key };
   const response = await request(`manage/classes/${room.id}/students`, body, teacher);
   expect(response.status).toBe(200); expect(response.headers.get('content-type')).toBe('application/pdf'); expect(response.headers.get('cache-control')).toContain('no-store');
+  expect(response.headers.get('content-disposition')).toBe('attachment; filename="synthetic-pupil-kodearcade-login-card.pdf"');
   expect(await response.text()).toContain('%PDF'); firstCard = cards.at(-1)!;
   expect(firstCard.credential).toHaveLength(4);
   const result = await (await request(`manage/classes/${room.id}`, undefined, teacher)).json();

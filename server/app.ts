@@ -11,6 +11,9 @@ import { createProgressRoutes } from './progress.js';
 import { createSchoolRoutes } from './schools.js';
 import { createFamilyRoutes } from './family.js';
 import { createByteRoutes, type BytePilotConfig } from './byte.js';
+import { eq } from 'drizzle-orm';
+import { session as sessionTable } from './db/schema.js';
+import { expiredSession, recordActivity, sessionView } from './session-policy.js';
 
 export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig, 'APP_ORIGIN'> & Partial<Pick<ServerConfig, 'BETTER_AUTH_SECRET'>>, accounts?: { auth: Auth; db: Database }, bytePilot?: BytePilotConfig) {
   const app = new Hono();
@@ -26,6 +29,27 @@ export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig
     await next();
   });
   app.get('/api/health', c => c.json({ status: 'ok', phase: 'foundation' }));
+  if (accounts) {
+    app.use('/api/*', async (c, next) => {
+      const actor = await accounts.auth.api.getSession({ headers: c.req.raw.headers });
+      if (actor?.session && expiredSession(actor)) {
+        await accounts.db.delete(sessionTable).where(eq(sessionTable.id, actor.session.id));
+        if (c.req.path === '/api/session') return c.json(null);
+        if (!['/api/auth/sign-in/email', '/api/auth/sign-out', '/api/student/login'].includes(c.req.path)) return c.json({ code: 'SESSION_EXPIRED' }, 401);
+      }
+      await next();
+    });
+    app.get('/api/session', async c => {
+      const actor = await accounts.auth.api.getSession({ headers: c.req.raw.headers });
+      return c.json(actor ? sessionView(actor) : null);
+    });
+    app.post('/api/session/activity', async c => {
+      const actor = await accounts.auth.api.getSession({ headers: c.req.raw.headers });
+      if (!actor || expiredSession(actor)) return c.json({ code: 'SESSION_EXPIRED' }, 401);
+      if (actor.user.principalKind === 'adult' && !await recordActivity(accounts.db, actor)) return c.json({ code: 'SESSION_EXPIRED' }, 401);
+      return c.json({ active: true });
+    });
+  }
   const classrooms = Boolean(accounts && config.BETTER_AUTH_SECRET);
   app.get('/api/capabilities', c => c.json({ adultAccounts: Boolean(accounts), classroomLogin: classrooms, classManagement: classrooms, learnerManagement: classrooms, pdfCards: classrooms, cloudProgress: classrooms, homeLearning: classrooms }));
   // Deliberate allowlist. Do not mount all Better Auth routes before adult/learner guards,

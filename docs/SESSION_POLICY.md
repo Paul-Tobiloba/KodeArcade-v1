@@ -1,0 +1,15 @@
+# Session protection and private card downloads
+
+Adults receive a warning at 55 idle minutes and lose account access at 60 idle minutes. All sessions also have a 24-hour absolute maximum from sign-in. Learner sessions have no idle timeout; they end at 24 hours. This is a product choice for the current pilot, not a claim that a full-day session is appropriate on every shared school device. Users should sign out when finished.
+
+The API enforces both deadlines. Better Auth session refresh and cookie caching are disabled. User interaction triggers a throttled, same-origin activity request for adults; background polling and learner interaction do not renew access. The activity update cannot resurrect an expired or deleted grant. Existing sessions with an earlier database expiry keep that earlier expiry; sign in again to obtain the new 24-hour grant. School-only mandatory 2FA and the separate 30-minute management unlock remain unchanged.
+
+`GET /api/session` exposes only the minimal user identity, non-secret session ID and deadline timestamps. It never returns the session token or email. `POST /api/session/activity` requires the existing session and exact-origin protection. Application API requests reject expired grants, and the next such request removes an idle-expired session from the database. No schema migration is required.
+
+The main navigation links an authenticated adult or learner to the appropriate dashboard. Login/signup entry pages redirect an already authenticated account rather than offering another login form. The browser checks the server on focus, route changes and a visible-tab interval; deadlines also run locally when offline.
+
+At expiry, a native modal protects the existing page without unmounting it. Sign into the same account in a new tab and return to resume the open form. A different account causes a reload so it cannot inherit the previous account's in-memory work. Open forms are retained **only in the current tab's memory**: closing, crashing or refreshing can still lose unsaved form data. This is not a replacement for explicit saving, nor a promise of durable form recovery. Existing encrypted learner activity recovery and cloud-save rules still apply. A temporary 401 during learner re-authentication does not clear that learner's mounted activity state; server authorization continues to block saves until valid access returns.
+
+Single classroom cards use names such as `tobi-jnr-kodearcade-login-card.pdf`; home cards use `alex-kodearcade-home-login-card.pdf`. Multi-student booklets use the class prefix. The server constructs an ASCII, bounded, path-safe Content-Disposition filename from the authorized display name, and the client carries it into the actual download. No credential is included in the filename. Cards remain private, no-store, one-time generated downloads.
+
+Verification covers synthetic Better Auth/PGlite integration, 55/60-minute browser clocks, 24-hour learner expiry, same-account form retention, session-aware navigation, safe filenames, and desktop/phone/tablet accessibility. No production account, live mail, real child identity or VPS configuration is required by these tests.

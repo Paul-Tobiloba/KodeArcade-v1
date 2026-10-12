@@ -36,6 +36,25 @@ beforeEach(async () => { await db.delete(schema.rateLimit); });
 afterAll(async () => { await client.close(); });
 
 describe('adult account HTTP integration', () => {
+  it('enforces adult idle expiry on the server while polling does not renew it', async () => {
+    const cookie = await verifiedAdult('idle-policy@example.com');
+    const user = (await db.select().from(schema.user).where(eq(schema.user.email, 'idle-policy@example.com')))[0];
+    const grant = (await db.select().from(schema.session).where(eq(schema.session.userId, user.id)))[0];
+    expect(grant.expiresAt.getTime() - grant.createdAt.getTime()).toBeGreaterThanOrEqual(23.9 * 3600_000);
+    const ago55 = new Date(Date.now() - 55 * 60_000);
+    await db.update(schema.session).set({ updatedAt: ago55 }).where(eq(schema.session.id, grant.id));
+    const status = await (await request('session', undefined, cookie)).json();
+    expect(status.user.principalKind).toBe('adult'); expect(status.lastActiveAt).toBe(ago55.getTime());
+    expect(status).not.toHaveProperty('token'); expect(status).not.toHaveProperty('user.email');
+    expect((await request('account', undefined, cookie)).status).toBe(200);
+    expect((await db.select().from(schema.session).where(eq(schema.session.id, grant.id)))[0].updatedAt.getTime()).toBe(ago55.getTime());
+    expect((await request('session/activity', {}, cookie)).status).toBe(200);
+    expect((await db.select().from(schema.session).where(eq(schema.session.id, grant.id)))[0].updatedAt.getTime()).toBeGreaterThan(ago55.getTime());
+    await db.update(schema.session).set({ updatedAt: new Date(Date.now() - 60 * 60_000) }).where(eq(schema.session.id, grant.id));
+    expect((await request('account', undefined, cookie)).status).toBe(401);
+    expect(await db.select().from(schema.session).where(eq(schema.session.id, grant.id))).toHaveLength(0);
+    expect((await request('session/activity', {}, cookie)).status).toBe(401);
+  });
   it('advertises only implemented capabilities and protects private data', async () => {
     expect(await (await request('capabilities')).json()).toMatchObject({ adultAccounts: true, classroomLogin: true, pdfCards: true, cloudProgress: true });
     expect((await request('account')).status).toBe(401);

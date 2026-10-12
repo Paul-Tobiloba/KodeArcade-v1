@@ -61,7 +61,8 @@ export function createAuth(db: Parameters<typeof drizzleAdapter>[0] & Executor, 
         if (mailRequest && access.emailAllowed && !access.emailAllowed(email)) throw new APIError('FORBIDDEN', { message: 'Development email is restricted to the configured test inbox.' });
       }
     }) },
-    session: { expiresIn: 60 * 60 * 8, updateAge: 60 * 15, cookieCache: { enabled: false } },
+    // Polling must not count as human activity or extend the 24-hour absolute limit.
+    session: { expiresIn: 60 * 60 * 24, disableSessionRefresh: true, cookieCache: { enabled: false } },
     rateLimit: { enabled: true, storage: 'database', window: 60, max: 30 },
     advanced: {
       useSecureCookies: config.APP_ORIGIN.startsWith('https:'),

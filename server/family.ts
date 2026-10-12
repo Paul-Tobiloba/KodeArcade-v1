@@ -1,6 +1,7 @@
 import { createHash, randomInt, randomUUID } from 'node:crypto';
 import { and, count, eq, inArray, sql } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
+import { cardFilename } from '../shared/card-filename.js';
 import { HTTPException } from 'hono/http-exception';
 import { getCookie } from 'hono/cookie';
 import { z } from 'zod';
@@ -64,8 +65,8 @@ export function createFamilyRoutes(auth: Auth, db: Database, config: Pick<Server
     await tx.insert(s.managementOperation).values({ actorId, key: body.operationKey, digest, resourceId });
   }
   const audit = (tx: Transaction, actorId: string, organizationId: string, action: string, resourceId: string) => tx.insert(s.auditEvent).values({ id: randomUUID(), actorId, organizationId, action, resourceId });
-  function pdf(c: Context, buffer: Buffer) {
-    c.header('Content-Type', 'application/pdf'); c.header('Content-Disposition', 'attachment; filename="kodearcade-private-home-card.pdf"');
+  function pdf(c: Context, buffer: Buffer, name: string) {
+    c.header('Content-Type', 'application/pdf'); c.header('Content-Disposition', `attachment; filename="${cardFilename(name, 'home')}"`);
     c.header('Cache-Control', 'private, no-store, max-age=0'); c.header('Pragma', 'no-cache'); return c.body(new Uint8Array(buffer));
   }
   app.post('/setup', async c => {
@@ -126,7 +127,7 @@ export function createFamilyRoutes(auth: Auth, db: Database, config: Pick<Server
       await tx.insert(s.courseAssignment).values({ id: randomUUID(), classroomId: contextId, courseKey: `grade-${body.grade}`, curriculumVersion });
       await audit(tx, actor.user.id, familyId, 'home-child.created', id); return card;
     });
-    return pdf(c, buffer);
+    return pdf(c, buffer, body.displayName);
   });
   app.post('/:familyId/children/:childId/reset', async c => {
     const actor = await adult(c, true), familyId = c.req.param('familyId'), childId = c.req.param('childId');
@@ -141,8 +142,8 @@ export function createFamilyRoutes(auth: Auth, db: Database, config: Pick<Server
       await tx.update(s.account).set({ password: hash }).where(and(eq(s.account.userId, learner.authUserId), eq(s.account.providerId, 'credential')));
       await tx.update(s.learner).set({ loginMethod: body.loginMethod, credentialVersion: sql`${s.learner.credentialVersion} + 1` }).where(eq(s.learner.id, childId));
       await tx.delete(s.session).where(eq(s.session.userId, learner.authUserId));
-      await audit(tx, actor.user.id, familyId, 'home-child.credential-reset', childId); return card;
-    }); return pdf(c, buffer);
+      await audit(tx, actor.user.id, familyId, 'home-child.credential-reset', childId); return { card, name: child.displayName };
+    }); return pdf(c, buffer.card, buffer.name);
   });
   app.post('/:familyId/children/:childId/profile', async c => {
     const actor = await adult(c, true), familyId = c.req.param('familyId'), childId = c.req.param('childId');

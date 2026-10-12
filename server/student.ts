@@ -50,7 +50,7 @@ export function createStudentRoutes(auth: Auth, db: Database, config: Pick<Serve
     try {
       // The raw username endpoint remains unmounted. Better Auth verifies the hash and
       // owns the opaque session/cookie; application policy binds it to this class.
-      const response = await auth.api.signInUsername({ headers: c.req.raw.headers, body: { username: body.username, password: credentialPassword(config.BETTER_AUTH_SECRET, body.method, credential), rememberMe: false }, asResponse: true });
+      const response = await auth.api.signInUsername({ headers: c.req.raw.headers, body: { username: body.username, password: credentialPassword(config.BETTER_AUTH_SECRET, body.method, credential), rememberMe: true }, asResponse: true });
       if (!response.ok) return denied();
       const data = await response.json() as { token: string; user: { id: string } };
       token = data.token;

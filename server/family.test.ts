@@ -59,6 +59,7 @@ it('requires verified adult ownership and recent password proof; setup is idempo
 it('creates one private child, enrollment, guardian and grade course atomically with one-time PDF', async () => {
   const key = randomUUID(), response = await create('Alex Example', 'text', parent, familyId, key);
   expect(response.status).toBe(200); expect(response.headers.get('content-type')).toBe('application/pdf'); expect(response.headers.get('cache-control')).toContain('no-store');
+  expect(response.headers.get('content-disposition')).toBe('attachment; filename="alex-example-kodearcade-home-login-card.pdf"');
   card = fixture.cards.at(-1)!; expect(card).toMatchObject({ username: 'alex', context: 'home' }); expect(card.credential).toMatch(/^[a-z]+ [a-z]+ [a-z]+$/);
   child = (await report()).children[0]; expect(child.courses).toMatchObject([{ course: 'grade-2', completed: 0 }]);
   expect((await create('Alex Example', 'text', parent, familyId, key)).status).toBe(409);

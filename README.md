@@ -43,7 +43,9 @@ The primary audience is young learners aged 6–14 who are new to programming, p
 
 ### Ask Byte learning help
 
-Movement and drawing activities include authored topic explanations, task reminders and local structural code checks in **Lesson & instructions → Ask Byte**. Existing progressive hints keep their star rules. A separate adult-only AI evaluation lab is disabled by default; students cannot access the model. See [private Byte setup and limits](docs/ASK_BYTE.md) before connecting the optional loopback Ollama gateway. No model connection is required for student lesson help.
+Movement and drawing activities include a responsive **Ask Byte** chat widget with typed questions, topic starters, task reminders and local structural code checks. Child/public help is authored on-device, not live AI. Existing progressive hints keep their star rules. The disabled-by-default, allowlisted adult AI pilot is available in the lab and widget; students cannot access the model. See [private Byte setup and limits](docs/ASK_BYTE.md). No model connection is required for student lesson help.
+
+Account navigation and timeout behavior are described in [session protection](docs/SESSION_POLICY.md). Private single-child PDF downloads now use the child's name as a safe filename prefix; class booklets use the class name.
 
 A local React/TypeScript prototype covers four modules of ten Byte challenges and a creative route project, with separate progress for each coding course, plus twenty computer-introduction activities. Informal testing with the owner's children informed the age-labelled courses and fixed-screen workspace. The submission deadline is Friday, 9 October 2026; formal curriculum validation remains pending.
 

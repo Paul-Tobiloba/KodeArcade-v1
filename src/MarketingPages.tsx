@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import SchoolFeatureContent from './SchoolFeatureContent';
+import { useAccountSession, dashboardHref } from './SessionProvider';
 import { ArrowRight, BookOpen, Blocks, Check, Gamepad2, Keyboard, Menu, MousePointer2, Play, ShieldCheck, Users, X } from 'lucide-react';
 import { courses } from './courses';
 export const adventures = [
@@ -11,8 +12,9 @@ export type MarketingPage = 'home' | 'courses' | 'how-it-works' | 'parents' | 'f
 const destinations = [{ page: 'how-it-works', label: 'How it works' }, { page: 'courses', label: 'Courses' }, { page: 'for-schools', label: 'For schools' }, { page: 'parents', label: 'For Parents' }, { page: 'student-login', label: 'Student login' }];
 function Brand() { return <a className="landing-brand" href="/" aria-label="KodeArcade home"><img src="/brand/mark-color.svg" width="36" height="36" alt="" /><span>KodeArcade</span></a>; }
 export function MarketingNav({ page, search }: { page: MarketingPage; search?: ReactNode }) {
+  const { session } = useAccountSession();
   const [open, setOpen] = useState(false);
-  return <header className="landing-nav"><Brand /><nav id="marketing-navigation" className={open ? 'menu-open' : ''} aria-label="Main navigation">{destinations.map(item => <a key={item.label} href={`/#/${item.page}`} aria-current={item.page === page ? 'page' : undefined} onClick={() => setOpen(false)}>{item.label}</a>)}</nav><div className="nav-actions">{search}<a className="landing-button small" href="/#/login">Log in<ArrowRight size={18} /></a><button className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="marketing-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button></div></header>;
+  return <header className="landing-nav"><Brand /><nav id="marketing-navigation" className={open ? 'menu-open' : ''} aria-label="Main navigation">{destinations.filter(item => !session || item.page !== "student-login").map(item => <a key={item.label} href={`/#/${item.page}`} aria-current={item.page === page ? 'page' : undefined} onClick={() => setOpen(false)}>{item.label}</a>)}</nav><div className="nav-actions">{search}<a className="landing-button small" href={session ? dashboardHref(session) : "/#/login"}>{session ? "My dashboard" : "Log in"}<ArrowRight size={18} /></a><button className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-expanded={open} aria-controls="marketing-navigation" onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button></div></header>;
 }
 export function MarketingFooter() { return <footer className="landing-footer"><Brand /><nav aria-label="Footer navigation"><a href="/#/how-it-works">How it works</a><a href="/#/courses">Courses</a><a href="/#/for-schools">For schools</a><a href="/#/parents">For Parents</a></nav><span>A learning preview for curious minds.</span></footer>; }
 export default function MarketingPages({ page }: { page: Exclude<MarketingPage, 'home'> }) {

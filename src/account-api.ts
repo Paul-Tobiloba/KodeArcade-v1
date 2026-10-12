@@ -29,6 +29,7 @@ export async function accountRequest<T>(path: string, body?: unknown, signal?: A
   }
   const data = await response.json().catch(() => null);
   if (!response.ok) throw new AccountError(response.status, typeof data?.code === 'string' ? data.code : 'REQUEST_FAILED');
+  if (path === 'auth/sign-out') dispatchEvent(new Event('kodearcade-signed-out'));
   if (!data || typeof data !== 'object') throw new AccountError(0, 'CONNECTION');
   return data as T;
 }
@@ -36,6 +37,7 @@ export function accountErrorMessage(error: unknown) {
   if (!(error instanceof AccountError)) return 'Something went wrong. Please try again.';
   if (error.status === 0 || error.status >= 500) return 'Cannot reach the account service. Check your connection and try again. The public activity preview is still available.';
   if (error.status === 429) return 'Too many attempts. Please wait before trying again.';
+  if (error.code === 'SESSION_EXPIRED') return 'Your session has ended. Sign in again to continue; your saved account work is unchanged.';
   if (error.code === 'STEP_UP_REQUIRED') return 'Unlock management with your adult password, then try again. The unlock lasts 30 minutes.';
   if (error.code === 'SCHOOL_MFA_REQUIRED') return 'School administrators must enable two-step verification in Account & security before creating or administering a school.';
   if (error.code === 'STAFF_MFA_REQUIRED') return 'This staff member must enable two-step verification in their account before becoming a school administrator. Their teacher access is unchanged.';
@@ -65,11 +67,12 @@ export function accountErrorMessage(error: unknown) {
   return 'We could not continue with those details. Check them and try again. Recovery links may have expired.';
 }
 
-export async function accountPdf(path: string, body: unknown, signal?: AbortSignal): Promise<Blob> {
+export async function accountPdf(path: string, body: unknown, signal?: AbortSignal): Promise<File> {
   let response: Response;
   try { response = await fetch(`/api/${path}`, { method: 'POST', credentials: 'same-origin', cache: 'no-store', redirect: 'error', signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
   catch { throw new AccountError(0, 'CONNECTION'); }
   if (!response.ok) { const data = await response.json().catch(() => null); throw new AccountError(response.status, typeof data?.code === 'string' ? data.code : 'REQUEST_FAILED'); }
   if (!response.headers.get('content-type')?.startsWith('application/pdf')) throw new AccountError(0, 'CONNECTION');
-  return response.blob();
+  const supplied = /filename="([a-z0-9-]+\.pdf)"/.exec(response.headers.get('content-disposition') ?? '')?.[1];
+  return new File([await response.blob()], supplied ?? 'kodearcade-private-login-card.pdf', { type: 'application/pdf' });
 }

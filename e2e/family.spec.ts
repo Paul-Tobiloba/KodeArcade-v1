@@ -113,6 +113,8 @@ test('parent login preserves role through MFA to family portal', async ({ page }
 
 test('home dashboard recovery offers the correct login after an initial failure or expired session', async ({ page }, info) => {
   let unavailable = true;
+  const now = Date.now();
+  await page.route('**/api/session', route => route.fulfill({ json: unavailable ? null : { user: { id: 'noah', name: 'Noah', principalKind: 'learner' }, sessionKey: 'synthetic', lastActiveAt: now, expiresAt: now + 24 * 3600_000 } }));
   await page.route('**/api/student/courses', route => unavailable
     ? route.fulfill({ status: 401, json: { code: 'UNAUTHORIZED' } })
     : route.fulfill({ json: { learnerId: 'noah', classroomId: 'home-noah', displayName: 'Noah', classroomName: family.name, learningContext: 'home', assignments: [] } }));
@@ -126,12 +128,14 @@ test('home dashboard recovery offers the correct login after an initial failure 
   unavailable = false;
   await page.getByRole('button', { name: 'Try again', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Your home adventures' })).toBeVisible();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
   unavailable = true;
   await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
-  await expect(page.getByRole('heading', { name: 'Let’s open your dashboard' })).toBeVisible();
-  await expect(page.getByText('Check your connection, or ask your parent, guardian or teacher for help.')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Home learner sign in', exact: true })).toHaveAttribute('href', '/#/home-login');
+  await expect(page.getByRole('dialog', { name: 'Sign in again to continue' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Open sign in', exact: true })).toHaveAttribute('target', '_blank');
   await page.screenshot({ path: `.impeccable/review/family-recovery-expired-${info.project.name}.png`, fullPage: true });
-  await page.getByRole('link', { name: 'Home learner sign in', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Home learner sign in' })).toBeVisible();
+  unavailable = false;
+  await page.getByRole('button', { name: 'I’ve signed in — check again' }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your home adventures' })).toBeVisible();
 });

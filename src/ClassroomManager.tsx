@@ -17,6 +17,7 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
   const [card, setCard] = useState('');
+  const [cardName, setCardName] = useState('');
   const [busy, setBusy] = useState(false);
   const [selected, setSelected] = useState<Pupil>();
   const [adding, setAdding] = useState(route === 'learner-new');
@@ -39,7 +40,7 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
     const operationKey = operationKeys.current.get(signature) ?? crypto.randomUUID();
     operationKeys.current.set(signature, operationKey);
     try {
-      if (pdf) { const blob = await accountPdf(path, { ...body, operationKey }); setCard(URL.createObjectURL(blob)); }
+      if (pdf) { const blob = await accountPdf(path, { ...body, operationKey }); setCardName(blob.name); setCard(URL.createObjectURL(blob)); }
       else await accountRequest(path, { ...body, operationKey });
       operationKeys.current.delete(signature);
       reload(); return true;
@@ -52,7 +53,7 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
     <a className="account-back" href={workspaceHref('classes', workspace.id)}><ArrowLeft size={17} />Your classes</a>
     <h1>{route === 'class-new' ? 'Create a class' : data?.room.name ?? (route === 'learners' || route === 'learner-new' ? 'Your students' : 'Your classes')}</h1>
     {error && <Notice error>{error}</Notice>}
-    {card && <section className="account-private-card" aria-label="Private login card ready"><h2>Login card ready</h2><p>Download this private PDF now. It is only available here until you leave or dismiss it. Existing passwords cannot be reprinted—reset a lost card to issue a new one.</p><a className="account-button primary" href={card} download="kodearcade-private-login-card.pdf"><Download size={18} />Download PDF card</a><button className="account-button" onClick={() => setCard('')}>Dismiss private card</button></section>}
+    {card && <section className="account-private-card" aria-label="Private login card ready"><h2>Login card ready</h2><p>Download this private PDF now. It is only available here until you leave or dismiss it. Existing passwords cannot be reprinted—reset a lost card to issue a new one.</p><a className="account-button primary" href={card} download={cardName}><Download size={18} />Download PDF card</a><button className="account-button" onClick={() => setCard('')}>Dismiss private card</button></section>}
     <ManagementUnlock mfa={account.profile.twoFactorEnabled === true} />
     {route === 'class-new' ? <form className="account-management-form" aria-busy={busy} onSubmit={async event => {
       event.preventDefault(); const form = new FormData(event.currentTarget); setBusy(true); setError('');

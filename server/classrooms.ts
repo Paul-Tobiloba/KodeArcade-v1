@@ -1,6 +1,7 @@
 import { createHash, randomUUID, randomInt } from 'node:crypto';
 import { and, eq, sql, count, inArray } from 'drizzle-orm';
 import { Hono, type Context } from 'hono';
+import { cardFilename } from '../shared/card-filename.js';
 import { gradeKey, curriculumVersion } from '../shared/progress.js';
 import { progressCatalog } from '../shared/progress-catalog.js';
 import { reportSummary } from '../shared/reports.js';
@@ -72,9 +73,9 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
     for (let attempt = 0; attempt < 20; attempt++) { const candidate = `${full}${randomInt(1000, 1_000_000)}`; if (!await taken(candidate)) return candidate; }
     return fail(409, 'USERNAME_UNAVAILABLE');
   }
-  function pdf(c: Context, buffer: Buffer) {
+  function pdf(c: Context, buffer: Buffer, name: string, booklet = false) {
     c.header('Content-Type', 'application/pdf');
-    c.header('Content-Disposition', 'attachment; filename="kodearcade-private-login-card.pdf"');
+    c.header('Content-Disposition', `attachment; filename="${cardFilename(name, booklet ? 'booklet' : 'login')}"`);
     c.header('Cache-Control', 'private, no-store, max-age=0');
     c.header('Pragma', 'no-cache');
     return c.body(new Uint8Array(buffer));
@@ -226,7 +227,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       await audit(tx, actor.user.id, room.organizationId, 'student.created', id);
       return card;
     });
-    return pdf(c, buffer);
+    return pdf(c, buffer, body.displayName);
   });
 
   app.post('/classes/:id/students/import', async c => {
@@ -264,7 +265,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       // Render before commit: failure cannot leave a partially imported class.
       return loginCards(cards);
     });
-    return pdf(c, buffer);
+    return pdf(c, buffer, room.name, true);
   });
 
   app.post('/classes/:id/students/reset-cards', async c => {
@@ -293,7 +294,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       }
       return loginCards(cards);
     });
-    return pdf(c, buffer);
+    return pdf(c, buffer, room.name, true);
   });
 
   async function enrolled(roomId: string, learnerId: string) {
@@ -320,7 +321,7 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       await tx.delete(s.session).where(eq(s.session.userId, student.learner.authUserId));
       await audit(tx, actor.user.id, room.organizationId, 'student.credential-reset', student.learner.id);
     });
-    return pdf(c, buffer);
+    return pdf(c, buffer, student.learner.displayName);
   });
   app.post('/classes/:id/students/:studentId/update', async c => {
     const { actor, room } = await manages(c, c.req.param('id'), true);

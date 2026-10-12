@@ -8,12 +8,16 @@ import StudentCourses from './StudentCourses';
 import { Notice } from './AccountUI';
 import LoadingScreen from './LoadingScreen';
 import FamilyManager from './FamilyManager';
+import { useAccountSession, dashboardHref } from './SessionProvider';
 import './account.css';
 
 const privateRoutes = new Set(['family', 'onboarding', 'dashboard', 'classes', 'classroom', 'class-new', 'learners', 'learner-new', 'account-settings', 'schools', 'school-join']);
 privateRoutes.add('byte-lab');
 
 export default function AccountPortal({ route }: { route: string }) {
+  const active = useAccountSession();
+  const loginEntry = ['login', 'adult-login', 'student-login', 'home-login', 'signup', 'two-factor'].includes(route);
+  useEffect(() => { if (loginEntry && active.session) location.replace(dashboardHref(active.session)); }, [loginEntry, active.session]);
   const [capabilities, setCapabilities] = useState<Capabilities>();
   const [account, setAccount] = useState<Account>();
   const [loading, setLoading] = useState(privateRoutes.has(route));
@@ -35,6 +39,7 @@ export default function AccountPortal({ route }: { route: string }) {
     }
     return () => { controller.abort(); document.title = 'KodeArcade — Play. Build. Learn.'; };
   }, [route, retry]);
+  if (loginEntry && (active.loading || active.session)) return <LoadingScreen label="Checking your session…" />;
   if (route === 'student-courses') return <StudentCourses />;
   const dashboard = privateRoutes.has(route) && route !== 'onboarding' && account && !loading && !loadError;
   const params = new URLSearchParams(location.hash.split('?')[1]);
@@ -48,7 +53,7 @@ export default function AccountPortal({ route }: { route: string }) {
       <img className="account-world-code" src="/images/auth/code-symbol.png" alt="" />
       <img className="account-byte" src="/images/auth/byte-peek.png" alt="" />
     </div>
-    <a className="skip-link" href="#account-main">Skip to content</a><header className="account-header"><a className="account-brand" href="/" aria-label="KodeArcade home"><img src="/brand/mark-color.svg" width="34" height="38" alt="" /><span>KodeArcade</span></a><nav aria-label="Account navigation"><a className="account-header-extra" href="/#/how-it-works">How it works</a><a className="account-header-extra" href="/#/courses">Courses</a><a className="account-header-extra" href="/#/parents">For parents</a><a href="/#/learn">Try an activity</a><a className="account-header-login" href={dashboard ? '/#/account-settings' : '/#/login'}>{dashboard ? 'Account settings' : 'Log in'}</a></nav></header>
+    <a className="skip-link" href="#account-main">Skip to content</a><header className="account-header"><a className="account-brand" href="/" aria-label="KodeArcade home"><img src="/brand/mark-color.svg" width="34" height="38" alt="" /><span>KodeArcade</span></a><nav aria-label="Account navigation"><a className="account-header-extra" href="/#/how-it-works">How it works</a><a className="account-header-extra" href="/#/courses">Courses</a><a className="account-header-extra" href="/#/parents">For parents</a><a href="/#/learn">Try an activity</a><a className="account-header-login" href={active.session ? (dashboard ? '/#/account-settings' : dashboardHref(active.session)) : '/#/login'}>{active.session ? (dashboard ? 'Account settings' : 'My dashboard') : 'Log in'}</a></nav></header>
     {dashboard && family ? <main id="account-main"><FamilyManager account={account} refresh={() => setRetry(n => n + 1)} /></main> : dashboard && scopedAccount ? <div className="account-workspace"><aside className="account-sidebar"><h2>{workspace?.name ?? 'Your workspace'}</h2>{account.workspaces.length > 0 && <label className="account-field account-workspace-switch">Workspace<select value={workspace?.id ?? ''} onChange={event => { location.hash = `/dashboard?workspace=${encodeURIComponent(event.target.value)}`; }}>{account.workspaces.map(item => <option key={item.id} value={item.id}>{item.name} ({item.kind === 'school' ? 'School' : item.kind === 'family' ? 'Family' : 'Personal'})</option>)}</select></label>}<nav aria-label="Workspace navigation">{[{ href: 'dashboard', label: 'Overview', icon: LayoutDashboard }, { href: 'classes', label: 'Classes', icon: GraduationCap }, { href: 'learners', label: 'Learners', icon: Users }, { href: 'family', label: 'Family portal', icon: Users }, { href: 'schools', label: workspace?.kind === 'school' && workspace.role === 'school_admin' ? 'School administration' : 'Schools', icon: ShieldCheck }, { href: 'account-settings', label: 'Account & security', icon: Settings }].map(({ href, label, icon: Icon }) => <a href={workspaceHref(href, workspace?.id)} key={href} aria-current={route === href ? 'page' : undefined}><Icon size={20} />{label}</a>)}</nav><p><ShieldCheck size={18} />{workspace?.kind === 'school' ? 'School classes belong to this school. Personal classes stay separate.' : 'Your personal workspace is separate from school memberships.'}</p></aside><main id="account-main" className="account-workspace-main"><AccountWorkspace route={route} account={scopedAccount} capabilities={capabilities} refresh={() => setRetry(n => n + 1)} /></main></div>
       : <main id="account-main" className={`account-entry ${route === 'login' ? 'account-chooser-layout' : ''}`}>{route !== 'login' && <a className="account-back" href="/#/login"><ArrowLeft size={17} />Choose another login</a>}
         {loading ? <LoadingScreen embedded label="Opening your workspace…" /> : loadError ? <section className="account-panel"><h1>Let’s get you back in</h1><Notice error>{loadError}</Notice><a className="account-button primary" href={route === 'family' ? '/#/adult-login?role=parent' : '/#/adult-login'}>Adult login<ArrowRight size={18} /></a><button className="account-button" onClick={() => setRetry(n => n + 1)}>Try again</button></section> : route === 'login' ? <Chooser /> : route === 'student-login' || route === 'home-login' ? <StudentLogin capabilities={capabilities} home={route === 'home-login'} /> : route === 'onboarding' && account ? <Onboarding account={account} /> : <AdultAccount route={route} capabilities={capabilities} />}

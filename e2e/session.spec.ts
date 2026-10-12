@@ -1,0 +1,62 @@
+import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+const account = { profile: { name: 'Sample Adult', email: 'adult@example.test' }, workspaces: [], classes: [] };
+test('signed-in adult gets dashboard navigation and does not see the login form again', async ({ page }) => {
+  const now = Date.now();
+  await page.route('**/api/session', route => route.fulfill({ json: { user: { id: 'adult', name: 'Sample Adult', principalKind: 'adult' }, sessionKey: 'sample', lastActiveAt: now, expiresAt: now + 3600_000 } }));
+  await page.route('**/api/session/activity', route => route.fulfill({ json: { active: true } }));
+  await page.route('**/api/account', route => route.fulfill({ json: account }));
+  await page.route('**/api/capabilities', route => route.fulfill({ json: { adultAccounts: true } }));
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'My dashboard', exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Log in', exact: true })).toHaveCount(0);
+  await page.goto('/#/adult-login?role=parent');
+  await expect(page).toHaveURL(/#\/dashboard$/);
+  await expect(page.getByRole('heading', { name: 'Welcome, Sample Adult' })).toBeVisible();
+});
+
+test('adult warning, stay, expiry and same-account recovery preserve the open form', async ({ page }, info) => {
+  await page.clock.install();
+  const now = await page.evaluate(() => Date.now());
+  let lastActiveAt = now, signedIn = true, renewals = 0;
+  await page.route('**/api/session', route => route.fulfill({ json: signedIn ? { user: { id: 'adult', name: 'Sample Adult', principalKind: 'adult' }, sessionKey: 'sample', lastActiveAt, expiresAt: lastActiveAt + 3600_000 } : null }));
+  await page.route('**/api/session/activity', async route => { renewals++; lastActiveAt = await page.evaluate(() => Date.now()); return route.fulfill({ json: { active: true } }); });
+  await page.route('**/api/account', route => route.fulfill({ json: account }));
+  await page.route('**/api/capabilities', route => route.fulfill({ json: { adultAccounts: true } }));
+  await page.goto('/#/onboarding');
+  await expect(page.getByRole('link', { name: 'My dashboard', exact: true })).toHaveAttribute('href', '/#/dashboard');
+  await expect(page.getByRole('link', { name: 'Log in', exact: true })).toHaveCount(0);
+  await page.getByLabel('Teaching workspace name').fill('Unsaved classroom plan');
+  await page.clock.fastForward(55 * 60_000 + 2000);
+  await expect(page.getByRole('dialog', { name: 'Still here?' })).toBeVisible();
+  expect((await new AxeBuilder({ page }).include('.session-dialog').analyze()).violations).toEqual([]);
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({ path: `.impeccable/review/session-warning-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Stay signed in' }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByLabel('Teaching workspace name')).toHaveValue('Unsaved classroom plan');
+  expect(renewals).toBeGreaterThan(0);
+  signedIn = false;
+  await page.clock.fastForward(60 * 60_000 + 2000);
+  await expect(page.getByRole('dialog', { name: 'Sign in again to continue' })).toBeVisible();
+  await page.screenshot({ path: `.impeccable/review/session-expired-${info.project.name}.png`, fullPage: true });
+  signedIn = true; lastActiveAt = await page.evaluate(() => Date.now());
+  await page.getByRole('button', { name: 'I’ve signed in — check again' }).click();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByLabel('Teaching workspace name')).toHaveValue('Unsaved classroom plan');
+});
+
+test('student login redirects to their dashboard, has no idle renewal and expires at 24 hours', async ({ page }) => {
+  await page.route('**/api/capabilities', route => route.fulfill({ json: { adultAccounts: true, classroomLogin: true } }));
+  await page.clock.install(); const now = await page.evaluate(() => Date.now()); let renewals = 0;
+  await page.route('**/api/session', route => route.fulfill({ json: { user: { id: 'pupil', name: 'Sample Pupil', principalKind: 'learner' }, sessionKey: 'sample', lastActiveAt: now, expiresAt: now + 24 * 3600_000 } }));
+  await page.route('**/api/session/activity', route => { renewals++; return route.fulfill({ json: {} }); });
+  await page.route('**/api/student/courses', route => route.fulfill({ json: { learnerId: 'pupil', classroomId: 'room', displayName: 'Sample Pupil', classroomName: 'Sample class', assignments: [] } }));
+  await page.goto('/#/student-login');
+  await expect(page).toHaveURL(/#\/student-courses$/);
+  await expect(page.getByRole('heading', { name: 'Welcome, Sample Pupil!' })).toBeVisible();
+  await page.clock.fastForward(61 * 60_000);
+  await expect(page.getByRole('dialog')).not.toBeVisible(); expect(renewals).toBe(0);
+  await page.clock.fastForward(23 * 3600_000);
+  await expect(page.getByRole('dialog', { name: 'Sign in again to continue' })).toBeVisible();
+});
