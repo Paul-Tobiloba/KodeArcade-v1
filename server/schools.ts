@@ -31,11 +31,17 @@ export function createSchoolRoutes(auth: Auth, db: Database, config: Pick<Server
     return actor;
   }
   async function school(store: StaffDatabase, id: string, actorId: string, admin = true) {
-    const [member] = await store.select({ id: s.organization.id, name: s.organization.name, role: s.organizationMember.role }).from(s.organization)
+    const [member] = await store.select({ id: s.organization.id, name: s.organization.name, role: s.organizationMember.role, twoFactorEnabled: s.user.twoFactorEnabled }).from(s.organization)
       .innerJoin(s.organizationMember, and(eq(s.organizationMember.organizationId, s.organization.id), eq(s.organizationMember.userId, actorId)))
+      .innerJoin(s.user, eq(s.user.id, s.organizationMember.userId))
       .where(and(eq(s.organization.id, id), eq(s.organization.kind, 'school')));
     if (!member || (admin && member.role !== 'school_admin')) return fail(404, 'NOT_FOUND');
+    if (member.role === 'school_admin' && !member.twoFactorEnabled) return fail(403, 'SCHOOL_MFA_REQUIRED');
     return member;
+  }
+  async function requireAdminMfa(store: StaffDatabase, userId: string, code = 'SCHOOL_MFA_REQUIRED') {
+    const [user] = await store.select({ enabled: s.user.twoFactorEnabled }).from(s.user).where(eq(s.user.id, userId));
+    if (!user?.enabled) return fail(403, code);
   }
   async function lockSchool(tx: Transaction, id: string, actorId: string) {
     await tx.select().from(s.organization).where(eq(s.organization.id, id)).for('update');
@@ -67,6 +73,7 @@ export function createSchoolRoutes(auth: Auth, db: Database, config: Pick<Server
     if (!await budget(db, config.BETTER_AUTH_SECRET, 'school-create', actor.user.id, 5, 86400)) return fail(429, 'LIMIT');
     const id = randomUUID();
     const resolvedId = await db.transaction(async tx => {
+      await requireAdminMfa(tx, actor.user.id);
       const existingId = await operation(tx, actor.user.id, body.operationKey, { ...body, action: 'school.create' }, id, true);
       if (existingId) return existingId;
       await tx.insert(s.organization).values({ id, name: body.name, kind: 'school' });
@@ -139,6 +146,7 @@ export function createSchoolRoutes(auth: Auth, db: Database, config: Pick<Server
       await tx.select().from(s.organization).where(and(eq(s.organization.id, candidate.organizationId), eq(s.organization.kind, 'school'))).for('update');
       const [invitation] = await tx.select().from(s.schoolInvitation).where(eq(s.schoolInvitation.id, candidate.id)).for('update');
       if (!invitation || invitation.closedAt || invitation.expiresAt <= new Date() || invitation.email !== actor.user.email.toLowerCase()) return fail(404, 'INVITATION_UNAVAILABLE');
+      if (invitation.role === 'school_admin') await requireAdminMfa(tx, actor.user.id);
       // Removing/demoting the inviter also invalidates any outstanding invitations.
       await school(tx, invitation.organizationId, invitation.createdBy);
       const [existing] = await tx.select().from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, invitation.organizationId), eq(s.organizationMember.userId, actor.user.id)));
@@ -159,6 +167,7 @@ export function createSchoolRoutes(auth: Auth, db: Database, config: Pick<Server
       await lockSchool(tx, id, actor.user.id);
       const [member] = await tx.select().from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, id), eq(s.organizationMember.userId, userId)));
       if (!member || member.role !== body.previousRole || body.role === member.role) return fail(409, 'STAFF_CONFLICT');
+      if (body.role === 'school_admin') await requireAdminMfa(tx, userId, 'STAFF_MFA_REQUIRED');
       if (member.role === 'school_admin') {
         const [admins] = await tx.select({ total: count() }).from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, id), eq(s.organizationMember.role, 'school_admin')));
         if (admins.total <= 1) return fail(409, 'LAST_ADMIN');

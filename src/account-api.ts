@@ -36,7 +36,9 @@ export function accountErrorMessage(error: unknown) {
   if (!(error instanceof AccountError)) return 'Something went wrong. Please try again.';
   if (error.status === 0 || error.status >= 500) return 'Cannot reach the account service. Check your connection and try again. The public activity preview is still available.';
   if (error.status === 429) return 'Too many attempts. Please wait before trying again.';
-  if (error.code === 'STEP_UP_REQUIRED') return 'Unlock management with your adult password, then try again. The unlock lasts five minutes.';
+  if (error.code === 'STEP_UP_REQUIRED') return 'Unlock management with your adult password, then try again. The unlock lasts 30 minutes.';
+  if (error.code === 'SCHOOL_MFA_REQUIRED') return 'School administrators must enable two-step verification in Account & security before creating or administering a school.';
+  if (error.code === 'STAFF_MFA_REQUIRED') return 'This staff member must enable two-step verification in their account before becoming a school administrator. Their teacher access is unchanged.';
   if (error.code === 'ALREADY_PROCESSED') return 'This request was already completed. Reload your learners. If the card was lost, reset the password to generate a new card.';
   if (error.code === 'FAMILY_LIMIT') return 'A family can have up to 10 home learners, including paused profiles.';
   if (error.code === 'PROFILE_CONFLICT') return 'This profile changed in another session. Reload the family and review it before saving again.';

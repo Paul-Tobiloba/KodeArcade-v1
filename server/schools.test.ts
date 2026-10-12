@@ -53,6 +53,11 @@ it('requires verified adult, step-up and explicit authority; creates a separate 
   expect((await request('schools', body)).status).toBe(401);
   expect((await request('schools', body, owner.locked)).status).toBe(403);
   expect((await request('schools', { ...body, confirmAuthority: false }, owner.cookie)).status).toBe(400);
+  const denied = await request('schools', body, owner.cookie);
+  expect(denied.status).toBe(403); expect(await denied.json()).toEqual({ code: 'SCHOOL_MFA_REQUIRED' });
+  expect(await db.select().from(s.organization).where(eq(s.organization.kind, 'school'))).toHaveLength(0);
+  // Fixture represents completed Better Auth enrollment; independent auth tests cover its endpoints.
+  await db.update(s.user).set({ twoFactorEnabled: true }).where(eq(s.user.id, owner.id));
   const created = await request('schools', body, owner.cookie); expect(created.status).toBe(201); schoolId = (await created.json()).id;
   for (let attempt = 0; attempt < 2; attempt++) {
     const replay = await request('schools', body, owner.cookie);
@@ -119,6 +124,10 @@ it('protects the last administrator and supports admin invitations and staff rem
   const memberPath = `schools/${schoolId}/members/`;
   for (const role of ['teacher', 'remove']) expect((await request(memberPath + owner.id, { role, previousRole: 'school_admin', confirm: true }, owner.cookie)).status).toBe(409);
   const invited = await invite(owner, deputy.email, 'school_admin');
+  const denied = await request('schools/accept', { token: invited.token, confirm: true }, deputy.cookie);
+  expect(denied.status).toBe(403); expect(await denied.json()).toEqual({ code: 'SCHOOL_MFA_REQUIRED' });
+  expect(await db.select().from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, schoolId), eq(s.organizationMember.userId, deputy.id)))).toHaveLength(0);
+  await db.update(s.user).set({ twoFactorEnabled: true }).where(eq(s.user.id, deputy.id));
   expect((await request('schools/accept', { token: invited.token, confirm: true }, deputy.cookie)).status).toBe(200);
   expect((await request(`schools/${schoolId}`, undefined, deputy.cookie)).status).toBe(200);
   expect((await request(`manage/classes/${roomId}`, undefined, deputy.cookie)).status).toBe(200);
@@ -154,4 +163,23 @@ it('does not let learner or unverified principals create a school', async () => 
   expect((await request('schools', { name: 'Denied', confirmAuthority: true, operationKey: randomUUID() }, stranger.cookie)).status).toBe(403);
   await db.update(s.user).set({ emailVerified: true, principalKind: 'learner' }).where(eq(s.user.id, stranger.id));
   expect((await request('schools', { name: 'Denied', confirmAuthority: true, operationKey: randomUUID() }, stranger.cookie)).status).toBe(403);
+});
+
+it('requires MFA before promoting a teacher; loss of MFA blocks admin access but not personal teaching', async () => {
+  const invitation = await invite(owner, 'recovery@example.com');
+  expect(invitation.token).toBeTruthy();
+  // Deputy was demoted in the preceding lifecycle test and remains a school teacher.
+  await db.update(s.user).set({ twoFactorEnabled: false }).where(eq(s.user.id, deputy.id));
+  const path = `schools/${schoolId}/members/${deputy.id}`;
+  const denied = await request(path, { role: 'school_admin', previousRole: 'teacher', confirm: true }, owner.cookie);
+  expect(denied.status).toBe(403); expect(await denied.json()).toEqual({ code: 'STAFF_MFA_REQUIRED' });
+  await db.update(s.user).set({ twoFactorEnabled: true }).where(eq(s.user.id, deputy.id));
+  expect((await request(path, { role: 'school_admin', previousRole: 'teacher', confirm: true }, owner.cookie)).status).toBe(200);
+  await db.update(s.user).set({ twoFactorEnabled: false }).where(eq(s.user.id, deputy.id));
+  expect((await request(`schools/${schoolId}`, undefined, deputy.cookie)).status).toBe(403);
+  expect((await request(`manage/classes/${roomId}`, undefined, deputy.cookie)).status).toBe(404);
+  expect((await request('manage/classes', { organizationId: schoolId, name: 'Blocked admin class', grade: 2, operationKey: randomUUID() }, deputy.cookie)).status).toBe(403);
+  expect((await request(`manage/classes/${deputy.personalClass}`, undefined, deputy.cookie)).status).toBe(200);
+  const account = await (await request('account', undefined, deputy.cookie)).json();
+  expect(account.classes.some((room: { organizationId: string }) => room.organizationId === schoolId)).toBe(false);
 });

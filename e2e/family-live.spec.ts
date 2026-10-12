@@ -41,7 +41,7 @@ test('live parent → private home cards → child learning/save → parent prog
     await db.insert(s.user).values({ id: parentId, name: 'Synthetic QA Parent', email, emailVerified: true, principalKind: 'adult' });
     await db.insert(s.account).values({ id: randomUUID(), userId: parentId, accountId: parentId, providerId: 'credential', password: await hashPassword(password) });
     await signIn(); await page.getByLabel('Confirm adult password', { exact: true }).fill(password); await page.getByRole('button', { name: 'Unlock management', exact: true }).click();
-    await expect(page.getByText('Management unlocked for five minutes', { exact: true })).toBeVisible();
+    await expect(page.getByText('Management unlocked', { exact: true })).toBeVisible();
     await page.getByLabel('Family workspace name').fill('Synthetic QA Family'); await page.getByRole('checkbox').check(); await page.getByRole('button', { name: 'Create family workspace' }).click();
     await expect(page.getByRole('heading', { name: 'Your children (0)' })).toBeVisible({ timeout: 20_000 });
     const cards: Awaited<ReturnType<typeof getCard>>[] = [];

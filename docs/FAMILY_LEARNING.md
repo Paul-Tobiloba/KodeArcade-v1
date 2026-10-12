@@ -4,7 +4,7 @@
 
 Sign in via Parent on the account chooser (`/#/adult-login?role=parent`). Verification, recovery and MFA preserve that parent intent and open `/#/family`. Existing teachers can open Family portal from their workspace sidebar without converting or moving their personal/school classes.
 
-Confirm the adult password (and authenticator code when enabled) to unlock management for five minutes. Create a family workspace with a parent/guardian responsibility acknowledgement. Add a child using a first name or family nickname, Grade 1–6 and picture/text login method. No child email or date of birth is requested. A family supports up to ten home profiles including paused profiles.
+Confirm the adult password (and authenticator code when enabled) to unlock management for 30 minutes, tied to the current sign-in. Two-step verification is optional for parents; accounts that enable it still require it at sign-in and management unlock. Create a family workspace with a parent/guardian responsibility acknowledgement. Add a child using a first name or family nickname, Grade 1–6 and picture/text login method. No child email or date of birth is requested. A family supports up to ten home profiles including paused profiles.
 
 Creation assigns the selected grade course and returns a private, no-store PDF. Usernames use lowercase first name, then full name, then random digits on collision. Text passwords contain three random words; picture passwords contain four randomly selected pictures, allowing repeats. A card uses a Home code and `/#/home-login`, not the classroom login route.
 

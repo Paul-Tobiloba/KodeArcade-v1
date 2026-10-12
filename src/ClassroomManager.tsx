@@ -6,6 +6,7 @@ import { CourseAssignments, CsvImport } from './TeacherBatch';
 import LoadingScreen from './LoadingScreen';
 import ClassProgress from './ClassProgress';
 import ClassLifecycle, { ClassList } from './ClassLifecycle';
+import SchoolMfaNotice from './SchoolMfaNotice';
 
 type Pupil = { id: string; displayName: string; username: string; grade: number; loginMethod: 'picture' | 'text'; active: boolean };
 type Classroom = { room: { id: string; name: string; code: string; grade: number; archivedAt?: string | null }; learners: Pupil[]; assignments: { id: string; courseKey: string }[] };
@@ -46,6 +47,7 @@ export default function ClassroomManager({ route, account, refresh }: { route: s
     finally { setBusy(false); }
   }
   if (!workspace) return <><h1>Set up a teaching workspace</h1><p>Classes and student credentials are managed by teachers. Family profiles are a separate feature.</p><a className="account-button" href="/#/onboarding">Workspace setup<ArrowRight size={18} /></a></>;
+  if (workspace.kind === 'school' && workspace.role === 'school_admin' && !account.profile.twoFactorEnabled) return <SchoolMfaNotice />;
   return <>
     <a className="account-back" href={workspaceHref('classes', workspace.id)}><ArrowLeft size={17} />Your classes</a>
     <h1>{route === 'class-new' ? 'Create a class' : data?.room.name ?? (route === 'learners' || route === 'learner-new' ? 'Your students' : 'Your classes')}</h1>
@@ -91,5 +93,22 @@ export function ManagementUnlock({ mfa, family = false }: { mfa: boolean; family
   const [until, setUntil] = useState(0), [busy, setBusy] = useState(false), [error, setError] = useState('');
   useEffect(() => { const controller = new AbortController(); accountRequest<{ unlockedForSeconds: number }>('manage/management/status', undefined, controller.signal).then(value => { if (value.unlockedForSeconds > 0) setUntil(Date.now() + value.unlockedForSeconds * 1000); }).catch(() => {}); return () => controller.abort(); }, []);
   useEffect(() => { if (!until) return; const timer = setTimeout(() => setUntil(0), Math.max(0, until - Date.now())); return () => clearTimeout(timer); }, [until]);
-  return <details className="account-management-unlock" open={!until}><summary><KeyRound size={18} />{until ? 'Management unlocked for five minutes' : family ? 'Unlock family management' : 'Unlock classroom management'}</summary>{until ? <p><ShieldCheck size={18} />Your password was confirmed for this session. Refreshing this page may show the prompt again.</p> : <><p>{family ? 'Confirm your adult password before adding children, changing courses or issuing home login cards.' : 'Confirm your adult password before creating classes, changing assignments or issuing student cards.'}</p>{error && <Notice error>{error}</Notice>}<form aria-busy={busy} onSubmit={async event => { event.preventDefault(); const form = event.currentTarget, data = new FormData(form); setBusy(true); setError(''); try { await accountRequest('manage/management/unlock', { password: data.get('password'), ...(mfa ? { code: data.get('code') } : {}) }); form.reset(); setUntil(Date.now() + 300_000); } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><Password label="Confirm adult password" />{mfa && <label className="account-field">Authenticator code<input name="code" inputMode="numeric" pattern="[0-9]{6}" autoComplete="one-time-code" maxLength={6} required /></label>}<Submit busy={busy}>Unlock management</Submit></form></>}</details>;
+  return <details className="account-management-unlock" open={!until}>
+    <summary><KeyRound size={18} />{until ? 'Management unlocked' : family ? 'Unlock family management' : 'Unlock classroom management'}</summary>
+    {until ? <p><ShieldCheck size={18} />Unlocked until {new Date(until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. The 30-minute unlock applies only to this sign-in and does not extend your account session.</p> : <>
+      <p>{family ? 'Confirm your adult password before adding children, changing courses or issuing home login cards.' : 'Confirm your adult password before creating classes, changing assignments or issuing student cards.'} Management stays unlocked for 30 minutes.</p>
+      {error && <Notice error>{error}</Notice>}
+      <form aria-busy={busy} onSubmit={async event => {
+        event.preventDefault(); const form = event.currentTarget, data = new FormData(form); setBusy(true); setError('');
+        try {
+          const result = await accountRequest<{ unlockedForSeconds: number }>('manage/management/unlock', { password: data.get('password'), ...(mfa ? { code: data.get('code') } : {}) });
+          form.reset(); setUntil(Date.now() + result.unlockedForSeconds * 1000);
+        } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); }
+      }}>
+        <Password label="Confirm adult password" />
+        {mfa && <label className="account-field">Authenticator code<input name="code" inputMode="numeric" pattern="[0-9]{6}" autoComplete="one-time-code" maxLength={6} required /></label>}
+        <Submit busy={busy}>Unlock management</Submit>
+      </form>
+    </>}
+  </details>;
 }

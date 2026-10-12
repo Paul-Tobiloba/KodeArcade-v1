@@ -15,6 +15,7 @@ import { assignedCourseKeys, budget, credentialPassword, CURRICULUM_VERSION, gen
 import { loginCard, loginCards, type Card } from './login-card.js';
 import { parseClassroomCsv, type ImportedStudent } from '../shared/classroom-import.js';
 import { classroomAccess } from './staff-access.js';
+import { managementUnlockSeconds } from '../shared/security-policy.js';
 
 const name = z.string().trim().min(1).max(60);
 const grade = z.number().int().min(1).max(6);
@@ -96,8 +97,8 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
         await auth.api.verifyTOTP({ headers: c.req.raw.headers, body: { code: body.code, trustDevice: false } });
       }
     } catch { return fail(403, actor.user.twoFactorEnabled ? 'PASSWORD_OR_MFA_INVALID' : 'PASSWORD_INVALID'); }
-    setCookie(c, stepCookie, stepGrant(config.BETTER_AUTH_SECRET, actor.session.id), { httpOnly: true, secure: config.APP_ORIGIN.startsWith('https:'), sameSite: 'Strict', path: '/api', maxAge: 300 });
-    return c.json({ unlockedForSeconds: 300 });
+    setCookie(c, stepCookie, stepGrant(config.BETTER_AUTH_SECRET, actor.session.id), { httpOnly: true, secure: config.APP_ORIGIN.startsWith('https:'), sameSite: 'Strict', path: '/api', maxAge: managementUnlockSeconds });
+    return c.json({ unlockedForSeconds: managementUnlockSeconds });
   });
 
   app.post('/classes', async c => {
@@ -111,6 +112,10 @@ export function createClassroomRoutes(auth: Auth, db: Database, config: Pick<Ser
       await operation(tx, actor.user.id, body.operationKey, body, id);
       const [currentMember] = await tx.select().from(s.organizationMember).where(and(eq(s.organizationMember.organizationId, body.organizationId), eq(s.organizationMember.userId, actor.user.id)));
       if (!currentMember || !['teacher', 'school_admin'].includes(currentMember.role)) return fail(403, 'FORBIDDEN');
+      if (currentMember.role === 'school_admin') {
+        const [admin] = await tx.select({ enabled: s.user.twoFactorEnabled }).from(s.user).where(eq(s.user.id, actor.user.id));
+        if (!admin?.enabled) return fail(403, 'SCHOOL_MFA_REQUIRED');
+      }
       const [total] = await tx.select({ total: count() }).from(s.classroom).where(eq(s.classroom.organizationId, body.organizationId));
       if (total.total >= 100) return fail(409, 'CLASS_LIMIT');
       await tx.insert(s.classroom).values({ id, organizationId: body.organizationId, name: body.name, grade: body.grade, code });

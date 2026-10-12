@@ -5,6 +5,7 @@ import { Notice, Password, Submit } from './AccountUI';
 import ClassroomManager from './ClassroomManager';
 import SchoolManager from './SchoolManager';
 import ByteLab from './ByteLab';
+import { schoolSecurityReturn } from './SchoolMfaNotice';
 
 export function Onboarding({ account }: { account: Account }) {
   const [role, setRole] = useState('teacher');
@@ -38,5 +39,43 @@ function SecuritySettings({ account, refresh }: { account: Account; refresh: () 
   const [error, setError] = useState('');
   const [setup, setSetup] = useState<{ totpURI: string; backupCodes: string[] }>();
   const [confirmed, setConfirmed] = useState(false);
-  return <><h1>Account & security</h1><dl className="account-details"><div><dt>Name</dt><dd>{account.profile.name}</dd></div><div><dt>Email</dt><dd>{account.profile.email}<span className="account-verified"><Check size={15} />Verified</span></dd></div></dl><section className="account-security-section"><h2>Two-step verification</h2><p>Add a code from your authenticator app to protect your adult account. Keep backup codes somewhere private, not on a classroom computer.</p>{error && <Notice error>{error}</Notice>}{confirmed || account.profile.twoFactorEnabled ? <Notice>Two-step verification is enabled.</Notice> : setup ? <><p>In your authenticator app, choose “Enter setup key”. Use your email as the account name and this key:</p><code className="account-secret">{new URL(setup.totpURI).searchParams.get('secret')}</code><form aria-busy={busy} onSubmit={async e => { e.preventDefault(); const data = new FormData(e.currentTarget); setBusy(true); setError(''); try { await accountRequest('auth/two-factor/verify-totp', { code: String(data.get('code')).replace(/\s/g, ''), trustDevice: false }); setConfirmed(true); } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><label className="account-field">Code from your authenticator<input name="code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9 ]{6,9}" required /></label><Submit busy={busy}>Confirm two-step verification</Submit></form></> : <form aria-busy={busy} onSubmit={async e => { e.preventDefault(); const data = new FormData(e.currentTarget); setBusy(true); setError(''); try { const result = await accountRequest<{ totpURI: string; backupCodes: string[] }>('auth/two-factor/enable', { password: String(data.get('password')) }); if (typeof result.totpURI !== 'string' || !Array.isArray(result.backupCodes)) throw new Error(); const uri = new URL(result.totpURI); if (uri.protocol !== 'otpauth:' || !uri.searchParams.get('secret')) throw new Error(); setSetup(result); } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><Password label="Confirm your current password" /><Submit busy={busy}>Set up two-step verification</Submit></form>}{setup && <div className="account-backup-codes"><h3>Save your backup codes privately</h3><p>Each can be used once if you lose your authenticator. These codes are only shown during this setup.</p><ul>{setup.backupCodes.map(code => <li key={code}><code>{code}</code></li>)}</ul>{confirmed && <button className="account-button" onClick={() => { setSetup(undefined); refresh(); }}>I’ve saved my codes</button>}</div>}</section><section className="account-security-section"><h2>Password & shared computers</h2><p>Use the email recovery flow to replace your password and sign out other sessions. Never leave your adult account open for a student.</p><a href="/#/forgot-password">Reset password by email</a></section></>;
+  const schoolSetup = new URLSearchParams(location.hash.split('?')[1]).get('schoolSecurity') === '1';
+  const required = schoolSetup || account.workspaces.some(workspace => workspace.kind === 'school' && workspace.role === 'school_admin');
+  return <>
+    <h1>Account & security</h1>
+    <dl className="account-details"><div><dt>Name</dt><dd>{account.profile.name}</dd></div><div><dt>Email</dt><dd>{account.profile.email}<span className="account-verified"><Check size={15} />Verified</span></dd></div></dl>
+    <section className="account-security-section">
+      <h2>Two-step verification</h2>
+      <p>{required ? 'Required for school administrators before creating or administering a school.' : 'Optional for parents and teachers. Add a code from your authenticator app for extra protection.'} Keep backup codes somewhere private, not on a classroom computer.</p>
+      {error && <Notice error>{error}</Notice>}
+      {confirmed || account.profile.twoFactorEnabled ? <Notice>Two-step verification is enabled.</Notice> : setup ? <>
+        <p>In your authenticator app, choose “Enter setup key”. Use your email as the account name and this key:</p>
+        <code className="account-secret">{new URL(setup.totpURI).searchParams.get('secret')}</code>
+        <form aria-busy={busy} onSubmit={async event => {
+          event.preventDefault(); const data = new FormData(event.currentTarget); setBusy(true); setError('');
+          try { await accountRequest('auth/two-factor/verify-totp', { code: String(data.get('code')).replace(/\s/g, ''), trustDevice: false }); setConfirmed(true); }
+          catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); }
+        }}>
+          <label className="account-field">Code from your authenticator<input name="code" autoComplete="one-time-code" inputMode="numeric" pattern="[0-9 ]{6,9}" required /></label>
+          <Submit busy={busy}>Confirm two-step verification</Submit>
+        </form>
+      </> : <form aria-busy={busy} onSubmit={async event => {
+        event.preventDefault(); const data = new FormData(event.currentTarget); setBusy(true); setError('');
+        try {
+          const result = await accountRequest<{ totpURI: string; backupCodes: string[] }>('auth/two-factor/enable', { password: String(data.get('password')) });
+          if (typeof result.totpURI !== 'string' || !Array.isArray(result.backupCodes)) throw new Error();
+          const uri = new URL(result.totpURI);
+          if (uri.protocol !== 'otpauth:' || !uri.searchParams.get('secret')) throw new Error();
+          setSetup(result);
+        } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); }
+      }}><Password label="Confirm your current password" /><Submit busy={busy}>Set up two-step verification</Submit></form>}
+      {setup && <div className="account-backup-codes">
+        <h3>Save your backup codes privately</h3><p>Each can be used once if you lose your authenticator. These codes are only shown during this setup.</p>
+        <ul>{setup.backupCodes.map(code => <li key={code}><code>{code}</code></li>)}</ul>
+        {confirmed && <button className="account-button" onClick={() => { setSetup(undefined); refresh(); }}>I’ve saved my codes</button>}
+      </div>}
+      {schoolSetup && account.profile.twoFactorEnabled && !setup && <a className="account-button primary" href={schoolSecurityReturn()}>Continue school setup<ArrowRight size={18} /></a>}
+    </section>
+    <section className="account-security-section"><h2>Password & shared computers</h2><p>Use the email recovery flow to replace your password and sign out other sessions. Never leave your adult account open for a student.</p><a href="/#/forgot-password">Reset password by email</a></section>
+  </>;
 }

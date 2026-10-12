@@ -68,7 +68,7 @@ test('live teacher → PDF credentials → student courses', async ({ page }, in
     await page.getByRole('link', { name: 'Manage classes', exact: true }).click();
     await page.getByLabel('Confirm adult password', { exact: true }).fill(password);
     await page.getByRole('button', { name: 'Unlock management', exact: true }).click();
-    await expect(page.getByText('Management unlocked for five minutes')).toBeVisible();
+    await expect(page.getByText('Management unlocked', { exact: true })).toBeVisible();
     await page.getByRole('link', { name: 'Create class', exact: true }).click();
     await page.getByLabel('Class name', { exact: true }).fill('Synthetic Grade 2A');
     await page.getByRole('combobox', { name: 'Grade', exact: true }).selectOption('2');

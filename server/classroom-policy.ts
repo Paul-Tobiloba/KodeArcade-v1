@@ -4,6 +4,7 @@ import type { Database } from './db/client.js';
 import { consumeLoginBudget, throttleKey } from './security/login-throttle.js';
 import { pictureIds } from '../shared/pictures.js';
 import { credentialWords } from './credential-words.js';
+import { managementUnlockSeconds } from '../shared/security-policy.js';
 
 export { curriculumVersion as CURRICULUM_VERSION } from '../shared/progress.js';
 export const assignedCourseKeys = ['grade-1', 'grade-2', 'grade-3', 'grade-4', 'grade-5', 'grade-6'] as const;
@@ -31,7 +32,7 @@ export async function budget(db: Database, secret: string, scope: string, identi
 }
 export type AdultSession = NonNullable<Awaited<ReturnType<Auth['api']['getSession']>>>;
 export const stepCookie = 'kodearcade_management';
-export function stepGrant(secret: string, sessionId: string, expires = Date.now() + 5 * 60_000) {
+export function stepGrant(secret: string, sessionId: string, expires = Date.now() + managementUnlockSeconds * 1000) {
   const payload = `${sessionId}:${expires}`;
   return `${expires}.${createHmac('sha256', secret).update(payload).digest('hex')}`;
 }
@@ -39,7 +40,7 @@ export function validStepGrant(secret: string, sessionId: string, grant = '') {
   const [expires, signature] = grant.split('.');
   if (!/^\d{13}$/.test(expires ?? '') || !/^[a-f0-9]{64}$/.test(signature ?? '')) return false;
   const time = Number(expires);
-  if (time <= Date.now() || time > Date.now() + 5 * 60_000) return false;
+  if (time <= Date.now() || time > Date.now() + managementUnlockSeconds * 1000) return false;
   const expected = stepGrant(secret, sessionId, time).split('.')[1];
   return timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 }

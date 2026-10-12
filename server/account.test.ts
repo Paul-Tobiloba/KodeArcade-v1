@@ -8,6 +8,8 @@ import type { Database } from './db/client.js';
 import { createAuth } from './auth.js';
 import { createApp } from './app.js';
 import { loadConfig } from './config.js';
+import { createOTP } from '@better-auth/utils/otp';
+import { base32 } from '@better-auth/utils/base32';
 
 const client = new PGlite(), db = drizzle(client, { schema });
 const config = loadConfig({ NODE_ENV: 'test', APP_ORIGIN: 'https://learn.example.com', BETTER_AUTH_SECRET: 'synthetic-only-auth-test-f379e95023de43e0beef', DATABASE_URL: 'postgresql://test:test@localhost/test' });
@@ -77,6 +79,31 @@ describe('adult account HTTP integration', () => {
   });
   it('keeps recovery callbacks on the application origin', async () => {
     expect((await request('auth/request-password-reset', { email: 'teacher@example.com', redirectTo: 'https://attacker.test/' })).status).toBeGreaterThanOrEqual(400);
+  });
+  it('keeps MFA optional, verifies enrollment, and preserves MFA checks for adults who opt in', async () => {
+    const cookie = await verifiedAdult('optional-mfa@example.com');
+    const unlocked = await request('manage/management/unlock', { password }, cookie);
+    expect(unlocked.status).toBe(200);
+    expect(await unlocked.json()).toEqual({ unlockedForSeconds: 1800 });
+    expect(unlocked.headers.getSetCookie().join(';')).toContain('Max-Age=1800');
+    const setupResponse = await request('auth/two-factor/enable', { password }, cookie);
+    expect(setupResponse.status).toBe(200);
+    const setup = await setupResponse.json();
+    expect((await (await request('account', undefined, cookie)).json()).profile.twoFactorEnabled).toBe(false);
+    const secret = new TextDecoder().decode(base32.decode(new URL(setup.totpURI).searchParams.get('secret')!));
+    const code = await createOTP(secret).totp();
+    const confirmed = await request('auth/two-factor/verify-totp', { code, trustDevice: false }, cookie);
+    expect(confirmed.status).toBe(200);
+    const enrolledCookie = cookies(confirmed);
+    expect((await (await request('account', undefined, enrolledCookie)).json()).profile.twoFactorEnabled).toBe(true);
+    expect((await request('manage/management/unlock', { password }, enrolledCookie)).status).toBe(403);
+    expect((await request('manage/management/unlock', { password, code: 'invalid' }, enrolledCookie)).status).toBe(400);
+    expect((await request('manage/management/unlock', { password, code }, enrolledCookie)).status).toBe(200);
+    await request('auth/sign-out', {}, enrolledCookie);
+    const signingIn = await request('auth/sign-in/email', { email: 'optional-mfa@example.com', password, rememberMe: false });
+    expect(await signingIn.json()).toMatchObject({ twoFactorRedirect: true });
+    expect((await request('account', undefined, cookies(signingIn))).status).toBe(401);
+    expect((await request('auth/two-factor/verify-totp', { code, trustDevice: false }, cookies(signingIn))).status).toBe(200);
   });
   it('completes password recovery and revokes the previous session', async () => {
     const cookie = await verifiedAdult('recovery@example.com');

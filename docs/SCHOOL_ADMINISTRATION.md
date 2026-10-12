@@ -17,11 +17,12 @@ A school administrator can manage all classes and staff within that school. A sc
 ## Administrator workflow
 
 1. Open **Schools** in the adult workspace. An authorized adult can create a separate school after confirming their authority. This is self-attestation, not verified institutional identity.
-2. Unlock sensitive management for five minutes using the existing password/MFA step-up.
-3. Generate an invitation for a colleague’s email and select Teacher or Administrator. Copy the private link and share it yourself: **no invitation email is sent automatically**.
-4. The colleague signs into a verified adult account with that exact email, reopens the link if necessary, reviews the school/role, unlocks management and confirms acceptance.
-5. Assign one or more school staff members to each school class. Administrators retain access even if no teacher is assigned.
-6. Change a member’s school role or remove school membership using the explicit confirmation. Removal immediately revokes future school/class requests and removes assignments. It does not delete pupils, progress or that adult’s personal workspace. An already delivered response cannot be recalled.
+2. Enable and confirm Better Auth two-step verification before creating or administering a school. Parent and teacher accounts, including school teachers, may opt in but are not required to enroll. An admin invitation cannot be accepted until enrollment is complete; a teacher cannot be promoted to administrator before enrolling. Existing school administrators without 2FA can reach account security, but their school administration and class access are blocked until setup is complete. Personal teaching access is unchanged.
+3. Unlock sensitive management for 30 minutes using the existing password/MFA step-up. The signed grant is bound to the current session, has a matching 1,800-second cookie lifetime, and does not extend the account session. Opted-in adults still confirm their authenticator code when unlocking. Setup links preserve the school action or invitation for the return journey; setup alone never grants a school role.
+4. Generate an invitation for a colleague’s email and select Teacher or Administrator. Copy the private link and share it yourself: **no invitation email is sent automatically**.
+5. The colleague signs into a verified adult account with that exact email, reopens the link if necessary, reviews the school/role, unlocks management and confirms acceptance.
+6. Assign one or more school staff members to each school class. Administrators retain access even if no teacher is assigned.
+7. Change a member’s school role or remove school membership using the explicit confirmation. Removal immediately revokes future school/class requests and removes assignments. It does not delete pupils, progress or that adult’s personal workspace. An already delivered response cannot be recalled.
 
 Invitations expire after seven days and are single-use. Only a SHA-256 token digest is stored. Reissuing for the same school/email invalidates earlier links; revocation or the inviter losing administrator access invalidates pending links. Lost one-time links must be generated again. Tokens are not returned in staff listings or written to audit events.
 

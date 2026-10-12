@@ -4,6 +4,7 @@ import { AccountError, accountErrorMessage, accountRequest, workspaceHref, type 
 import { Notice, Submit } from './AccountUI';
 import { ManagementUnlock } from './ClassroomManager';
 import LoadingScreen from './LoadingScreen';
+import SchoolMfaNotice from './SchoolMfaNotice';
 
 type Role = 'teacher' | 'school_admin';
 type Staff = { userId: string; name: string; email: string; role: Role };
@@ -27,7 +28,7 @@ export default function SchoolManager({ route, account, refresh }: { route: stri
   const [accessUnavailable, setAccessUnavailable] = useState(false);
   const keys = useRef(new Map<string, string>());
   useEffect(() => {
-    if (!admin || route === 'school-join') return;
+    if (!admin || !account.profile.twoFactorEnabled || route === 'school-join') return;
     const controller = new AbortController();
     accountRequest<School>(`schools/${workspace.id}`, undefined, controller.signal).then(setData).catch(failure => {
       if (!controller.signal.aborted) {
@@ -36,7 +37,7 @@ export default function SchoolManager({ route, account, refresh }: { route: stri
       }
     });
     return () => controller.abort();
-  }, [admin, workspace?.id, route, revision]);
+  }, [admin, account.profile.twoFactorEnabled, workspace?.id, route, revision]);
   async function mutate<T>(path: string, body: object, keyed = false): Promise<T | undefined> {
     setBusy(true); setError(''); setMessage('');
     const signature = JSON.stringify([path, body]);
@@ -57,10 +58,11 @@ export default function SchoolManager({ route, account, refresh }: { route: stri
     finally { setBusy(false); }
   }
   if (route === 'school-join') return <JoinSchool account={account} refresh={refresh} />;
+  if (admin && !account.profile.twoFactorEnabled) return <><h1>{workspace.name}</h1><SchoolMfaNotice /></>;
   if (accessUnavailable) return <><h1>School access unavailable</h1><Notice error>Your access may have changed, or this workspace is unavailable. Refresh your workspaces and contact the school administrator if you still need access.</Notice><button className="account-button primary" onClick={refresh}>Refresh workspaces<ArrowRight size={18} /></button></>;
   return <>
     <div className="account-workspace-heading"><div><h1>{admin ? workspace.name : 'Your school workspaces'}</h1><p>{workspace?.kind === 'school' ? `${roleName(workspace.role as Role)} access · School-owned classes and records` : 'Teach independently, join a school, or do both with the same account.'}</p></div><Building2 size={30} /></div>
-    <ManagementUnlock mfa={account.profile.twoFactorEnabled === true} />
+    {account.profile.twoFactorEnabled && <ManagementUnlock mfa />}
     {error && <Notice error>{error}</Notice>}
     {message && <Notice>{message}</Notice>}
     {replacement && <section className="account-private-card" aria-label="Replace lost invitation"><h2>Replace the lost invitation</h2><p>Generate a new private link for {replacement.body.email}. The previous invitation link will stop working.</p><button className="account-button primary" disabled={busy} onClick={async () => {
@@ -94,11 +96,11 @@ export default function SchoolManager({ route, account, refresh }: { route: stri
         if (await mutate(`schools/${workspace.id}/classes/${room.id}/staff`, { userIds, previous: room.staffIds, confirm: true })) { refresh(); }
       }} /><a href={workspaceHref(`classroom?id=${room.id}`, workspace.id)}>Open class and reports<ArrowRight size={16} /></a></details>) : <p>No school classes yet. <a href={workspaceHref('class-new', workspace.id)}>Create a school class</a>; your personal classes will not be moved.</p>}</section>
     </>}
-    <section className="account-school-section"><details open={new URLSearchParams(location.hash.split('?')[1]).get('setup') === '1' || undefined}><summary><Building2 size={18} />Create a separate school workspace</summary><p>Only create this if you are authorized to administer the school. You will become its initial administrator. This does not verify the school’s identity or transfer your existing classes.</p><form className="account-management-form" aria-busy={busy} onSubmit={async event => {
+    <section className="account-school-section"><details open={new URLSearchParams(location.hash.split('?')[1]).get('setup') === '1' || undefined}><summary><Building2 size={18} />Create a separate school workspace</summary><p>Only create this if you are authorized to administer the school. You will become its initial administrator. This does not verify the school’s identity or transfer your existing classes.</p>{!account.profile.twoFactorEnabled ? <SchoolMfaNotice /> : <form className="account-management-form" aria-busy={busy} onSubmit={async event => {
       event.preventDefault(); const form = new FormData(event.currentTarget);
       const result = await mutate<{ id: string }>('schools', { name: form.get('name'), confirmAuthority: true }, true);
       if (result) { refresh(); location.hash = `/schools?workspace=${result.id}`; }
-    }}><label className="account-field">School name<input name="name" minLength={2} maxLength={80} required /></label><label className="account-checkbox"><input type="checkbox" required />I am authorized to administer this school.</label><Submit busy={busy}>Create school workspace</Submit></form></details><p>Joining an existing school? Ask its administrator for a private invitation link. A school name or classroom code cannot grant staff access.</p></section>
+    }}><label className="account-field">School name<input name="name" minLength={2} maxLength={80} required /></label><label className="account-checkbox"><input type="checkbox" required />I am authorized to administer this school.</label><Submit busy={busy}>Create school workspace</Submit></form>}</details><p>Joining an existing school? Ask its administrator for a private invitation link. A school name or classroom code cannot grant staff access.</p></section>
   </>;
 }
 
@@ -119,5 +121,19 @@ function JoinSchool({ account, refresh }: { account: Account; refresh: () => voi
     accountRequest<{ name: string; role: Role; expiresAt: string }>('schools/invitation', { token }, controller.signal).then(setInvitation).catch(failure => { if (!controller.signal.aborted) setError(accountErrorMessage(failure)); });
     return () => controller.abort();
   }, [token]);
-  return <><h1>Join a school workspace</h1><p>Signed in as {account.profile.email}. Only the invited email can accept this link. If you need to sign in first, reopen your original invitation afterwards.</p>{error && <Notice error>{error}</Notice>}{!invitation && !error && <LoadingScreen embedded label="Checking your invitation…" />}{invitation && <><h2>{invitation.name}</h2><p>You have been invited as a {roleName(invitation.role).toLowerCase()}. {invitation.role === 'school_admin' ? 'Administrators can manage all school classes and staff.' : 'Teachers can access only their assigned school classes.'} Your personal workspace and existing classes will not change.</p><ManagementUnlock mfa={account.profile.twoFactorEnabled === true} /><form aria-busy={busy} onSubmit={async event => { event.preventDefault(); setBusy(true); setError(''); try { const result = await accountRequest<{ id: string }>('schools/accept', { token, confirm: true }); refresh(); location.hash = `/dashboard?workspace=${result.id}`; } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><label className="account-checkbox"><input type="checkbox" required disabled={busy} />Join {invitation.name} with this school role.</label><Submit busy={busy}>Accept invitation<ShieldCheck size={18} /></Submit></form></>}<a className="account-button account-school-join-back" href="/#/dashboard">Back to my workspace</a></>;
+  return <><h1>Join a school workspace</h1><p>Signed in as {account.profile.email}. Only the invited email can accept this link. If you need to sign in first, reopen your original invitation afterwards.</p>
+    {error && <Notice error>{error}</Notice>}
+    {!invitation && !error && <LoadingScreen embedded label="Checking your invitation…" />}
+    {invitation && <><h2>{invitation.name}</h2><p>You have been invited as a {roleName(invitation.role).toLowerCase()}. {invitation.role === 'school_admin' ? 'Administrators can manage all school classes and staff.' : 'Teachers can access only their assigned school classes.'} Your personal workspace and existing classes will not change.</p>
+      {invitation.role === 'school_admin' && !account.profile.twoFactorEnabled ? <SchoolMfaNotice /> : <>
+        <ManagementUnlock mfa={account.profile.twoFactorEnabled === true} />
+        <form aria-busy={busy} onSubmit={async event => {
+          event.preventDefault(); setBusy(true); setError('');
+          try { const result = await accountRequest<{ id: string }>('schools/accept', { token, confirm: true }); refresh(); location.hash = `/dashboard?workspace=${result.id}`; }
+          catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); }
+        }}><label className="account-checkbox"><input type="checkbox" required disabled={busy} />Join {invitation.name} with this school role.</label><Submit busy={busy}>Accept invitation<ShieldCheck size={18} /></Submit></form>
+      </>}
+    </>}
+    <a className="account-button account-school-join-back" href="/#/dashboard">Back to my workspace</a>
+  </>;
 }

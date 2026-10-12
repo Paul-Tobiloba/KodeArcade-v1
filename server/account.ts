@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { and, eq, or } from 'drizzle-orm';
+import { and, eq, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { Hono } from 'hono';
 import type { Auth } from './auth.js';
@@ -20,7 +20,7 @@ export function createAccountRoutes(auth: Auth, db: Database) {
       .from(classroom).innerJoin(organization, eq(organization.id, classroom.organizationId))
       .innerJoin(organizationMember, and(eq(organizationMember.organizationId, classroom.organizationId), eq(organizationMember.userId, session.user.id)))
       .leftJoin(classroomStaff, and(eq(classroomStaff.classroomId, classroom.id), eq(classroomStaff.organizationId, classroom.organizationId), eq(classroomStaff.userId, session.user.id)))
-      .where(or(and(eq(organization.kind, 'school'), eq(organizationMember.role, 'school_admin')), and(eq(organizationMember.role, 'teacher'), eq(classroomStaff.userId, session.user.id))));
+      .where(or(and(eq(organization.kind, 'school'), eq(organizationMember.role, 'school_admin'), sql`${session.user.twoFactorEnabled === true}`), and(eq(organizationMember.role, 'teacher'), eq(classroomStaff.userId, session.user.id))));
     return c.json({ profile: { name: session.user.name, email: session.user.email, twoFactorEnabled: session.user.twoFactorEnabled }, workspaces, classes });
   });
   app.post('/onboarding', async c => {
