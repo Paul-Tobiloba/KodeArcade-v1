@@ -217,17 +217,24 @@
 .run-log p { margin-top: 8px; line-height: 1.6; }
 .star-dialog { text-align: center; padding: 46px 34px 30px; background: #fff; position: fixed; }
 .celebration-close { position: absolute; top: 10px; right: 10px; width: 44px; height: 44px; color: #586477; }
-.reward-stars { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 100px; margin-block: 8px 20px; }
-.reward-stars svg { width: clamp(32px,8vw,60px); height: auto; }
-.reward-stars .unearned { color: #ddd2b5; }
-.reward-stars .earned { color: #ffbd28; stroke: #d89009; animation: star-arrives 450ms cubic-bezier(.16,1,.3,1) both; }
+.reward-stars { display: grid; grid-template-columns: .58fr .8fr 1fr .8fr .58fr; align-items: center; gap: 4px; width: min(100%, 392px); min-height: 136px; margin: 8px auto 20px; }
+.reward-star-slot { display: block; min-width: 0; transform: translateY(22px); }
+.reward-star-slot:nth-child(2), .reward-star-slot:nth-child(4) { transform: translateY(8px); }
+.reward-star-slot:nth-child(3) { transform: translateY(-8px); }
+.reward-star { position: relative; display: block; width: 100%; aspect-ratio: 1; }
+.reward-star img { display: block; width: 100%; height: 100%; object-fit: contain; user-select: none; }
+.reward-star.unearned img { filter: grayscale(1); opacity: .3; }
+.reward-stars .earned { animation: star-arrives 500ms cubic-bezier(.16,1,.3,1) both; }
+.reward-star-shine { position: absolute; inset: 0; pointer-events: none; opacity: 0; background: linear-gradient(110deg, transparent 38%, #ffffffb3 49%, transparent 60%); background-size: 300% 100%; mask: url('/images/rewards/golden-star.png') center / contain no-repeat; }
+.earned .reward-star-shine { animation: star-shine 700ms 200ms ease-out both; }
 .star-dialog h2 { font-family: Fredoka,sans-serif; font-size: 2.5rem; margin-bottom: 14px; }
 .star-dialog .feedback-message { color: #465269; font-size: 1.05rem; line-height: 1.7; max-width: 30ch; margin: 0 auto 26px; }
 .celebration-next { width: 100%; min-height: 56px; font-size: 1.1rem; }
 .star-dialog .next-challenge-label { margin-top: 18px; color: #586477; }
-@keyframes star-arrives { from { transform: translateY(16px) scale(.65) rotate(-12deg); filter: brightness(1.3); } to { transform: translateY(0) scale(1) rotate(0); filter: brightness(1); } }
-.still-stars .earned { animation: none; }
-@media(prefers-reduced-motion: reduce) { .reward-stars .earned { animation: none; } }
+@keyframes star-arrives { 0% { transform: scale(.55); } 65% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes star-shine { 0% { background-position: 100% 0; opacity: 0; } 30% { opacity: .8; } 100% { background-position: 0 0; opacity: 0; } }
+.still-stars .earned, .still-stars .reward-star-shine { animation: none; }
+@media(prefers-reduced-motion: reduce) { .reward-stars .earned, .reward-star-shine { animation: none; } }
 @container(max-width: 800px) { .course-app .workspace-grid { grid-template-columns: minmax(0,1fr); }.course-app .board { max-width: 360px; }.course-app .board-surround { padding: 30px 10%; } }
 @media(max-width: 600px) { .course-app .course-main { padding: 18px 14px; }.mission-tools { gap: 8px; }.challenge-reward { flex-wrap: wrap; }.challenge-reward>span:last-child { font-size: .7rem; }.course-app .board-surround { padding: 30px 8%; }.course-app .scene .goal { min-height: 68px; }.star-dialog { padding: 40px 24px 26px; }.star-dialog h2 { font-size: 2rem; }.retry-toast { padding: 10px; }.retry-toast p { font-size: .8rem; } }
 
