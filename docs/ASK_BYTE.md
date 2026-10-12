@@ -52,6 +52,37 @@ docker compose --env-file /home/bytepilot/kodearcade-byte-pilot/.env --project-d
 
 Stop the development SSH tunnel and disable the local pilot separately. Do not run `docker compose down` from the n8n directory or delete Ollama models/volumes. Container support is preparation, not evidence of a live connection or successful model evaluation.
 
+### Opt-in local launch without editing secrets into .env
+
+After privately transferring `gateway.env` outside the repository, run:
+
+```text
+node scripts/start-byte-pilot.mjs /PRIVATE/PATH/gateway.env YOUR_VERIFIED_ADULT_USER_ID
+```
+
+This launcher loads existing `.env` configuration, reads only the small gateway credential file, enables the pilot for exactly one supplied adult ID in that process, fixes its gateway URL to the loopback tunnel and starts the normal API. It rejects production and Vercel environments. It does not edit `.env` or persist the token/allowlist. Stop any previous API process first to avoid a port conflict. The normal `npm run dev:server` remains AI-off when the underlying `.env` has no pilot setting. Existing server checks still require a verified adult session and reject learners, even when a learner ID is mistakenly supplied. The launcher does not create sessions or bypass sign-in.
+
+An optional serial smoke check sends four fixed synthetic questions (loops, sequence, ELSE and an off-topic dinner question) through the private gateway:
+
+```text
+node --import tsx scripts/evaluate-byte-gateway.ts /PRIVATE/PATH/gateway.env
+node --test scripts/start-byte-pilot.test.mjs scripts/byte-gateway.test.mjs
+```
+
+It stops on the first failed response, prints timings and synthetic answers, and writes no result/history file. These four checks are not a child-safety evaluation or classroom load test. Check the signed-in browser → application API → gateway → Qwen → rendered answer separately. Do not replay real student work for testing.
+
+### Known pilot limitation: cold model startup
+
+The October 12 live check reached the private VPS gateway, but two cold requests exceeded its 45-second deadline and returned 503. After a separate no-prompt preload, the four synthetic checks passed. Cold readiness is **not** resolved. Do not raise resource caps, extend request deadlines or leave the model resident indefinitely to conceal this limitation.
+
+For a supervised test, an operator can preload the existing model on the VPS immediately before submitting a question:
+
+```sh
+curl --max-time 90 -sS http://127.0.0.1:11434/api/generate -H 'Content-Type: application/json' -d '{"model":"qwen3.5:2b","keep_alive":"2m","stream":false,"options":{"num_ctx":2048}}'
+```
+
+This generates no explanation and loads the model for a short idle window. It still consumes resources under the existing Ollama caps. The gateway also requests a two-minute keep-alive; another cold start may occur after idle time. Preloading is an operator step for this adult development pilot, not an unattended deployment solution. See [live verification evidence](ASK_BYTE_LIVE_VERIFICATION.md) and the [Ollama preload/keep-alive documentation](https://docs.ollama.com/faq).
+
 References: [Docker Compose service controls](https://docs.docker.com/reference/compose-file/services/), [Linux host networking](https://docs.docker.com/engine/network/drivers/host/), [Node environment-file loading](https://nodejs.org/api/cli.html#--env-filefile).
 
 ## Boundaries and limits
