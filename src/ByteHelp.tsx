@@ -24,13 +24,13 @@ export default function ByteHelp({ topic, goal, program }: { topic: ByteTopic; g
   }, [session?.user.id, session?.user.principalKind]);
   useEffect(() => { request.current?.abort(); request.current = null; setBusy(false); setMessages([]); setQuestion(''); setError(''); }, [topic, goal]);
   useEffect(() => { if (open) input.current?.focus({ preventScroll: true }); }, [open]);
-  useEffect(() => { if (open && transcript.current) transcript.current.scrollTop = transcript.current.scrollHeight; }, [messages, busy, open]);
+  useEffect(() => { if (open && transcript.current) transcript.current.scrollTop = messages.length || busy ? transcript.current.scrollHeight : 0; }, [messages, busy, open]);
   function cancel() { request.current?.abort(); request.current = null; setBusy(false); }
   function close() { cancel(); setOpen(false); requestAnimationFrame(() => launch.current?.focus({ preventScroll: true })); }
   function append(who: Message['who'], text: string) { setMessages(previous => [...previous, { who, text }].slice(-12)); }
   async function send(text = question, local?: string) {
     if (busy || text.trim().length < 8) return;
-    const value = text.trim(); setQuestion(''); setError(''); append('you', value);
+    const value = text.trim(); setQuestion(''); setError(''); append('you', value); input.current?.focus({ preventScroll: true });
     if (local || !pilot || !byteQuestionAllowed(value)) { append('byte', local ?? (!byteQuestionAllowed(value) ? byteRedirect : localByteAnswer(value, topic, goal, program))); return; }
     const controller = new AbortController(); request.current = controller; setBusy(true);
     try {
@@ -49,17 +49,16 @@ export default function ByteHelp({ topic, goal, program }: { topic: ByteTopic; g
     {!open && <button ref={launch} type="button" className="byte-launch" onClick={() => setOpen(true)} aria-expanded={false} aria-controls={id}><CharacterSprite concept="Sequences" /><span>Ask Byte</span></button>}
     {open && <section id={id} className="byte-chat" role="dialog" aria-modal="false" aria-labelledby={`${id}-title`} onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close(); } }}>
       <div className="byte-chat-heading"><CharacterSprite concept="Sequences" /><div><h2 id={`${id}-title`}>Ask Byte</h2><p>{pilot ? 'Experimental AI · adult tester only' : 'Lesson help · on this device'}</p></div><button type="button" aria-label="Close Byte chat" onClick={close}><X size={20} /></button></div>
-      <p className="byte-chat-intro">Ask about coding or this activity. I’ll help you think, not give the whole solution. Don’t share personal details.</p>
       <div className="byte-transcript" ref={transcript} role="log" aria-live="polite" aria-relevant="additions text" aria-label="Conversation with Byte">
-        {!messages.length && <p>Hi! What are you working on? Try a question below, or type your own.</p>}
+        {!messages.length && <><p className="byte-chat-intro">Ask about coding or this activity. I’ll help you think, not give the whole solution. Don’t share personal details.</p><p>Hi! What are you working on? Try a question below, or type your own.</p>
+          <div className="byte-starters">{starters.map(({ label, question: value, answer, icon: Icon }) => <button type="button" key={label} disabled={busy} onClick={() => { void send(value, answer); }}><Icon size={16} />{label}</button>)}</div></>}
         {messages.map((message, index) => <div key={index} className={`byte-message byte-message-${message.who}`}><strong>{message.who === 'byte' ? 'Byte' : 'You'}</strong><p>{message.text}</p>{message.who === 'byte' && <ReadAloud text={message.text} label="Listen to Byte" />}</div>)}
         {busy && <p role="status">Byte is thinking… You can keep coding. The experimental model may take up to 45 seconds.</p>}
+        {error && <p className="byte-chat-error" role="alert">{error}</p>}
       </div>
-      <div className="byte-starters">{starters.map(({ label, question: value, answer, icon: Icon }) => <button type="button" key={label} disabled={busy} onClick={() => { void send(value, answer); }}><Icon size={16} />{label}</button>)}</div>
-      {error && <p className="byte-chat-error" role="alert">{error}</p>}
       <form onSubmit={event => { event.preventDefault(); void send(); }} aria-busy={busy}>
         <label htmlFor={`${id}-question`}>Your coding question</label><textarea ref={input} id={`${id}-question`} value={question} onChange={event => setQuestion(event.target.value)} required minLength={8} maxLength={300} rows={2} placeholder="Why does my loop repeat too many times?" disabled={busy} />
-        <div><small>{question.length}/300</small>{busy ? <button type="button" onClick={cancel}>Cancel reply</button> : <button type="submit" disabled={question.trim().length < 8}><Send size={16} />Ask Byte</button>}<button type="button" disabled={busy || !messages.length} onClick={() => { setMessages([]); setError(''); }}>Clear chat</button></div>
+        <div><small>{question.length}/300</small>{busy ? <button type="button" onClick={cancel}>Cancel reply</button> : <button type="submit" disabled={question.trim().length < 8}><Send size={16} />Ask Byte</button>}<button type="button" disabled={busy || !messages.length} onClick={() => { setMessages([]); setError(''); input.current?.focus({ preventScroll: true }); }}>Clear chat</button></div>
       </form>
       <p className="byte-chat-note">{pilot ? 'Typed questions go to the private AI gateway. AI can be wrong. Code checks stay on-device.' : 'Authored coding help, not live AI. Your questions and program stay on this device.'} Chat clears when you leave this activity.</p>
     </section>}

@@ -8,6 +8,10 @@ The **adult-only private lab** is at `/#/byte-lab`, linked from adult Account & 
 
 ## Private development setup
 
+### Chat layout
+
+The conversation uses the available panel height, with its own scroll area and a visible composer. Starter buttons disappear together after the first question (typed or selected); **Clear chat** restores them. The welcome copy shares the empty conversation area rather than taking space from replies. Desktop, phone, tablet and a 438px-high window are covered by the widget's browser tests.
+
 Do not change n8n, its compose project, Traefik routing or Ollama's loopback binding. No ports need to be opened in the firewall. The standalone gateway uses Node 22+ and has no npm dependencies. Review `scripts/byte-gateway.mjs`, copy that file to a separate VPS directory and run it with a dedicated unprivileged OS account. It binds only `127.0.0.1:11435` and calls Ollama only at `127.0.0.1:11434`.
 
 1. Generate a separate random gateway token locally: `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`. Keep it private; do not paste it into chat or commit it.

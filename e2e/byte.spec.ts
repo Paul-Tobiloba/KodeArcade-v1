@@ -22,6 +22,8 @@ test('activity widget uses the allowlisted adult pilot, keeps code checks local 
   await page.locator('.byte-launch').click(); await expect(page.locator('.byte-chat')).toContainText('adult tester only');
   await page.getByLabel('Your coding question').fill('Why does my coding loop need a count?');
   await page.locator('.byte-chat button[type=submit]').click(); await expect(page.locator('.byte-transcript')).toContainText('Synthetic pilot hint');
+  await expect(page.locator('.byte-starters')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Clear chat' }).click();
   await page.getByRole('button', { name: 'Help check my code' }).click(); expect(calls).toBe(1);
   mode = 'slow'; await page.getByLabel('Your coding question').fill('How do I check the coding loop count?');
   await page.locator('.byte-chat button[type=submit]').click(); await page.getByRole('button', { name: 'Cancel reply' }).click();
@@ -44,8 +46,14 @@ test('Byte offers local help without bypassing hints, with responsive keyboard a
   await expect(page.getByRole('button', { name: 'Explain this topic' })).toBeVisible();
   await page.getByRole('button', { name: 'Explain this topic' }).click();
   await expect(page.locator('.byte-transcript')).toContainText('sequence is a set of instructions in order');
+  await expect(page.locator('.byte-starters')).toHaveCount(0);
+  await expect(page.getByLabel('Your coding question')).toBeFocused();
+  await page.getByRole('button', { name: 'Clear chat' }).click();
+  await expect(page.locator('.byte-starters button')).toHaveCount(3);
   await page.getByRole('button', { name: 'What is my task?' }).click();
   await expect(page.locator('.byte-transcript')).toContainText('charging station');
+  await expect(page.locator('.byte-starters')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Clear chat' }).click();
   await page.getByRole('button', { name: 'Help check my code' }).click();
   await expect(page.locator('.byte-transcript')).toContainText('No instructions are connected');
   await expect(page.getByRole('button', { name: 'Reveal first hint' })).toBeVisible();
@@ -57,6 +65,13 @@ test('Byte offers local help without bypassing hints, with responsive keyboard a
   await page.locator('.byte-chat button[type=submit]').click();
   await expect(page.locator('.byte-transcript')).toContainText('I help with coding');
   expect(calls).toBe(0);
+  const layout = await page.locator('.byte-chat').evaluate(panel => {
+    const log = panel.querySelector('.byte-transcript')!, form = panel.querySelector('form')!;
+    return { height: panel.clientHeight, conversationHeight: log.clientHeight, nestedScroll: panel.scrollHeight > panel.clientHeight + 1, composerBottom: form.getBoundingClientRect().bottom, bottom: panel.getBoundingClientRect().bottom };
+  });
+  expect(layout.conversationHeight).toBeGreaterThan(layout.height * .4);
+  expect(layout.nestedScroll).toBe(false);
+  expect(layout.composerBottom).toBeLessThan(layout.bottom);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(() => window.scrollTo(0, 0));
@@ -68,6 +83,32 @@ test('Byte offers local help without bypassing hints, with responsive keyboard a
   await expect(page.locator('.hint-current')).toBeVisible();
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('kodearcade-v1')!).progress['grade-2-sequences-1'].hints)).toBe(1);
   expect(errors).toEqual([]);
+});
+
+test('Byte keeps the composer visible in short windows and scrolls only the conversation', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'Short-window check supplements the three device layouts.');
+  await page.setViewportSize({ width: 1024, height: 438 });
+  await page.goto('/#/learn/grade-2');
+  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.locator('.byte-launch').click();
+  await page.getByRole('button', { name: 'Explain this topic' }).click();
+  for (let i = 0; i < 4; i++) {
+    await page.getByLabel('Your coding question').fill('Why does my loop repeat too many times?');
+    await page.locator('.byte-chat button[type=submit]').click();
+  }
+  const dimensions = await page.locator('.byte-chat').evaluate(panel => {
+    const log = panel.querySelector('.byte-transcript')!;
+    return { top: panel.getBoundingClientRect().top, bottom: panel.getBoundingClientRect().bottom, viewport: innerHeight, panelOverflow: panel.scrollHeight > panel.clientHeight + 1, transcriptHeight: log.clientHeight, transcriptOverflow: log.scrollHeight > log.clientHeight };
+  });
+  expect(dimensions.top).toBeGreaterThanOrEqual(0);
+  expect(dimensions.bottom).toBeLessThanOrEqual(dimensions.viewport);
+  expect(dimensions.panelOverflow).toBe(false);
+  expect(dimensions.transcriptHeight).toBeGreaterThan(120);
+  expect(dimensions.transcriptOverflow).toBe(true);
+  await expect(page.locator('.byte-starters')).toHaveCount(0);
+  await expect(page.getByLabel('Your coding question')).toBeInViewport();
+  await expect(page.getByRole('button', { name: 'Clear chat' })).toBeInViewport();
+  await page.screenshot({ path: '.impeccable/review/byte-chat-short-desktop.png' });
 });
 
 test('adult lab is visibly disabled by default and never submits on load', async ({ page }, info) => {
