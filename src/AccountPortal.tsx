@@ -11,6 +11,7 @@ import FamilyManager from './FamilyManager';
 import './account.css';
 
 const privateRoutes = new Set(['family', 'onboarding', 'dashboard', 'classes', 'classroom', 'class-new', 'learners', 'learner-new', 'account-settings', 'schools', 'school-join']);
+privateRoutes.add('byte-lab');
 
 export default function AccountPortal({ route }: { route: string }) {
   const [capabilities, setCapabilities] = useState<Capabilities>();

@@ -41,6 +41,10 @@ The primary audience is young learners aged 6–14 who are new to programming, p
 
 ## Current stage
 
+### Ask Byte learning help
+
+Movement and drawing activities include authored topic explanations, task reminders and local structural code checks in **Lesson & instructions → Ask Byte**. Existing progressive hints keep their star rules. A separate adult-only AI evaluation lab is disabled by default; students cannot access the model. See [private Byte setup and limits](docs/ASK_BYTE.md) before connecting the optional loopback Ollama gateway. No model connection is required for student lesson help.
+
 A local React/TypeScript prototype covers four modules of ten Byte challenges and a creative route project, with separate progress for each coding course, plus twenty computer-introduction activities. Informal testing with the owner's children informed the age-labelled courses and fixed-screen workspace. The submission deadline is Friday, 9 October 2026; formal curriculum validation remains pending.
 
 The [spiral curriculum brief](docs/SPIRAL_CURRICULUM.md) records the expanded curriculum, 1–5-star rewards and age-specific assessments. Five-question topic quizzes now end every shipped coding module, with age-banded questions, explanations, retries and protected best results. Quiz results are separate from challenge stars. See [workspace reward notes](docs/WORKSPACE_REWARDS.md).

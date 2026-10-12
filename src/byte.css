@@ -1,0 +1,32 @@
+.byte-help { margin: 18px 0; border-block: 1px solid var(--line, #ded9ed); color: var(--ink, #181339); }
+.byte-help > summary { display: flex; align-items: center; gap: 10px; min-height: 68px; padding: 10px 0; cursor: pointer; list-style: none; }
+.byte-help > summary::-webkit-details-marker { display: none; }
+.byte-help > summary > .character-sprite { width: 44px; height: 44px; flex: 0 0 44px; }
+.byte-help > summary > span:not(.character-sprite) { flex: 1; min-width: 0; }
+.byte-help summary strong { display: block; font-family: Fredoka, 'Segoe UI', sans-serif; font-size: 1rem; font-weight: 600; }
+.byte-help summary span span { display: block; font-size: .875rem; color: var(--muted, #575472); }
+.byte-help > summary > svg { transition: transform 180ms ease-out; }
+.byte-help[open] > summary > svg { transform: rotate(180deg); }
+.byte-help-content { padding-bottom: 16px; }
+.byte-help-content > p { margin: 0 0 12px; font-size: .875rem; line-height: 1.6; }
+.byte-actions { display: grid; gap: 8px; }
+.byte-actions button { display: flex; align-items: center; gap: 9px; min-height: 44px; padding: 10px 12px; text-align: left; background: #fff; color: #241259; border: 1px solid #c6b6e8; border-radius: 8px; font: 600 .875rem/1.4 'Segoe UI', sans-serif; cursor: pointer; }
+.byte-actions button:hover, .byte-actions button[aria-pressed=true] { background: #ede8ff; border-color: #6237df; }
+.byte-actions button:active { background: #ded9ed; }
+.byte-help :focus-visible, .byte-lab :focus-visible { outline: 3px solid #986cf5; outline-offset: 3px; }
+.byte-answer { margin: 16px 0 12px; padding: 14px; border-radius: 12px; background: #f7f4fe; font-size: .875rem; line-height: 1.6; overflow-wrap: anywhere; }
+.byte-answer h3 { display: flex; align-items: center; gap: 7px; margin: 0 0 8px; font: 600 .875rem/1.4 'Segoe UI', sans-serif; }
+.byte-answer p { margin: 0 0 10px; }
+.byte-answer p:last-child { margin-bottom: 0; }
+.byte-answer .read-aloud { margin-top: 2px; }
+.byte-help-content .byte-help-note { margin: 0; font-size: .875rem; color: var(--muted, #575472); }
+.byte-lab { max-width: 760px; }
+.byte-lab p { max-width: 70ch; }
+.byte-lab select, .byte-lab textarea { width: 100%; font: inherit; caret-color: #6237df; }
+.byte-lab textarea { min-height: 112px; resize: vertical; padding: 11px 13px; border: 1px solid #bcb3dc; border-radius: 12px; background: #fcfbff; color: #181339; }
+.byte-lab textarea::placeholder { color: #6a617c; opacity: 1; }
+.byte-lab textarea:disabled { opacity: .65; }
+.byte-lab .byte-answer { font-size: 1rem; }
+.byte-lab-status { padding: 16px; background: #f7f4fe; border-radius: 12px; }
+.byte-lab-status h2 { margin: 0 0 8px; }
+@media (prefers-reduced-motion: reduce) { .byte-help > summary > svg { transition: none; } }

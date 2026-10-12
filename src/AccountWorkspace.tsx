@@ -4,6 +4,7 @@ import { accountErrorMessage, accountRequest, workspaceHref, type Account, type 
 import { Notice, Password, Submit } from './AccountUI';
 import ClassroomManager from './ClassroomManager';
 import SchoolManager from './SchoolManager';
+import ByteLab from './ByteLab';
 
 export function Onboarding({ account }: { account: Account }) {
   const [role, setRole] = useState('teacher');
@@ -16,7 +17,8 @@ export default function AccountWorkspace({ route, account, capabilities, refresh
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const parent = account.workspaces[0]?.kind === 'family';
-  if (route === 'account-settings') return <SecuritySettings account={account} refresh={refresh} />;
+  if (route === 'byte-lab') return <ByteLab />;
+  if (route === 'account-settings') return <><SecuritySettings account={account} refresh={refresh} /><section className="account-security-section"><h2>Experimental learning tools</h2><p>Byte’s private AI lab is disabled by default and requires explicit adult tester approval. Student lesson help uses authored explanations.</p><a href="/#/byte-lab">View private lab status</a></section></>;
   if (route === 'schools' || route === 'school-join') return <SchoolManager route={route} account={account} refresh={refresh} />;
   if (capabilities?.classManagement && ['classes', 'classroom', 'class-new', 'learners', 'learner-new'].includes(route)) return <ClassroomManager route={route} account={account} refresh={refresh} />;
   if (route === 'class-new' || route === 'learner-new') return <><a className="account-back" href={route === 'class-new' ? '/#/classes' : '/#/learners'}><ArrowLeft size={17} />Back</a><h1>{route === 'class-new' ? 'Set up a class' : 'Add a learner'}</h1><Notice>This form is not active yet. {route === 'class-new' ? 'Classroom creation and course assignments' : 'Generated credentials and printable login cards'} still need their server integration. No information is saved here.</Notice><form className="account-management-form"><fieldset disabled><label className="account-field">{route === 'class-new' ? 'Class name' : 'Learner display name'}<input /></label><label className="account-field">Grade<select defaultValue="1">{[1, 2, 3, 4, 5, 6].map(grade => <option key={grade} value={grade}>Grade {grade}</option>)}</select></label>{route === 'learner-new' && <><label className="account-field">Login method<select><option>Picture password (Grades 1–2)</option><option>Generated text password</option></select></label><p>The teacher will choose the method. KodeArcade will generate a credential and a printable login card—not ask for a child’s email.</p></>}<button className="account-button primary" type="button">{route === 'class-new' ? 'Create class' : 'Generate login card'}</button></fieldset></form></>;

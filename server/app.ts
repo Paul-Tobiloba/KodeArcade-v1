@@ -10,8 +10,9 @@ import { createStudentRoutes } from './student.js';
 import { createProgressRoutes } from './progress.js';
 import { createSchoolRoutes } from './schools.js';
 import { createFamilyRoutes } from './family.js';
+import { createByteRoutes, type BytePilotConfig } from './byte.js';
 
-export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig, 'APP_ORIGIN'> & Partial<Pick<ServerConfig, 'BETTER_AUTH_SECRET'>>, accounts?: { auth: Auth; db: Database }) {
+export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig, 'APP_ORIGIN'> & Partial<Pick<ServerConfig, 'BETTER_AUTH_SECRET'>>, accounts?: { auth: Auth; db: Database }, bytePilot?: BytePilotConfig) {
   const app = new Hono();
   app.use('*', secureHeaders());
   app.use('/api/*', async (c, next) => { c.header('Cache-Control', 'no-store'); await next(); });
@@ -55,6 +56,7 @@ export function createApp(auth: Pick<Auth, 'handler'>, config: Pick<ServerConfig
       app.route('/api/manage', createClassroomRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/schools', createSchoolRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/family', createFamilyRoutes(accounts.auth, accounts.db, classroomConfig));
+      app.route('/api/byte', createByteRoutes(accounts.auth, accounts.db, config.BETTER_AUTH_SECRET, bytePilot));
       app.route('/api/student', createStudentRoutes(accounts.auth, accounts.db, classroomConfig));
       app.route('/api/student/progress', createProgressRoutes(accounts.auth, accounts.db, classroomConfig));
     }

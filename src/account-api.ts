@@ -1,4 +1,5 @@
 export const accountRoutes = new Set(['family', 'home-login', 'login', 'student-login', 'student-courses', 'adult-login', 'signup', 'check-email', 'email-verified', 'forgot-password', 'reset-password', 'two-factor', 'onboarding', 'dashboard', 'classes', 'classroom', 'class-new', 'learners', 'learner-new', 'account-settings', 'schools', 'school-join']);
+accountRoutes.add('byte-lab');
 export function accountRoute(hash: string) {
   const route = hash.replace(/^#\//, '').split('?')[0];
   return accountRoutes.has(route) ? route : undefined;
