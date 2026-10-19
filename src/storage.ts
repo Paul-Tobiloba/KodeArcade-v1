@@ -1,11 +1,15 @@
 import { directions, initialProgram, missions, same, type Block, type Position } from './learning';
 import { firstChallenge, isCourse, type CourseId } from './courses';
 import { SEQUENCE_TOPIC, type TopicRecord } from './topicJourney';
-export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
+import { activityStorage } from './activityStorage';
+import { validRepeatCount } from '../shared/repeats.js';
+import { validWorkspace } from '../shared/studioGallery.js';
+import { courseQuizIds, quizRecord, type QuizRecord } from '../shared/quizzes';
+export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; workspaceTour?: 'completed' | 'skipped'; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
-export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord> };
+export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord>; quizzes: Record<string, QuizRecord> };
 export const SAVE_KEY = 'kodearcade-v1';
-export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [], topicRecords: {} });
+export const emptySave = (): Save => ({ version: 1, nickname: '', reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false, current: missions.findIndex(m => m.id === firstChallenge('grade-1')), progress: {}, course: 'grade-1', courseProgress: {}, basicsComplete: [], topicRecords: {}, quizzes: {} });
 export function switchCourse(save: Save, course: CourseId): Save {
   if (save.course === course) return save;
   const target = save.courseProgress[course] ?? { current: missions.findIndex(m => m.id === firstChallenge(course)), progress: {} };
@@ -13,11 +17,17 @@ export function switchCourse(save: Save, course: CourseId): Save {
 }
 export function freshProgress(index: number): Progress { return { blocks: initialProgram(missions[index]), attempts: 0, hints: 0, complete: false, worldLayout: 'tiles-v1' }; }
 const object = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
+const allowedQuizzes = new Set(['words', ...Array.from({ length: 6 }, (_, i) => `grade-${i + 1}`)].flatMap(course => courseQuizIds(course, true)));
 export function parseSave(raw: string | null): Save {
   if (!raw) return emptySave();
   const value: unknown = JSON.parse(raw);
   if (!object(value) || value.version !== 1 || !object(value.progress)) throw new Error('Unsupported save');
   const save = emptySave();
+  if (object(value.quizzes)) for (const [id, record] of Object.entries(value.quizzes)) {
+    if (!allowedQuizzes.has(id)) continue;
+    const parsed = quizRecord.safeParse(record);
+    if (parsed.success) save.quizzes[id] = parsed.data;
+  }
   // Existing learners keep their text-block work; each course has its own progress.
   save.course = isCourse(value.course) ? value.course : 'words';
   save.basicsComplete = Array.isArray(value.basicsComplete) ? [...new Set(value.basicsComplete.filter((id): id is string => typeof id === 'string' && /^(mouse|keyboard)-[0-9]$/.test(id)))] : [];
@@ -43,17 +53,25 @@ export function parseSave(raw: string | null): Save {
     const blocks: Block[] = [];
     for (const b of p.blocks) {
       if (!object(b) || typeof b.id !== 'string' || ids.has(b.id) || !(directions.includes(b.kind as never) || (b.kind === 'repeat' && mission.loops))) continue;
-      if (b.kind === 'repeat' && (!directions.includes(b.direction as never) || !Number.isInteger(b.count) || Number(b.count) < 2 || Number(b.count) > 5)) continue;
+      if (b.kind === 'repeat' && (!directions.includes(b.direction as never) || !validRepeatCount(b.count))) continue;
       ids.add(b.id);
       blocks.push({ id: b.id, kind: b.kind as Block['kind'], direction: directions.includes(b.direction as never) ? b.direction as Block['direction'] : 'right', count: b.kind === 'repeat' ? Number(b.count) : 2 });
     }
     const progress: Progress = { blocks, attempts: Number.isInteger(p.attempts) ? Math.max(0, Math.min(100000, Number(p.attempts))) : 0, hints: Number.isInteger(p.hints) ? Math.max(0, Math.min(4, Number(p.hints))) : 0, complete: p.complete === true };
     // Old saved programs keep the exact collision map they were written for.
     if (p.worldLayout === 'tiles-v1' || p.worldLayout === 'open-v1') progress.worldLayout = p.worldLayout;
-    if (object(p.workspace) && JSON.stringify(p.workspace).length < 100000) progress.workspace = p.workspace;
+    if (object(p.workspace)) {
+      // Let the gallery's recovery screen handle malformed collection data.
+      // Never silently drop a recognized gallery and turn it into an empty one.
+      if (Object.hasOwn(p.workspace, 'byteStudioGallery')) {
+        if (JSON.stringify(p.workspace).length > 1000000) throw new Error('Saved gallery exceeds the safe read limit.');
+        progress.workspace = p.workspace;
+      } else if (validWorkspace(p.workspace)) progress.workspace = p.workspace;
+    }
     if (typeof p.textCode === 'string' && p.textCode.length <= 10000) progress.textCode = p.textCode;
     if (p.codingMode === 'blocks' || p.codingMode === 'text') progress.codingMode = p.codingMode;
     if (p.lessonSeen === true) progress.lessonSeen = true;
+    if (p.workspaceTour === 'completed' || p.workspaceTour === 'skipped') progress.workspaceTour = p.workspaceTour;
     if (progress.complete && Number.isInteger(p.stars) && Number(p.stars) >= 1 && Number(p.stars) <= 5) progress.stars = Number(p.stars);
     if (mission.id.endsWith('rescue-project') && object(p.end)) {
       const end = { x: Number(p.end.x), y: Number(p.end.y) };
@@ -69,7 +87,7 @@ export function parseSave(raw: string | null): Save {
 }
 export function loadSave(): { save: Save; warning: string; resumed: boolean } {
   try {
-    const raw = localStorage.getItem(SAVE_KEY);
+    const raw = activityStorage.getItem(SAVE_KEY);
     return { save: parseSave(raw), warning: '', resumed: !!raw };
   } catch {
     return { save: emptySave(), warning: 'Saved progress could not be read. You can play this session. Your previous save will stay untouched until you choose Reset saved progress in Settings.', resumed: false };

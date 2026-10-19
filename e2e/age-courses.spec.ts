@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('arrow course, stage Play, delayed feedback and independent saves', async ({ page }, testInfo) => {
+test('legacy arrow course, stage Play, delayed feedback and independent saves', async ({ page }, testInfo) => {
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/learn/arrows');
@@ -21,18 +21,21 @@ test('arrow course, stage Play, delayed feedback and independent saves', async (
   await expect(page.getByText('Byte is recharged.', { exact: false })).toBeVisible();
   await page.getByRole('button', { name: 'Close feedback' }).click();
   await page.getByRole('link', { name: 'Change course', exact: true }).click();
-  await page.getByRole('link', { name: /Ages 8–10 Code Adventurers/ }).click();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Where shall we begin?' })).toBeVisible();
+  // Previous courses remain reachable by saved URLs, not the new grade catalogue.
+  await page.goto('/#/learn/words');
   await expect(page.getByText('0 / 24 blocks', { exact: true })).toBeVisible();
   await expect(page.locator('.blocklyFlyout:not(.blocklyTrashcanFlyout)')).toContainText('Move right');
   await page.getByRole('link', { name: 'Change course', exact: true }).click();
-  await page.getByRole('link', { name: /Ages 6–8 Little Explorers/ }).click();
+  await expect(page.getByRole('heading', { name: 'Where shall we begin?' })).toBeVisible();
+  await page.goto('/#/learn/arrows');
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   await page.reload(); await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
-  // A wrong route must also show its valid moves before feedback.
+  // Show the valid right step, then stop before the blocked down tile.
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_down').click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
-  await expect(page.locator('.robot-position')).toHaveCSS('--y', '3');
+  await expect(page.locator('.robot-position')).toHaveCSS('--x', '2');
+  await expect(page.locator('.robot-position')).toHaveCSS('--y', '2');
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.locator('.retry-toast')).toBeVisible();
   expect(errors).toEqual([]);

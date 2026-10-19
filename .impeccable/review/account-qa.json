@@ -1,0 +1,236 @@
+[
+  {
+    "device": "desktop",
+    "route": "login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "adult-login?role=teacher",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "signup?role=parent",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "student-login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "dashboard",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "classes",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "learners",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "class-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "learner-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "account-settings",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "forgot-password",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "check-email",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "desktop",
+    "route": "two-factor",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "adult-login?role=teacher",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "signup?role=parent",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "student-login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "dashboard",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "classes",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "learners",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "class-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "learner-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "account-settings",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "forgot-password",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "check-email",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "mobile",
+    "route": "two-factor",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "adult-login?role=teacher",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "signup?role=parent",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "student-login",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "dashboard",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "classes",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "learners",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "class-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "learner-new",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "account-settings",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "forgot-password",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "check-email",
+    "overflow": false,
+    "violations": []
+  },
+  {
+    "device": "tablet",
+    "route": "two-factor",
+    "overflow": false,
+    "violations": []
+  }
+]

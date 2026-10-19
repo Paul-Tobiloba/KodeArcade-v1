@@ -1,6 +1,7 @@
 import type { Mission, Direction, Position } from './learning';
 import type { serialization } from 'blockly/core';
 import { courses } from './courses';
+import { originalTopics } from '../shared/curriculum-topics';
 type State = serialization.blocks.State;
 const move = (d: Direction): State => ({ type: `ka_${d}` });
 const chain = (...blocks: State[]): State => blocks.reduceRight<State | undefined>((next, block) => ({ ...block, ...(next ? { next: { block: next } } : {}) }), undefined)!;
@@ -18,7 +19,7 @@ export const gradeSolutions: Record<string, State> = {};
 export const gradeMissions: Mission[] = [];
 for (const course of courses) {
   const grade = course.grade!, size = course.size;
-  for (const topic of course.topics) for (let i = 0; i < 10; i++) {
+  for (const topic of originalTopics(course.grade!)) for (let i = 0; i < 10; i++) {
     const id = `${course.id}-${topic}-${i + 1}`, guide = guides[topic];
     const h = grade <= 2 ? Math.min(4, 1 + Math.floor(i / 2)) : Math.min(size - 1, grade - 1 + Math.floor(i / 2));
     const v = grade <= 2 ? (i < 2 ? 0 : 1 + i % 3) : Math.min(size - 1, 1 + (i % (size - 1)));

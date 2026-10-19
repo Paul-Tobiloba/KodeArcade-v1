@@ -1,0 +1,11 @@
+# Racing speed threshold — 18 October 2026
+
+New Three-lane racer starters accelerate both traffic cars from4 to7 stage units per movement after score is strictly greater than50 (first activates at51). Each traffic car defines its own speed variable. Your car uses an ordinary IF score >50 AND boosted ==0, broadcasts speed_up, then marks boosted1. Each traffic sprite receives speed_up and sets speed7. Movement subtracts that speed from y. This uses existing generic blocks/interpreter and no hidden racing logic or new shared-variable semantics.
+
+Children can edit50 in Your car's conditional and4/7 in each traffic car's speed blocks. A new Run creates fresh runtime state, resetting scores, flags and traffic speeds. The broadcast fires once per run, not repeatedly adding speed. Existing authored projects are not overwritten or auto-migrated: use New project → Three-lane racer for the updated starter, keeping previous work in My projects.
+
+No new UI layout, artwork, backend schema or API changes. Private project/backup serialization remains the same. Work local on codex/auth; no commit/push/deploy. Validation results recorded after execution below.
+
+Verification:1713 frontend tests passed/39 files; production build and server compiler passed. Six race browser cases passed across desktop/phone/tablet, including editable conditional/message handlers, both traffic responses, save/reload and existing steering. The near-threshold browser fixture initializes score50 and temporarily displays speed counters; production starts at0. Unit simulation reaches real50/51 without skipping the threshold, asserts no acceleration at50, both speeds7 above50, only two delivered messages, stable non-cumulative speed, authored-work immutability and reset on a new engine. A second case edits the actual Blockly threshold to2 and faster speed to9, proving these values are authorable, not hard-coded engine rules. Browser test initially needed to reopen the selected sprite's own code view after switching; this was corrected without changing product behavior. No live-account writes.
+
+User requested keeping the PC awake until completion then hibernating. A bounded hidden keep-awake helper was started and system hibernation availability confirmed. Hibernation is requested only after these checks; no force-close or shutdown/reboot is used.

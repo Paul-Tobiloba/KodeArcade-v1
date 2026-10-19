@@ -56,8 +56,8 @@ export const drawingSaveKey = (grade: string, id: string) => `kodearcade-drawing
 export function drawingTopic(grade: string, activity: DrawingActivity): string {
   if (activity.free) return 'project';
   if (activity.id === 'spiral') return 'variables';
-  if (grade === 'grade-1') return activity.id === 'trail' ? 'sequences' : 'directions';
-  return activity.reference.includes('for ') ? 'loops' : 'directions';
+  if (grade === 'grade-1') return 'sequences';
+  return activity.reference.includes('for ') ? 'loops' : 'sequences';
 }
 export function drawingsForTopic(grade: string, topic: string) {
   return (drawingActivities[grade] ?? []).flatMap((activity, index) => drawingTopic(grade, activity) === topic ? [{ activity, index }] : []);

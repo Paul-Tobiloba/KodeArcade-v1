@@ -1,7 +1,11 @@
 import { topicMissions } from './topicMissions';
+import { validRepeatCount } from '../shared/repeats.js';
 import { gradeMissions } from './gradeMissions';
 import { journeyMissions } from './topicJourney';
 import { collectionMissions } from './collectionMissions';
+import { dataMissions } from './dataMissions';
+import { conceptMissions } from './conceptMissions';
+import { creativeMissions } from './creativeMissions';
 export type Direction = 'right' | 'down' | 'left' | 'up';
 export type Block = { id: string; kind: Direction | 'repeat'; direction: Direction; count: number };
 export type Position = { x: number; y: number };
@@ -13,6 +17,10 @@ export type Mission = {
   conditionals?: boolean; variables?: boolean; targetScore?: number;
   requireElse?: boolean; requireChange?: boolean; requireVariableRead?: boolean;
   maxBlocks?: number;
+  conceptTask?: import('./conceptModel').ConceptTask;
+  spriteEvent?: 'click';
+  spriteInitial?: import('./spriteModel').SpriteState;
+  dataTask?: { topic: 'statements' | 'lists' | 'objects'; required: string[]; list?: number[]; robot?: { speed: number; energy: number } };
   replaces?: string;
   countPickups?: boolean;
   collectOnly?: boolean;
@@ -127,13 +135,16 @@ missions.push(...topicMissions);
 missions.push(...gradeMissions, ...journeyMissions);
 // Append versioned replacements; saved numeric mission indices must never shift.
 missions.push(...collectionMissions);
+missions.push(...dataMissions);
+missions.push(...conceptMissions);
+missions.push(...creativeMissions);
 for (const [id, limit] of Object.entries({ 'on-repeat': 2, 'loop-corner': 4, 'loop-stairs': 3 })) missions.find(m => m.id === id)!.maxBlocks = limit;
 export const same = (a: Position, b: Position) => a.x === b.x && a.y === b.y;
 export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };
 }
 export function initialProgram(mission: Mission): Block[] { return mission.starter.map(makeBlock); }
-export type Frame = Position & { blockId: string; step: number; score?: number; note?: string; collected?: Position[]; gateOpen?: boolean; bridgeBuilt?: boolean; fell?: boolean };
+export type Frame = Position & { blockId: string; step: number; heading?: Direction; score?: number; note?: string; durationMs?: number; sprite?: import('./spriteModel').SpriteState; lab?: { output: (number | boolean)[]; calls: number }; collected?: Position[]; gateOpen?: boolean; bridgeBuilt?: boolean; fell?: boolean };
 export type RunResult = { frames: Frame[]; success: boolean; message: string };
 const delta: Record<Direction, Position> = { right: { x: 1, y: 0 }, left: { x: -1, y: 0 }, up: { x: 0, y: -1 }, down: { x: 0, y: 1 } };
 
@@ -145,7 +156,7 @@ export function runProgram(mission: Mission, blocks: Block[], compiled?: { usedL
   let position = { ...mission.start };
   for (const block of blocks) {
     if (!directions.includes(block.kind as Direction) && block.kind !== 'repeat') return fail('One block is not recognised. Remove it and add a movement block.');
-    if (block.kind === 'repeat' && (!mission.loops || !Number.isInteger(block.count) || block.count < 2 || block.count > 5 || !directions.includes(block.direction))) return fail('Check your repeat block. Choose a direction and a count from 2 to 5.');
+    if (block.kind === 'repeat' && (!mission.loops || !validRepeatCount(block.count) || !directions.includes(block.direction))) return fail('Check your repeat block. Choose a direction and a whole-number count of 0 or more.');
     const direction = block.kind === 'repeat' ? block.direction : block.kind;
     const count = block.kind === 'repeat' ? block.count : 1;
     for (let n = 0; n < count; n++) {

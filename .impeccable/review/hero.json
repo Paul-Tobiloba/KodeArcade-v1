@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 2,
+  "stage": "hero",
+  "id": "hero",
+  "title": "KodeArcade illustrated login — first screen",
+  "comp": { "path": ".impeccable/mocks/auth/approved-login.png", "width": 1672, "height": 941 },
+  "components": [{
+    "id": "first-viewport",
+    "name": "First viewport",
+    "medium": "React / HTML / CSS",
+    "note": "Assembled role chooser with approved artwork and the original branded K header. Student authentication, classroom tools and cloud progress remain under development; role copy is the owner's design-reference wording for this calibration screen.",
+    "box": { "x": 0, "y": 0, "w": 1, "h": 1 },
+    "preview": { "kind": "page", "path": ".impeccable/review/runtime/index.html" },
+    "dependencies": [
+      ".impeccable/review/runtime/assets/AccountPortal-BLd4oH6B.js",
+      ".impeccable/review/runtime/assets/AccountPortal-oHC5aVeS.css",
+      ".impeccable/review/runtime/assets/App-CWewW98p.js",
+      ".impeccable/review/runtime/assets/index-DjSQwShV.js",
+      ".impeccable/review/runtime/assets/index-DP7bfOjm.css",
+      ".impeccable/review/runtime/assets/undo-2-BoB94qbY.js",
+      "public/brand/loading.css", "public/brand/mark-loading.svg", "public/brand/favicon.svg",
+      "public/fonts/BalooBhai2.ttf", "public/fonts/Fredoka.ttf", "public/brand/mark-color.svg",
+      "public/images/auth/island-world.png", "public/images/auth/code-symbol.png", "public/images/auth/byte-peek.png",
+      "public/images/auth/student-bag.png", "public/images/auth/teacher-board.png", "public/images/auth/parent-family.png"
+    ]
+  }]
+}

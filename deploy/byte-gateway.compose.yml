@@ -1,0 +1,47 @@
+# Private Linux VPS pilot only. This is not part of the n8n compose project.
+name: kodearcade-byte-pilot
+services:
+  gateway:
+    image: node:22-alpine
+    container_name: kodearcade-byte-gateway
+    user: "${BYTE_GATEWAY_UID:?Run prepare-byte-pilot.sh first}:${BYTE_GATEWAY_GID:?Run prepare-byte-pilot.sh first}"
+    # Required to reach the existing loopback-only Ollama. The Node server
+    # explicitly binds 127.0.0.1; host mode is NOT network isolation.
+    network_mode: host
+    command: ["node", "--env-file=/run/byte.env", "/app/byte-gateway.mjs"]
+    init: true
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpus: 0.25
+    pids_limit: 64
+    restart: "no"
+    labels:
+      traefik.enable: "false"
+    volumes:
+      - type: bind
+        source: ./byte-gateway.mjs
+        target: /app/byte-gateway.mjs
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./gateway.env
+        target: /run/byte.env
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      # A 401 proves the gateway is up without generating or sending a token.
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:11435/byte/generate',{signal:AbortSignal.timeout(2000)}).then(r=>process.exit(r.status===401?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: local
+      options:
+        max-size: "1m"
+        max-file: "2"

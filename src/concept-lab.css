@@ -1,0 +1,23 @@
+.concept-stage { display: flex; flex-direction: column; min-height: 0; }
+.concept-stage .scene-heading { flex-shrink: 0; }
+.concept-result-area { flex: 1; min-height: 0; overflow: auto; padding: 20px; }
+.concept-result-area h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px; font-size: 1rem; }
+.concept-result-area dl { margin: 0 0 24px; }
+.concept-result-area dl > div { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid #ded9ed; }
+.concept-result-area dt { color: #575472; }
+.concept-result-area dd { margin: 0; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.concept-output { list-style-position: inside; padding: 0; margin: 0 0 24px; }
+.concept-output li { padding: 8px 0; }
+.concept-output span { margin-left: 12px; color: #575472; font-size: .875rem; }
+.concept-trace { padding-top: 16px; border-top: 1px solid #ded9ed; }
+.concept-success { color: #08796e; }
+.concept-error { color: #9c233a; }
+.concept-keyboard { padding: 12px; border-top: 1px solid #ded9ed; overflow: auto; max-height: 240px; }
+.concept-keyboard summary { cursor: pointer; font-weight: 600; min-height: 36px; }
+.concept-keyboard p { font-size: .875rem; }
+.concept-keyboard label { display: grid; gap: 6px; min-width: 0; font-size: .875rem; }
+.concept-keyboard-fields { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin: 12px 0; }
+.concept-keyboard-fields label { flex: 1 1 140px; }
+.concept-keyboard select, .concept-keyboard input { width: 100%; min-width: 0; min-height: 44px; border: 1px solid #c6b6e8; border-radius: 7px; background: #fff; color: #181339; padding: 8px; }
+.concept-keyboard :focus-visible { outline: 3px solid #986cf5; outline-offset: 2px; }
+@media (max-width: 950px), (max-height: 600px) { .concept-stage .concept-result-area { flex: none; overflow: visible; } .concept-keyboard { max-height: none; overflow: visible; } }

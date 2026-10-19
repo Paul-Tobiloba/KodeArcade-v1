@@ -22,7 +22,8 @@ test('lesson, activity and code use responsive columns without decorative side t
     const widths = await page.locator('.workspace-grid').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').map(parseFloat));
     expect(widths).toHaveLength(3);
     const total = widths.reduce((a,b) => a+b,0);
-    expect(widths.map(w => Math.round(w/total*100))).toEqual([25,30,45]);
+    expect(widths[0]).toBeCloseTo(1308 * .2, 0);
+    expect(widths[1] / widths[2]).toBeCloseTo(2 / 3, 2);
     const articleFlow = await page.locator('.activity-guide-content').evaluate(el => {
       const concept = el.querySelector('.activity-concept')!;
       const article = el.querySelector('.activity-reading')!;

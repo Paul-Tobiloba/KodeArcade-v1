@@ -2,7 +2,7 @@ import type { Mission } from './learning';
 import type { Save } from './storage';
 
 export const SEQUENCE_TOPIC = 'v2.0-grade-1-sequences';
-export const sequenceCore = Array.from({ length: 10 }, (_, i) => `grade-1-sequences-${i + 1}`);
+export const sequenceCore = [...Array.from({ length: 5 }, (_, i) => `grade-1-sequences-${i + 1}`), ...[3, 4, 6, 8, 10].map(i => `grade-1-directions-${i}`)];
 export const sequenceExtras = ['g1-seq-v2-bonus-1', 'g1-seq-v2-bonus-2', 'g1-seq-v2-repair', 'g1-seq-v2-rescue-project'];
 export type TopicRecord = { watched: boolean; guided: boolean; mastered: boolean; masteryAttempts: number };
 export const emptyTopicRecord = (): TopicRecord => ({ watched: false, guided: false, mastered: false, masteryAttempts: 0 });
@@ -12,7 +12,7 @@ export const sequenceManifest = {
   prerequisite: 'No coding prerequisite. Computer Explorers is available for mouse/touch practice.',
   representation: 'Arrow blocks', video: '/lessons/grade-1-sequences.webm',
   core: sequenceCore, extras: sequenceExtras,
-  limitation: 'The ten existing core route variants are retained for save compatibility; their challenge-specific teaching prompts are added here. Follow-up learner testing remains pending.',
+  limitation: 'Ten mixed sequence and direction challenges form one module. Previous challenge IDs and earned badges remain compatible. Follow-up learner testing remains pending.',
 };
 export const corePurposes = [
   ['One instruction', 'Find Byte and the star. Add one arrow and watch one step.'],
@@ -20,11 +20,11 @@ export const corePurposes = [
   ['Put steps in order', 'Trace the vertical part and then the horizontal part of this route.'],
   ['Plan two parts', 'Say the first part of your plan, then the second. Put both parts into blocks.'],
   ['Count repeated steps', 'Count squares, not grid lines. Add one arrow for each square.'],
-  ['Predict before Play', 'Point to the square where Byte will stop before running your program.'],
-  ['Explain your sequence', 'Read your arrows aloud in order. Does your spoken plan reach the star?'],
-  ['Try another route', 'Find a different sequence to the same star. Compare what changed.'],
-  ['Check a longer plan', 'Trace every arrow with your finger. Look for an extra or missing step.'],
-  ['Independent journey', 'Plan, build and test a route yourself. Then show what you know in the topic journey.'],
+  ['Avoid an obstacle', 'Look for a clear first square before choosing your arrows.'],
+  ['Choose a safe order', 'Compare moving across first with moving vertically first. Which avoids the obstacle?'],
+  ['Predict before Play', 'Trace every visited square, not only the final destination.'],
+  ['Check a longer route', 'Read your directions in order and check for extra or missing steps.'],
+  ['Independent journey', 'Plan a safe route yourself, then show what you know in the topic journey.'],
 ];
 const supplemental = (id: string, title: string, goal: string, end: { x: number; y: number }, route: Mission['starter'], starter: Mission['starter'] = [], walls: Mission['walls'] = []): Mission => ({
   id, title, goal, end, start: { x: 0, y: 4 }, size: 5, walls, concept: 'Sequences', description: 'Grade 1 Sequences · V2 topic activity', loops: false, starter, solution: route,
@@ -43,7 +43,8 @@ export function sequenceEvidence(save: Save) {
   const stars = sequenceCore.reduce((n, id) => n + (save.progress[id]?.stars ?? 0), 0);
   const repaired = !!save.progress[sequenceExtras[2]]?.complete;
   const project = !!save.progress[sequenceExtras[3]]?.complete;
-  return { record, completed, stars, repaired, project, badge: record.watched && record.guided && completed === 10 && repaired && record.mastered && project };
+  const previousCoreComplete = Array.from({ length: 10 }, (_, i) => `grade-1-sequences-${i + 1}`).every(id => save.progress[id]?.complete);
+  return { record, completed, stars, repaired, project, badge: record.watched && record.guided && (completed === 10 || previousCoreComplete) && repaired && record.mastered && project };
 }
 export const masteryMissions = [
   { prompt: 'Which sequence takes Byte two squares right?', options: [['right','right'], ['right','up'], ['left','left']], answer: 0 },

@@ -4,7 +4,7 @@ export default defineConfig(({ mode }) => {
   const configured = loadEnv(mode, '.', '').SITE_URL || '';
   const origin = configured ? new URL(configured).origin : '';
   if (origin && !origin.startsWith('https://')) throw new Error('SITE_URL must be a public HTTPS origin');
-  return { plugins: [react(), { name: 'social-sharing', transformIndexHtml() {
+  return { server: { strictPort: true, watch: { ignored: ['**/.impeccable/**', '**/server/**', '**/drizzle/**'], usePolling: process.platform === 'win32', interval: 300 }, proxy: { '/api': { target: 'http://127.0.0.1:3001' } } }, plugins: [react(), { name: 'social-sharing', transformIndexHtml() {
     return [
       { tag: 'meta', attrs: { property: 'og:type', content: 'website' } },
       { tag: 'meta', attrs: { property: 'og:site_name', content: 'KodeArcade' } },

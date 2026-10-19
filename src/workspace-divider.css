@@ -1,0 +1,7 @@
+.workspace-divider { position: absolute; z-index: 8; width: 16px; display: flex; align-items: center; justify-content: center; cursor: col-resize; touch-action: none; color: #575472; }
+.workspace-divider[hidden] { display: none; }
+.workspace-divider > svg { flex-shrink: 0; border-radius: 4px; background: #eeebf8; }
+.workspace-divider:hover, .workspace-divider:focus-visible { color: #6237df; background: #ded0ff66; }
+.workspace-divider:focus-visible { outline: 2px solid #6237df; outline-offset: -2px; }
+[data-stage-resizing=true] { user-select: none; cursor: col-resize; transition: none !important; }
+@media (max-width: 950px), (max-height: 600px) { .workspace-divider { display: none; } }
