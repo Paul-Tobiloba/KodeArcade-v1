@@ -10,5 +10,5 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["server", "drizzle.config.ts", "vitest.server.config.ts"]
+  "include": ["api", "server", "drizzle.config.ts", "vitest.server.config.ts"]
 }

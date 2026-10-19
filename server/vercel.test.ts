@@ -1,0 +1,32 @@
+import { beforeEach, afterEach, expect, it, vi } from 'vitest';
+const mocks = vi.hoisted(() => ({ create: vi.fn(), attach: vi.fn() }));
+vi.mock('./runtime.js', () => ({ createRuntime: mocks.create }));
+vi.mock('@vercel/functions', () => ({ attachDatabasePool: mocks.attach }));
+beforeEach(() => { vi.resetModules(); vi.clearAllMocks(); });
+afterEach(() => vi.restoreAllMocks());
+it('is import-safe and reuses one runtime across concurrent routes', async () => {
+  const response = new Response('ok', { headers: [['Set-Cookie', 'a=1; HttpOnly'], ['Set-Cookie', 'b=2; Secure']] });
+  const fetch = vi.fn(() => response);
+  mocks.create.mockReturnValue({ app: { fetch } });
+  const api = (await import('../api/index.js')).default;
+  expect(mocks.create).not.toHaveBeenCalled();
+  const request = new Request('https://learn.example.com/api/auth/verify-email?token=synthetic&callbackURL=%2F', { headers: { Cookie: 'synthetic=1' } });
+  const results = await Promise.all([api.fetch(request), api.fetch(new Request('https://learn.example.com/api/session'))]);
+  expect(mocks.create).toHaveBeenCalledExactlyOnceWith(process.env, mocks.attach);
+  expect(fetch.mock.calls[0]).toEqual([request]);
+  expect(results[0]).toBe(response);
+  expect(results[0].headers.getSetCookie()).toHaveLength(2);
+});
+it('returns a generic uncacheable error and retries initialization on the next request', async () => {
+  const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  mocks.create.mockImplementationOnce(() => { throw new Error('synthetic secret never log'); });
+  mocks.create.mockReturnValueOnce({ app: { fetch: () => new Response('ready') } });
+  const api = (await import('../api/index.js')).default;
+  const request = new Request('https://learn.example.com/api/session');
+  const failure = await api.fetch(request);
+  expect(failure.status).toBe(503);
+  expect(failure.headers.get('cache-control')).toBe('no-store');
+  expect(await failure.json()).toEqual({ error: 'Service unavailable' });
+  expect(JSON.stringify(log.mock.calls)).not.toContain('synthetic secret');
+  expect(await (await api.fetch(request)).text()).toBe('ready');
+});

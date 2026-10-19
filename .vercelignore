@@ -1,0 +1,16 @@
+.env
+.env.*
+.git
+.vercel
+.impeccable
+dist
+output
+test-results
+playwright-report
+e2e
+docs
+**/*.test.ts
+**/*.test.tsx
+*.log
+*.pem
+*.key
