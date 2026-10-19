@@ -15,8 +15,9 @@ The API rewrite does not swallow API 404s into HTML. The frontend uses hash rout
 ## Vercel project settings
 
 - Reuse the existing KodeArcade project; verify its team/project before any release.
-- Root Directory: the folder containing this `package.json`, `api/` and `vercel.json` (repository root for `cybPaul/KodeArcade`).
-- Framework: Vite. Install: `npm ci`. Build: `npm run build:vercel`. Output: `dist`. Node: 24.x.
+- Root Directory: the folder containing this `package.json`, `api/` and `vercel.json` (repository root for the connected KodeArcade repository; current personal preview: `Paul-Tobiloba/KodeArcade-v1`).
+- Framework: Vite. Install: `npm ci --include=dev`. Build: `npm run build:vercel`. Output: `dist`. Node: 24.x.
+- Include development dependencies during the build even though hosted `NODE_ENV` is `production`: TypeScript, Vite and type declarations are build tools. Plain `npm ci` defaults to omitting them in production mode, causing `tsc: command not found`. Keep the production runtime/email settings; do not change `NODE_ENV` to development to work around installation.
 - Retain the existing custom website domain `kodearcade.laelixsolutions.cloud`.
 - Do not change Hostinger nameservers, n8n records or already-verified Resend DNS records.
 
@@ -66,6 +67,7 @@ Build/startup never run `db:migrate`. Existing `server/db/migrate.ts` deliberate
 ## Troubleshooting
 
 - API returns HTML: check project root, API function discovery and rewrite configuration; do not mask it with a SPA fallback.
+- `tsc: command not found` during build: confirm the install log shows `npm ci --include=dev`, not the original plain `npm ci`; deploy the updated backend commit. Nonfatal npm cache/deprecation/install-script warnings are not the missing-TypeScript error. Do not blanket-approve dependency scripts to fix this unrelated problem.
 - API 503 plus initialization log: check required server values, explicit email mode, verified sender and forbidden development-only flags. Raw secrets are never logged by the adapter.
 - API 403 on writes or broken mail redirects: compare the browser's actual origin with `APP_ORIGIN` for that environment.
 - Health succeeds but login/save fails: check the selected DB, TLS, applied schema and database permissions; health does not query Postgres.
@@ -77,6 +79,7 @@ Build/startup never run `db:migrate`. Existing `server/db/migrate.ts` deliberate
 - Full frontend suite: 1,783 passed (42 files).
 - Full backend suite: 156 passed (18 files), including 14 new runtime, adapter, configuration and auth-flow checks. Real Better Auth/Drizzle runs against temporary PGlite; mocked HTTP captures Resend requests without sending mail.
 - `npm run build:vercel`: server typecheck and frontend production build passed. Existing Zod annotation and large-chunk warnings remain; they are not new backend errors.
+- After the first hosted build reported `tsc: command not found`, installation was corrected to `npm ci --include=dev`. A clean isolated checkout with `NODE_ENV=production` installed 236 packages, exposed TypeScript 5.9.3, and passed the complete `build:vercel` command. The three deployment configuration regressions passed. Existing install-script warnings were reproduced without preventing the build; no blanket script approval was added.
 - Official local builders `@vercel/node` 24.0.3 and `@vercel/build-utils` 14.21.3 produced a Node 24 function with 1,686 traced files. Logo and PDF fonts were present; local dotenv and the listening server entry were absent. Loading the emitted API returned health JSON and an API JSON 404; generating a synthetic private login-card PDF from the materialized bundle passed.
 - Builder dependencies/output live only in the ignored local `.impeccable/build/` verification directory; they are not new application dependencies or deployment assets. Only the pinned `@vercel/functions` helper is added to application dependencies.
 - No live database connection, migration, real email, DNS mutation, cloud deployment, push or merge was performed for this preparation. Hosted routing, environment values, database readiness and real provider delivery still require the preview checks above.

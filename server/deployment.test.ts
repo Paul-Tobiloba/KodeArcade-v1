@@ -8,7 +8,8 @@ it('keeps the static Vite app and routes only API traffic to one Node entry', ()
   expect(deployment.framework).toBe('vite');
   expect(deployment.outputDirectory).toBe('dist');
   expect(deployment.buildCommand).toBe('npm run build:vercel');
-  expect(deployment.installCommand).toBe('npm ci');
+  // Hosted NODE_ENV=production must not omit TypeScript/Vite build tools.
+  expect(deployment.installCommand).toBe('npm ci --include=dev');
   expect(deployment.rewrites).toEqual([{ source: '/api/:path*', destination: '/api' }]);
   expect(Object.keys(deployment.functions)).toEqual(['api/index.ts']);
   expect(deployment.functions['api/index.ts'].maxDuration).toBe(60);
