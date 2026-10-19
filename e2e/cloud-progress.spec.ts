@@ -124,6 +124,7 @@ test('recovered older revision cannot overwrite newer cloud work and can be expl
   await expect(page.getByText('Another tab saved newer work. Your changes have not overwritten it.')).toBeVisible();
   const before = posts; await page.waitForTimeout(1000); expect(posts).toBe(before);
   await page.getByRole('button', { name: 'Reload saved version' }).click();
+  await page.locator('.confirmation-accept').click();
   await expect(page.getByText('Another tab saved newer work. Your changes have not overwritten it.')).toHaveCount(0);
   await expect(page.getByRole('textbox')).not.toHaveValue('move_down()');
 });

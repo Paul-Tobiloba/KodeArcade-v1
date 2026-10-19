@@ -100,7 +100,6 @@ test('project backups reopen safely and library artwork can be painted without c
   await page.getByLabel('Choose Byte Lab project file', { exact: true }).setInputFiles({ name: 'not-project.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
   await expect(page.getByRole('alert')).toContainText('current project is unchanged'); expect(savedProject(saved())).toEqual(before);
   const imported = newStudioProject(); imported.title = 'Reopened backup';
-  page.on('dialog', dialog => dialog.accept());
   await page.getByLabel('Choose Byte Lab project file', { exact: true }).setInputFiles({ name: 'backup.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(saveStudioProject(imported))) });
   await expect(page.getByRole('textbox', { name: 'Project name', exact: true })).toHaveValue('Reopened backup');
   await expect.poll(() => savedProject(saved())?.title).toBe('Reopened backup');

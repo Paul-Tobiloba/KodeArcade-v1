@@ -260,6 +260,12 @@ Active learning workspaces use the dialog radius, grade cards the workspace radi
 
 ## Components
 
+### Protected-action confirmations
+
+App-owned confirmations use the shared native HTML dialog styled by `src/confirmation.css`, not browser JavaScript confirm/alert popups. Preserve the white surface, violet border, 16px radius, Fredoka title and system body text. Use the actual action as the affirmative label and explain what is lost and what is preserved. Cancel receives initial focus; Escape and Close cancel; keyboard focus stays in the dialog and returns to the trigger. Destructive actions use semantic red `#ad2435` and hover `#8c1d2b` with white text. These semantic danger colors supplement the brand palette rather than replacing violet primary actions. Narrow screens stack the actions without changing the underlying mobile layout.
+
+Home-screen PNG icons are deterministic rasterizations of `public/brand/mark-color.svg` on white. Apple uses the linked 180px touch icon; the web manifest supplies 192px/512px icons and a separate 512px maskable icon whose full K fits within the central safe circle. Rebuild with `node scripts/generate-app-icons.mjs`; do not substitute or regenerate the approved mark. No service worker, offline capability or public-sharing change is implied.
+
 ### Buttons
 
 Primary buttons are violet with white labels, darkening on hover. Secondary buttons are white with a subtle border. The base control has a 44px minimum height; primary controls use 46px. Focus uses a 3px violet-dark outline offset by 4px. Disabled buttons reduce opacity to .45 and show a disabled cursor. Existing compact utility controls are exceptions to the base sizing, not a new default.

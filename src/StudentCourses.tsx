@@ -1,3 +1,4 @@
+import { useConfirmation, type ConfirmAction } from './ConfirmationProvider';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ArrowRight, BookOpen, GraduationCap, HelpCircle, LogOut, ShieldCheck, UserRound } from 'lucide-react';
 import { AccountError, accountErrorMessage, accountRequest } from './account-api';
@@ -15,7 +16,7 @@ import './student-dashboard.css';
 
 const Activity = lazy(() => import('./App'));
 let offlineOwner: string | undefined;
-async function signOutStudent(confirmed = false, home = false) { if (!confirmed && hasOfflineOwner(offlineOwner) && !confirm('Unsynced recovery work is still on this device. Return to the activity to sync or download it. Sign out and remove these device copies anyway?')) return; await accountRequest('auth/sign-out', {}); clearOfflineOwner(offlineOwner); offlineOwner = undefined; clearStudentStorage(); location.hash = home ? '/home-login' : '/student-login'; }
+async function signOutStudent(confirm: ConfirmAction, confirmed = false, home = false) { if (!confirmed && hasOfflineOwner(offlineOwner) && !(await confirm({ title: "Sign out with unsynced work?", message: 'Unsynced recovery work is still on this device. Return to the activity to sync or download it. Sign out and remove these device copies anyway?', confirmLabel: "Sign out & remove copies", tone: 'danger' }))) return; await accountRequest('auth/sign-out', {}); clearOfflineOwner(offlineOwner); offlineOwner = undefined; clearStudentStorage(); location.hash = home ? '/home-login' : '/student-login'; }
 type Context = { learnerId: string; classroomId: string; displayName: string; classroomName: string; learningContext?: 'home' | 'classroom'; offlineOwner?: string; assignments: { id: string; courseKey: string; progress?: ReturnType<typeof summarizeProgress> }[] };
 function useStudentContext() {
   const [context, setContext] = useState<Context>();
@@ -36,10 +37,12 @@ function useStudentContext() {
   return { context, error };
 }
 function StudentSignOut() {
+  const confirm = useConfirmation();
   const [busy, setBusy] = useState(false), [error, setError] = useState('');
-  return <><button className="account-button" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await signOutStudent(); } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><LogOut size={18} />{busy ? 'Signing out…' : 'Sign out'}</button>{error && <Notice error>{error}</Notice>}</>;
+  return <><button className="account-button" disabled={busy} onClick={async () => { setBusy(true); setError(''); try { await signOutStudent(confirm); } catch (failure) { setError(accountErrorMessage(failure)); } finally { setBusy(false); } }}><LogOut size={18} />{busy ? 'Signing out…' : 'Sign out'}</button>{error && <Notice error>{error}</Notice>}</>;
 }
 export default function StudentCourses() {
+  const confirm = useConfirmation();
   const { context, error } = useStudentContext();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileHeading = useRef<HTMLHeadingElement>(null);
@@ -55,7 +58,7 @@ export default function StudentCourses() {
     <a className="skip-link" href="#student-main" onClick={event => { event.preventDefault(); document.getElementById('student-main')?.focus(); }}>Skip to content</a>
     <header className="student-dashboard-header">
       <a className="account-brand" href="/#/student-courses" aria-label="KodeArcade student dashboard"><img src="/brand/mark-color.svg" width="34" height="38" alt="" /><span>KodeArcade</span></a>
-      {context && <LearnerMenu account={{ displayName: context.displayName, signOut: () => signOutStudent(false, home) }} onSettings={() => setProfileOpen(true)} coursesCurrent />}
+      {context && <LearnerMenu account={{ displayName: context.displayName, signOut: () => signOutStudent(confirm, false, home) }} onSettings={() => setProfileOpen(true)} coursesCurrent />}
     </header>
     <main id="student-main" tabIndex={-1} className="student-dashboard-main">
       {error ? <section className="student-dashboard-error"><h1>Let’s open your dashboard</h1><Notice error>{error}</Notice><button className="account-button" onClick={() => location.reload()}>Try again</button><p>If you need to sign in again, choose the login that matches your card.</p><div className="account-recovery-links"><a className="account-button primary" href="/#/home-login">Home learner sign in<ArrowRight size={18} /></a><a className="account-button" href="/#/student-login">Classroom student sign in<ArrowRight size={18} /></a></div><p>Check your connection, or ask your parent, guardian or teacher for help.</p></section> : !context ? <LoadingScreen embedded label="Opening your dashboard…" /> : <>
@@ -83,6 +86,7 @@ export function StudentActivity({ course }: { course: string }) {
 }
 
 function CloudActivity({ context, course }: { context: Context; course: GradeKey }) {
+  const confirm = useConfirmation();
   const [saver, setSaver] = useState<CloudSaver>();
   const [status, setStatus] = useState<SaveStatus>('saved');
   const [recoveryStatus, setRecoveryStatus] = useState<'writing' | 'protected' | 'unavailable'>('unavailable');
@@ -123,8 +127,8 @@ function CloudActivity({ context, course }: { context: Context; course: GradeKey
   }, [saver]);
   if (error) return <div className="account-panel"><h1>Your progress could not be loaded</h1><Notice error>{error}</Notice><p>We haven’t opened an empty activity over your saved work.</p><button className="account-button" onClick={() => location.reload()}>Try again</button><a href="/#/student-courses">My courses</a></div>;
   if (!saver) return <LoadingScreen label="Loading your saved work…" />;
-  const signOut = async () => { if (!await saver.flush() && !confirm('Some work has not saved to your account. Sign out and remove this student’s device recovery copies? Download unsaved work first if needed.')) return; await saver.backedUp(); await signOutStudent(true, context.learningContext === 'home'); await saver.discardRecovery(); };
+  const signOut = async () => { if (!await saver.flush() && !(await confirm({ title: "Sign out with unsaved work?", message: 'Some work has not saved to your account. Sign out and remove this student’s device recovery copies? Download unsaved work first if needed.', confirmLabel: "Sign out & remove copies", tone: 'danger' }))) return; await saver.backedUp(); await signOutStudent(confirm, true, context.learningContext === 'home'); await saver.discardRecovery(); };
   const download = () => { const url = URL.createObjectURL(new Blob([saver.exportDraft()], { type: 'application/json' })); const link = document.createElement('a'); link.href = url; link.download = 'kodearcade-unsaved-work.json'; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); };
-  const reload = async () => { if (confirm('Discard this device draft and reload your saved account version? Download unsaved work first if needed.')) { await saver.discardRecovery(); location.reload(); } };
+  const reload = async () => { if ((await confirm({ title: "Discard this device draft?", message: 'Discard this device draft and reload your saved account version? Download unsaved work first if needed.', confirmLabel: "Discard & reload", tone: 'danger' }))) { await saver.discardRecovery(); location.reload(); } };
   return <Suspense fallback={<LoadingScreen />}><Activity student={{ displayName: context.displayName, signOut }} cloud={{ status, recoveryStatus, recoveryNotice, retry: () => { void saver.flush(); }, download, reload: () => { void reload(); } }} /></Suspense>;
 }

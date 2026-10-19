@@ -13,6 +13,31 @@ function child(name: string, grade: number, done: number): HomeChild {
   return { id: name.toLowerCase(), displayName: name, grade, active: true, username: name.toLowerCase(), homeCode: 'ABCDEFGH', loginMethod: grade <= 2 ? 'picture' : 'text', contextId: `home-${name}`, courses: [{ course, ...reportSummary(course, { revision: 1, document, updatedAt: '2026-10-12T10:00:00Z' }), challenges: catalog.challenges.map(id => ({ id, title: catalog.missions.find(m => m.id === id)?.title ?? id, complete: !!document.progress[id], stars: document.progress[id]?.stars ?? 0, attempts: document.progress[id]?.attempts ?? 0, hints: 0 })) }] };
 }
 let family: Family;
+test('parent password resets and access changes wait for modal approval', async ({ page }) => {
+  let resets = 0, pauses = 0, signOuts = 0;
+  await page.route(`**/api/family/${id}/children/alex/reset`, route => { resets++; return route.fulfill({ contentType: 'application/pdf', body: '%PDF-1.3 synthetic card' }); });
+  await page.route(`**/api/family/${id}/children/alex/profile`, route => { pauses++; return route.fulfill({ json: { updated: true } }); });
+  await page.route('**/api/auth/sign-out', route => { signOuts++; return route.fulfill({ json: {} }); });
+  await page.goto('/#/family');
+  await page.getByRole('button', { name: 'Reset password & generate PDF', exact: true }).click();
+  const modal = page.locator('.confirmation-dialog');
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+  expect(resets).toBe(0);
+  await page.getByRole('button', { name: 'Reset password & generate PDF', exact: true }).click();
+  await modal.getByRole('button', { name: 'Reset password & generate PDF', exact: true }).click();
+  await expect.poll(() => resets).toBe(1);
+  await page.getByRole('link', { name: 'Download PDF card' }).waitFor();
+  await page.getByRole('button', { name: 'Edit profile', exact: true }).click();
+  await page.getByRole('button', { name: 'Pause child access', exact: true }).click();
+  await page.keyboard.press('Escape');
+  expect(pauses).toBe(0);
+  await page.getByRole('button', { name: 'Pause child access', exact: true }).click();
+  await modal.getByRole('button', { name: 'Pause access', exact: true }).click();
+  await expect.poll(() => pauses).toBe(1);
+  await page.getByRole('button', { name: 'Sign out & open child sign-in', exact: true }).click();
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+  expect(signOuts).toBe(0);
+});
 test.beforeEach(async ({ page }) => {
   family = { id, name: 'Our coding adventures', children: [child('Alex', 4, 12), child('Maya', 6, 5), child('Noah', 2, 0)], generatedAt: '2026-10-12T10:00:00Z' };
   await page.route('**/api/capabilities', route => route.fulfill({ json: { adultAccounts: true, classroomLogin: true, classManagement: true, homeLearning: true } }));

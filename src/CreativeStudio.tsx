@@ -1,3 +1,4 @@
+import { useConfirmation } from './ConfirmationProvider';
 import { useEffect, useId, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 import { ArrowLeft, Play, Square, RotateCcw, Plus, Trash2, Copy, Pencil, HelpCircle, Settings, Download, FolderOpen, Upload, X, ArrowRight } from 'lucide-react';
 import StudioKeyControls from './StudioKeyControls';
@@ -45,6 +46,7 @@ export function AssetPicture({ asset, className = '', decorative = false }: { as
   return <span className={`studio-art-sprite ${className}`} role={decorative ? undefined : 'img'} aria-label={decorative ? undefined : asset.name} aria-hidden={decorative || undefined} style={{ backgroundImage: `url('/images/worlds/${asset.ref!.toLowerCase()}.png')` }} />;
 }
 export default function CreativeStudio({ initial, onChange, onProjects, onCreate, onExit, student, cloud, reduced, largeText, onReduced, onLargeText, soundEnabled = false, onSoundEnabled, onSound, onUnlockSound, onStopSound }: Props) {
+  const confirm = useConfirmation();
   const [loaded] = useState(() => { try { return { project: readStudioProject(initial), error: '' }; } catch { return { project: newStudioProject(), error: 'Your saved Byte Lab project could not be opened. The original draft is preserved; download it before starting over.' }; } });
   const [project, setProject] = useState(loaded.project), [tab, setTab] = useState<'Code' | 'Costumes' | 'Backgrounds'>('Code'), [category, setCategory] = useState('Motion');
   const [welcome, setWelcome] = useState(() => !loaded.error && !loaded.project.onboarding && untouchedStudioProject(loaded.project));
@@ -176,12 +178,12 @@ export default function CreativeStudio({ initial, onChange, onProjects, onCreate
     if (!commit(next)) return false;
     setProjectVersion(value => value + 1); setArtId(''); setTab('Code'); setCategory('Motion'); setWelcome(false); return true;
   }
-  function chooseStarter(kind: StudioProjectChoice | null) {
+  async function chooseStarter(kind: StudioProjectChoice | null) {
     const current = latest.current, firstUse = welcome && !current.onboarding;
     const next = studioNewProject(kind);
     if (onCreate && !welcome) { next.onboarding = current.onboarding === 'completed' ? 'completed' : 'skipped'; if (!onCreate(next)) starters.current?.close(); return; }
     const replacing = !untouchedStudioProject(current);
-    if (replacing && !confirm(`Download a backup of “${current.title}”, then replace this course’s saved project with “${next.title}”?`)) return;
+    if (replacing && !(await confirm({ title: "Replace this project?", message: `Download a backup of “${current.title}”, then replace this course’s saved project with “${next.title}”?`, confirmLabel: "Download backup & replace", tone: 'danger' }))) return;
     if (replacing) exportProject();
     next.onboarding = firstUse ? 'started' : current.onboarding === 'completed' ? 'completed' : 'skipped';
     if (replaceProject(next)) {
@@ -199,20 +201,20 @@ export default function CreativeStudio({ initial, onChange, onProjects, onCreate
       if (file.size > 2 * 1024 * 1024) throw new Error('Choose a project file smaller than 2 MB.');
       const next = readStudioBackup(JSON.parse(await file.text()));
       if (onCreate) { onCreate(next); return; }
-      if (!confirm('Download a backup of the current project, then open this project in the course’s saved slot?')) return;
+      if (!(await confirm({ title: "Open a different project?", message: 'Download a backup of the current project, then open this project in the course’s saved slot?', confirmLabel: "Download backup & open", tone: 'danger' }))) return;
       exportProject(); if (replaceProject(next)) { setTourOpen(false); setMessage('Project opened. A backup download of your previous project was requested.'); }
     } catch { setError('That file is not a supported Byte Lab project, or is over 2 MB. Your current project is unchanged.'); }
     finally { if (projectFile.current) projectFile.current.value = ''; }
   }
-  function removeArt() {
-    if (!selectedArt || (tab === 'Costumes' ? sprite.costumes.length : assets.length) <= 1 || !confirm(`Remove ${selectedArt.name} from ${tab === 'Costumes' ? 'this sprite' : 'the project backgrounds'}? Blocks using it will need a new selection.`)) return;
+  async function removeArt() {
+    if (!selectedArt || (tab === 'Costumes' ? sprite.costumes.length : assets.length) <= 1 || !(await confirm({ title: "Remove this artwork?", message: `Remove ${selectedArt.name} from ${tab === 'Costumes' ? 'this sprite' : 'the project backgrounds'}? Blocks using it will need a new selection.`, confirmLabel: "Remove artwork", tone: 'danger' }))) return;
     const next = structuredClone(latest.current);
     if (tab === 'Costumes') { const selected = next.sprites.find(s => s.id === next.selected)!; selected.costumes = selected.costumes.filter(id => id !== selectedArt.id); selected.costume = selected.costumes[0]; }
     else next.backdrop = assets.find(a => a.id !== selectedArt.id)!.id;
     if (!next.sprites.some(s => s.costumes.includes(selectedArt.id)) && next.backdrop !== selectedArt.id) next.assets = next.assets.filter(a => a.id !== selectedArt.id);
     if (commit(next)) setArtId('');
   }
-  function removeSprite() { if (project.sprites.length <= 1 || !confirm(`Remove ${sprite.name} and this sprite’s code from the project? Download a backup first if you want to keep it.`)) return; const next = { ...project, sprites: project.sprites.filter(s => s.id !== sprite.id) }; next.selected = next.sprites[0].id; commit(next); }
+  async function removeSprite() { if (project.sprites.length <= 1 || !(await confirm({ title: "Remove this sprite?", message: `Remove ${sprite.name} and this sprite’s code from the project? Download a backup first if you want to keep it.`, confirmLabel: "Remove sprite", tone: 'danger' }))) return; const next = { ...project, sprites: project.sprites.filter(s => s.id !== sprite.id) }; next.selected = next.sprites[0].id; commit(next); }
   function duplicateSprite() { if (project.sprites.length >= 4) return; const id = studioSpriteId(), copied = { ...structuredClone(sprite), id, name: `${sprite.name.slice(0, 18)} copy`, x: Math.min(100, sprite.x + 20) }; commit({ ...project, selected: id, sprites: [...project.sprites, copied] }); }
   if (loaded.error) return <main className="studio-recovery"><h1>Let’s protect your saved project</h1><p role="alert">{loaded.error}</p><button onClick={() => exportProject(true)}>Download original draft</button><button onClick={onExit}>Return to course</button><p>No empty project has been saved over it.</p></main>;
   return <div className={`studio-shell ${reduced ? 'studio-reduced' : ''} ${largeText ? 'studio-large' : ''}`}>

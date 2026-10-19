@@ -53,17 +53,17 @@ test('gallery creates, renames, duplicates and opens independent saved projects'
 });
 test('deletion is confirmed, restorable after reload and permanently removable only with confirmation', async ({ page }, info) => {
   const saved = await fixture(page); await page.goto('/#/student-play/grade-6/lab');
-  page.once('dialog', d => d.dismiss()); await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click(); expect(saved.gallery().projects[0].deletedAt).toBeUndefined();
-  page.once('dialog', d => d.accept()); await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click(); await page.locator('.confirmation-dialog').getByRole('button', { name: 'Cancel', exact: true }).click(); expect(saved.gallery().projects[0].deletedAt).toBeUndefined();
+  await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click(); await page.locator('.confirmation-accept').click();
   await expect.poll(() => !!saved.gallery().projects[0].deletedAt).toBe(true);
   await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click();
   await expect(page.getByRole('list', { name: 'Deleted projects' }).getByRole('article')).toHaveCount(1);
   await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: `.impeccable/review/gallery-trash-${info.project.name}.png`, fullPage: true });
   await page.reload(); await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click(); await page.getByRole('button', { name: 'Restore', exact: true }).click();
   await page.getByRole('button', { name: 'My projects (3)', exact: true }).click(); await expect(page.getByRole('button', { name: 'Open Space friends', exact: true })).toBeVisible();
-  page.once('dialog', d => d.accept()); await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click(); await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click();
-  page.once('dialog', d => d.dismiss()); await page.getByRole('button', { name: 'Delete forever', exact: true }).click(); await expect(page.getByRole('list', { name: 'Deleted projects' }).getByRole('article')).toHaveCount(1);
-  page.once('dialog', d => d.accept()); await page.getByRole('button', { name: 'Delete forever', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete Space friends', exact: true }).click(); await page.locator('.confirmation-accept').click(); await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete forever', exact: true }).click(); await page.locator('.confirmation-dialog').getByRole('button', { name: 'Cancel', exact: true }).click(); await expect(page.getByRole('list', { name: 'Deleted projects' }).getByRole('article')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Delete forever', exact: true }).click(); await page.locator('.confirmation-accept').click();
   await expect.poll(() => saved.gallery().projects.length).toBe(2); await expect(page.getByRole('heading', { name: 'Nothing in Recently deleted' })).toBeVisible();
 });
 test('gallery backups and single projects import additively without replacing previous work', async ({ page }) => {

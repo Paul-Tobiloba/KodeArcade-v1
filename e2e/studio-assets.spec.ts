@@ -119,7 +119,7 @@ test('a project at its asset capacity rejects an import without changing saved w
   expect(saved()).toEqual(before);
   await page.screenshot({ path: `.impeccable/review/assets-local-capacity-${info.project.name}.png`, fullPage: true });
   await page.getByRole('tab', { name: 'Backgrounds', exact: true }).click(); await page.locator('.studio-asset-list').getByRole('button', { name: 'Extra 0', exact: true }).click();
-  page.once('dialog', d => d.accept()); await page.locator('.studio-art-heading').getByRole('button', { name: 'Remove', exact: true }).click();
+  await page.locator('.studio-art-heading').getByRole('button', { name: 'Remove', exact: true }).click(); await page.locator('.confirmation-accept').click();
   await expect.poll(() => saved().assets.length).toBe(23);
   await page.getByRole('button', { name: 'Choose background', exact: true }).click(); await page.getByRole('button', { name: 'Use basketball background', exact: true }).click();
   await expect.poll(() => saved().assets.find(a => a.id === saved().backdrop)?.ref).toBe('basketball'); await expect(page.locator('.studio-error')).toHaveCount(0);
@@ -138,8 +138,8 @@ test('a gallery-budget rejection closes the library and focuses visible recovery
   await expect(page.getByRole('button', { name: 'Download gallery', exact: true })).toBeVisible();
   await page.screenshot({ path: `.impeccable/review/assets-capacity-${info.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'My projects', exact: true }).click();
-  page.once('dialog', d => d.accept()); await page.getByRole('button', { name: 'Delete Untitled project', exact: true }).nth(1).click();
-  await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click(); page.once('dialog', d => d.accept()); await page.getByRole('button', { name: 'Delete forever', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete Untitled project', exact: true }).nth(1).click(); await page.locator('.confirmation-accept').click();
+  await page.getByRole('button', { name: 'Recently deleted (1)', exact: true }).click(); await page.getByRole('button', { name: 'Delete forever', exact: true }).click(); await page.locator('.confirmation-accept').click();
   await page.getByRole('button', { name: 'My projects (3)', exact: true }).click(); await page.getByRole('button', { name: 'Open Untitled project', exact: true }).first().click();
   await page.getByRole('tab', { name: 'Backgrounds', exact: true }).click(); await page.getByRole('button', { name: 'Choose background', exact: true }).click(); await page.getByRole('button', { name: 'Use basketball background', exact: true }).click();
   await expect.poll(() => saved().assets.find(a => a.id === saved().backdrop)?.ref).toBe('basketball'); await expect(page.locator('.studio-library-error')).toHaveCount(0);

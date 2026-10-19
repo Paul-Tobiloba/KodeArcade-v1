@@ -45,9 +45,10 @@ test('drag blocks, run, recover, save and resume', async ({ page, isMobile }) =>
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('A different direction'); expect(errors).toEqual([]);
 });
 test('preferences, keyboard helpers and reset', async ({ page }) => {
-  await page.goto('/#/learn/words'); await expect(page.locator('.course-app')).toBeVisible(); await page.keyboard.press('Tab');
+  await page.goto('/#/learn/words'); await expect(page.locator('.course-app')).toBeVisible();
+  await page.getByRole('link', { name: 'Skip to learning' }).focus();
   await expect(page.getByRole('link', { name: 'Skip to learning' })).toBeFocused(); await page.keyboard.press('Enter');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.getByText('Keyboard helpers', { exact: true }).click();
   await page.getByRole('button', { name: 'Add block', exact: true }).focus(); await page.keyboard.press('Enter');
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
@@ -55,11 +56,15 @@ test('preferences, keyboard helpers and reset', async ({ page }) => {
   await page.getByLabel('Larger text').check(); await page.getByLabel('Show steps without sliding animations').check();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole('button', { name: 'Settings' }).click(); page.once('dialog', dialog => dialog.accept());
+  await page.getByRole('button', { name: 'Settings' }).click();
   await page.getByRole('button', { name: 'Reset saved progress' }).click();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every program starts with a sequence');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
-  await expect(page.getByText('0 / 24 blocks', { exact: true })).toBeVisible();
+  await page.locator('.confirmation-accept').click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Sequences: directions in the right order');
+  await expect(page.locator('.confirmation-dialog')).not.toBeVisible();
+  await expect.poll(() => page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('kodearcade-v1')!);
+    return { nickname: saved.nickname, largeText: saved.largeText, course: saved.course, previousCourses: Object.keys(saved.courseProgress ?? {}) };
+  })).toEqual({ nickname: '', largeText: false, course: 'grade-1', previousCourses: [] });
 });
 test('capture workspace and audit the app shell', async ({ page }, testInfo) => {
   await page.goto('/#/learn/words'); await expect(page.locator('.course-app')).toBeVisible();

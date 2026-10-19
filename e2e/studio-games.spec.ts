@@ -138,7 +138,7 @@ test('new personal functions support keyboard body editing, cancellation and con
   await pane.getByRole('button', { name: 'Save function', exact: true }).click(); await expect(page.getByRole('button', { name: 'Edit celebrate', exact: true })).toBeVisible();
   await expect.poll(() => JSON.stringify(saved().sprites[0].code)).toContain('celebrate'); const before = structuredClone(saved().sprites[0].code);
   await page.getByRole('button', { name: 'Edit celebrate', exact: true }).click(); await pane.getByRole('button', { name: 'Cancel editing', exact: true }).click(); expect(saved().sprites[0].code).toEqual(before);
-  await page.getByRole('button', { name: 'Edit celebrate', exact: true }).click(); page.once('dialog', d => d.accept()); await pane.getByRole('button', { name: 'Delete function', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit celebrate', exact: true }).click(); await pane.getByRole('button', { name: 'Delete function', exact: true }).click(); await page.locator('.confirmation-accept').click();
   await expect(page.getByRole('button', { name: 'Edit celebrate', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Edit greet', exact: true }).click(); await pane.getByRole('button', { name: 'Delete function', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('Remove calls to greet'); await pane.getByRole('button', { name: 'Cancel editing', exact: true }).click();

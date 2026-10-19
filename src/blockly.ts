@@ -1,5 +1,6 @@
 import * as Blockly from 'blockly/core';
 import * as En from 'blockly/msg/en';
+import { confirmEditorAction } from './ConfirmationProvider';
 import './conceptBlocks';
 import './spriteBlocks';
 import { runConcept } from './conceptRuntime';
@@ -10,6 +11,8 @@ import { relativeMovement } from './relativeMovement';
 import { directions, labels, runProgram, type Block, type Mission, type RunResult } from './learning';
 
 Blockly.setLocale(Object.fromEntries(Object.entries(En).filter((entry): entry is [string, string] => typeof entry[1] === 'string')));
+Blockly.dialog.setConfirm((message, callback) => { void confirmEditorAction({ title: 'Confirm code change', message, confirmLabel: 'Continue' }).then(callback); });
+Blockly.dialog.setAlert((message, callback) => { void confirmEditorAction({ title: 'Check your blocks', message, confirmLabel: 'OK', notice: true }).then(() => callback?.()); });
 Blockly.common.defineBlocksWithJsonArray([
   ...['forward', 'backward'].map(action => ({ type: `ka_${action}`, message0: `move ${action}`, previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: action === 'forward' ? 'Move one square in the facing direction.' : 'Move one square behind you without changing the facing direction.' })),
   ...['left', 'right'].map(side => ({ type: `ka_turn_${side}`, message0: `turn ${side}`, previousStatement: null, nextStatement: null, colour: '#08796e', tooltip: `Turn ${side} 90 degrees without moving.` })),

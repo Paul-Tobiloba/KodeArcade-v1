@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 const classId = '00000000-0000-4000-8000-000000000001';
 const pupils = [{ id: '00000000-0000-4000-8000-000000000002', displayName: 'Sample Alex', username: 'samplealex', grade: 2, active: true, loginMethod: 'picture' }, { id: '00000000-0000-4000-8000-000000000003', displayName: 'Sample Sam', username: 'samplesam', grade: 4, active: true, loginMethod: 'text' }];
 test.beforeEach(async ({ page }) => {
@@ -31,11 +32,83 @@ test('bulk cards require an explicit destructive reset confirmation', async ({ p
   let resets = 0;
   await page.route('**/students/reset-cards', route => { resets++; expect(route.request().postDataJSON().studentIds).toHaveLength(2); return route.fulfill({ contentType: 'application/pdf', body: '%PDF-1.3 synthetic booklet' }); });
   await page.getByLabel('Select first 50 active students').check();
-  page.once('dialog', dialog => dialog.dismiss());
-  await page.getByRole('button', { name: 'Reset selected & generate cards' }).click(); expect(resets).toBe(0);
-  page.once('dialog', dialog => { expect(dialog.message()).toContain('old cards will stop working'); return dialog.accept(); });
   await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+  await page.locator('.confirmation-dialog').getByRole('button', { name: 'Cancel', exact: true }).click(); expect(resets).toBe(0);
+  await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+  await expect(page.locator('.confirmation-dialog')).toContainText('old cards will stop working');
+  await page.locator('.confirmation-accept').click();
   await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible(); expect(resets).toBe(1);
+});
+
+test('single password reset uses a focused, cancellable modal and sends only one confirmed request', async ({ page }, info) => {
+  const nativeDialogs: string[] = [];
+  page.on('dialog', async dialog => { nativeDialogs.push(dialog.type()); await dialog.dismiss(); });
+  let resets = 0;
+  await page.route('**/students/*/reset', route => {
+    resets++;
+    expect(route.request().postDataJSON()).toMatchObject({ loginMethod: 'text' });
+    return route.fulfill({ contentType: 'application/pdf', body: '%PDF-1.3 synthetic card' });
+  });
+  await page.getByRole('button', { name: 'Manage Sample Alex' }).click();
+  await page.getByLabel('New password method').selectOption('text');
+  const trigger = page.getByRole('button', { name: 'Reset credential & generate PDF' });
+  const modal = page.getByRole('dialog', { name: 'Reset this student’s password?' });
+  await trigger.click();
+  await expect(modal).toBeVisible();
+  await expect(modal.getByRole('button', { name: 'Cancel', exact: true })).toBeFocused();
+  await expect(modal).toContainText('old card will stop working');
+  expect(resets).toBe(0);
+  for (let index = 0; index < 5; index++) {
+    await page.keyboard.press('Tab');
+    expect(await modal.evaluate(element => element.contains(document.activeElement))).toBe(true);
+  }
+  const accessibility = await new AxeBuilder({ page }).include('.confirmation-dialog').analyze();
+  expect(accessibility.violations).toEqual([]);
+  expect(await modal.evaluate(element => element.scrollWidth <= element.clientWidth)).toBe(true);
+  await page.screenshot({ path: `.impeccable/review/confirmation-reset-${info.project.name}.png` });
+  await page.keyboard.press('Escape');
+  await expect(modal).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  expect(resets).toBe(0);
+  await trigger.click();
+  await modal.getByRole('button', { name: 'Close confirmation' }).click();
+  expect(resets).toBe(0);
+  await trigger.click();
+  await modal.getByRole('button', { name: 'Reset password & generate PDF' }).dblclick();
+  await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
+  expect(resets).toBe(1);
+  expect(nativeDialogs).toEqual([]);
+});
+
+test('leaving a pending confirmation cancels it instead of acting on a stale classroom', async ({ page }) => {
+  let resets = 0;
+  await page.route('**/students/reset-cards', route => { resets++; return route.fulfill({ contentType: 'application/pdf', body: '%PDF-1.3 synthetic card' }); });
+  await page.getByLabel('Select first 50 active students').check();
+  await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+  await expect(page.locator('.confirmation-dialog')).toBeVisible();
+  await page.evaluate(() => { location.hash = '/classes'; });
+  await expect(page.locator('.confirmation-dialog')).not.toBeVisible();
+  expect(resets).toBe(0);
+  await page.goto(`/#/classroom?id=${classId}`);
+  await page.getByLabel('Select first 50 active students').check();
+  await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+  await page.locator('.confirmation-accept').click();
+  await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
+  expect(resets).toBe(1);
+});
+
+test('course removal remains unchanged on cancel and applies only after confirmation', async ({ page }) => {
+  let saves = 0;
+  await page.route('**/assignments/save', route => { saves++; expect(route.request().postDataJSON()).toMatchObject({ courses: [], previous: ['grade-2'] }); return route.fulfill({ json: { saved: true } }); });
+  const section = page.locator('.account-assignment-list');
+  await section.getByRole('checkbox').nth(1).uncheck();
+  await section.getByRole('button', { name: 'Save assignments', exact: true }).click();
+  const modal = page.getByRole('dialog', { name: 'Remove course access?' });
+  await modal.getByRole('button', { name: 'Cancel', exact: true }).click();
+  expect(saves).toBe(0);
+  await section.getByRole('button', { name: 'Save assignments', exact: true }).click();
+  await modal.getByRole('button', { name: 'Remove access', exact: true }).click();
+  await expect.poll(() => saves).toBe(1);
 });
 test('course choices remain drafts until Save assignments', async ({ page }, info) => {
   let saves = 0;

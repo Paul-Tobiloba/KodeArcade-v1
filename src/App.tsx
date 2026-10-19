@@ -1,3 +1,4 @@
+import { useConfirmation } from './ConfirmationProvider';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Play, Square, RotateCcw, Lightbulb, Settings, X, ChevronRight, Code2, Sparkles, Trash2, BookOpen, LibraryBig, ShieldCheck, PanelLeftClose, PanelLeftOpen, Star, Check } from 'lucide-react';
 import { missions, same, type Position, type RunResult } from './learning';
@@ -39,6 +40,7 @@ import { courseQuizIds, currentQuizId, quizModuleId } from '../shared/quizzes';
 import { SEQUENCE_TOPIC, emptyTopicRecord, isSequenceJourney, sequenceCore, sequenceExtras } from './topicJourney';
 
 export default function App({ student, cloud }: { student?: LearnerAccount; cloud?: SaveFeedbackProps } = {}) {
+  const confirm = useConfirmation();
   const labEntry = location.hash.split('/')[3] === 'lab';
   const artEntry = location.hash.split('/')[3] === 'art';
   const [loaded] = useState(() => { const state = loadSave(); const requested = location.hash.split('/')[2]; if (!isCourse(requested)) return state; const save = switchCourse(state.save, requested); const lab = labEntry ? missionIndex(`${requested}-creative-4`) : -1; return { ...state, save: lab >= 0 ? { ...save, current: lab } : save }; });
@@ -265,9 +267,9 @@ export default function App({ student, cloud }: { student?: LearnerAccount; clou
     setSave(s => ({ ...s, progress: { ...s.progress, [mission.id]: { ...s.progress[mission.id], end, complete: false } } }));
     setResult(null); setRetryMessage(''); setLastClue(''); setPosition(mission.start); setStep(0); setNotice(`Station moved to row ${end.y + 1}, column ${end.x + 1}.`);
   }
-  function resetAll() {
+  async function resetAll() {
     if (student) return;
-    if (!window.confirm(student ? 'Reset your programs and progress for this activity? Your account and profile name will not change.' : 'Delete your nickname, programs, and progress from this browser? This cannot be undone.')) return;
+    if (!(await confirm({ title: "Reset saved progress?", message: student ? 'Reset your programs and progress for this activity? Your account and profile name will not change.' : 'Delete your nickname, programs, and progress from this browser? This cannot be undone.', confirmLabel: "Reset progress", tone: 'danger' }))) return;
     stop();
     try {
       activityStorage.removeItem(SAVE_KEY);

@@ -1,3 +1,4 @@
+import { useConfirmation } from './ConfirmationProvider';
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import * as Blockly from 'blockly/core';
 import { Undo2, Redo2 } from 'lucide-react';
@@ -13,6 +14,7 @@ import { studioBehaviorFunctions, studioCreationFunctions } from './studioBehavi
 export type StudioEditorHandle = { highlight: (id: string) => void; center: () => void };
 type Props = { project: StudioProject; sprite: StudioSprite; running: boolean; category: string; onCategory: (category: string) => void; onChange: (code: Record<string, unknown>) => void | boolean; onError: (message: string) => void };
 export default forwardRef<StudioEditorHandle, Props>(function StudioEditor({ project, sprite, running, category, onCategory, onChange, onError }, ref) {
+  const confirm = useConfirmation();
   const host = useRef<HTMLDivElement>(null), current = useRef<Blockly.WorkspaceSvg | null>(null), change = useRef(onChange), configuration = useRef(project);
   change.current = onChange; configuration.current = project;
   const [workspace, setWorkspace] = useState<Blockly.WorkspaceSvg | null>(null), [count, setCount] = useState(0);
@@ -84,12 +86,12 @@ export default forwardRef<StudioEditorHandle, Props>(function StudioEditor({ pro
     Blockly.Events.disable(); try { Blockly.serialization.workspaces.load(code, workspace); workspace.getBlocksByType('ka_start', false)[0]?.setDeletable(false); configureStudioAssets(workspace, project, sprite.id); } finally { Blockly.Events.enable(); }
     setCount(workspace.getAllBlocks(false).length - 1); setRevision(n => n + 1); setEditing(null);
   }
-  function deleteDefinition() {
+  async function deleteDefinition() {
     if (!workspace || !editing?.originalId || editing.readOnly) return;
     const block = workspace.getBlockById(editing.originalId); if (!block) return;
     const name = block.getFieldValue('NAME');
     if (workspace.getAllBlocks(false).some(b => ['ka_function_call', 'ka_function_value', 'ka_studio_behavior'].includes(b.type) && b.getFieldValue('NAME') === name)) { setFunctionError(`Remove calls to ${name} before deleting its definition.`); return; }
-    if (!confirm(`Delete your function ${name}? Its body will be removed. Cancel keeps it.`)) return;
+    if (!(await confirm({ title: "Delete this function?", message: `Delete your function ${name}? Its body will be removed. Cancel keeps it.`, confirmLabel: "Delete function", tone: 'danger' }))) return;
     block.dispose(true); setEditing(null); setFunctionError('');
   }
   let translated = '';

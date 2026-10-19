@@ -104,8 +104,8 @@ test('live teacher → PDF credentials → student courses', async ({ page }, in
     await expect(page.locator('.account-roster').getByRole('row')).toHaveCount(5);
     await page.getByLabel('Select Synthetic Batch Alex', { exact: true }).check();
     await page.getByLabel('Select Synthetic Batch Sam', { exact: true }).check();
-    page.once('dialog', dialog => dialog.accept());
     await page.getByRole('button', { name: 'Reset selected & generate cards' }).click();
+    await page.locator('.confirmation-accept').click();
     await expect(page.getByRole('heading', { name: 'Login card ready' })).toBeVisible();
     await checkBooklet();
     const assignments = page.locator('.account-assignment-list');
@@ -114,8 +114,8 @@ test('live teacher → PDF credentials → student courses', async ({ page }, in
     await assignments.getByRole('button', { name: 'Save assignments', exact: true }).click();
     await expect.poll(async () => (await (await page.request.get(`/api/manage/classes/${classId}`)).json()).assignments.length).toBe(2);
     await assignments.getByRole('checkbox').nth(2).uncheck();
-    page.once('dialog', dialog => dialog.accept());
     await assignments.getByRole('button', { name: 'Save assignments', exact: true }).click();
+    await page.locator('.confirmation-accept').click();
     await expect.poll(async () => (await (await page.request.get(`/api/manage/classes/${classId}`)).json()).assignments.length).toBe(1);
     await noOverflow();
     await page.screenshot({ path: `.impeccable/review/classroom-live-${info.project.name}.png`, fullPage: true });

@@ -7,6 +7,7 @@ import { isCourse } from './courses';
 import LoadingScreen from './LoadingScreen';
 import { accountRoute } from './account-api';
 import SessionProvider from './SessionProvider';
+import ConfirmationProvider from './ConfirmationProvider';
 import './styles.css';
 import './course.css';
 import './brand.css';
@@ -27,4 +28,4 @@ function Router() {
   React.useEffect(() => { window.scrollTo(0, 0); }, [learning, marketingPage, courseRoute, account]);
   return studentActivity ? <React.Suspense fallback={<LoadingScreen />}><StudentActivity key={courseRoute} course={courseRoute} /></React.Suspense> : account ? <React.Suspense fallback={<LoadingScreen />}><AccountPortal key={hash} route={account} /></React.Suspense> : learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<LoadingScreen />}><App key={courseRoute} /></React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
 }
-ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><SessionProvider><Router /></SessionProvider></React.StrictMode>);
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><ConfirmationProvider><SessionProvider><Router /></SessionProvider></ConfirmationProvider></React.StrictMode>);

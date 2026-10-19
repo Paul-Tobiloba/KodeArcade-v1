@@ -1,3 +1,4 @@
+import { useConfirmation } from './ConfirmationProvider';
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
 import { ArrowLeft, Plus, Copy, Pencil, Trash2, RotateCcw, Download, FolderOpen, X } from 'lucide-react';
 import CreativeStudio, { AssetPicture } from './CreativeStudio';
@@ -28,6 +29,7 @@ export function StudioThumbnail({ project }: { project: StudioProject }) {
   </span>;
 }
 export default function StudioLibrary(props: Props) {
+  const confirm = useConfirmation();
   const [loaded] = useState(() => { try { return { gallery: readStudioGallery(props.initial), error: '' }; } catch { return { gallery: null, error: 'Your saved projects could not be opened. Download the original data before leaving; it has not been replaced.' }; } });
   const [gallery, setGallery] = useState(loaded.gallery), [error, setError] = useState(loaded.error), [message, setMessage] = useState(''), [trash, setTrash] = useState(false);
   const [rename, setRename] = useState<StudioGalleryEntry | null>(null), [title, setTitle] = useState('');
@@ -63,9 +65,9 @@ export default function StudioLibrary(props: Props) {
   function create(kind: StudioProjectChoice | null) {
     const project = studioNewProject(kind); project.onboarding = 'skipped'; add(project);
   }
-  function mutate(entry: StudioGalleryEntry, action: 'delete' | 'restore' | 'remove') {
-    if (action === 'delete' && !confirm(`Move “${entry.project.title}” to Recently deleted? You can restore it later.`)) return;
-    if (action === 'remove' && !confirm(`Permanently delete “${entry.project.title}”? This cannot be undone. Download it first if you want a backup.`)) return;
+  async function mutate(entry: StudioGalleryEntry, action: 'delete' | 'restore' | 'remove') {
+    if (action === 'delete' && !(await confirm({ title: "Delete this project?", message: `Move “${entry.project.title}” to Recently deleted? You can restore it later.`, confirmLabel: "Move to Recently deleted", tone: 'danger' }))) return;
+    if (action === 'remove' && !(await confirm({ title: "Permanently delete this project?", message: `Permanently delete “${entry.project.title}”? This cannot be undone. Download it first if you want a backup.`, confirmLabel: "Delete forever", tone: 'danger' }))) return;
     const current = latest.current!, now = new Date().toISOString();
     const projects = action === 'remove' ? current.projects.filter(p => p.id !== entry.id) : current.projects.map(p => p.id !== entry.id ? p : { ...p, deletedAt: action === 'delete' ? now : undefined });
     if (commit({ ...current, projects })) { setMessage(action === 'delete' ? `${entry.project.title} moved to Recently deleted. You can restore it there.` : action === 'restore' ? `${entry.project.title} restored to My projects.` : `${entry.project.title} permanently deleted.`); heading.current?.focus(); }
