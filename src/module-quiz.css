@@ -2,6 +2,12 @@
 .module-quiz-entry h2 { display: flex; align-items: center; gap: 10px; }
 .module-quiz-entry p { max-width: 65ch; margin: 8px 0 0; }
 .module-quiz-entry > button { flex-shrink: 0; }
+.quiz-entry-actions { display: flex; flex-direction: column; gap: 12px; flex-shrink: 0; }
+.quiz-version { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 20px 0; border-bottom: 1px solid #ded9ed; }
+.quiz-version p { flex: 1 1 280px; margin: 0; max-width: 65ch; }
+.quiz-version button { flex-shrink: 0; }
+.quiz-version-picker { display: grid; gap: 8px; max-width: 360px; margin-top: 20px; font-weight: 600; }
+.quiz-version-picker select { width: 100%; min-height: 44px; padding: 8px; border: 1px solid #c6b6e8; border-radius: 7px; color: #181339; background: #fff; font: inherit; }
 .module-quiz { max-width: 820px; margin: 0 auto 32px; padding: 28px; border-radius: 14px; background: #fff; color: #181339; }
 .quiz-instructions, .quiz-result { margin: 24px 0; max-width: 70ch; }
 .quiz-result h2 { margin: 0 0 12px; }

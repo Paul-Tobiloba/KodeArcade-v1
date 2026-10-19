@@ -7,20 +7,10 @@ export const progressCatalog = {
       "grade-1-sequences-3",
       "grade-1-sequences-4",
       "grade-1-sequences-5",
-      "grade-1-sequences-6",
-      "grade-1-sequences-7",
-      "grade-1-sequences-8",
-      "grade-1-sequences-9",
-      "grade-1-sequences-10",
-      "grade-1-directions-1",
-      "grade-1-directions-2",
       "grade-1-directions-3",
       "grade-1-directions-4",
-      "grade-1-directions-5",
       "grade-1-directions-6",
-      "grade-1-directions-7",
       "grade-1-directions-8",
-      "grade-1-directions-9",
       "grade-1-directions-10",
       "grade-1-debugging-1",
       "grade-1-debugging-2",
@@ -252,20 +242,10 @@ export const progressCatalog = {
       "grade-2-sequences-3",
       "grade-2-sequences-4",
       "grade-2-sequences-5",
-      "grade-2-sequences-6",
-      "grade-2-sequences-7",
-      "grade-2-sequences-8",
-      "grade-2-sequences-9",
-      "grade-2-sequences-10",
-      "grade-2-directions-1",
-      "grade-2-directions-2",
       "grade-2-directions-3",
       "grade-2-directions-4",
-      "grade-2-directions-5",
       "grade-2-directions-6",
-      "grade-2-directions-7",
       "grade-2-directions-8",
-      "grade-2-directions-9",
       "grade-2-directions-10",
       "grade-2-loops-1",
       "grade-2-loops-2",
@@ -567,21 +547,17 @@ export const progressCatalog = {
       "grade-3-sequences-3",
       "grade-3-sequences-4",
       "grade-3-sequences-5",
-      "grade-3-sequences-6",
-      "grade-3-sequences-7",
-      "grade-3-sequences-8",
-      "grade-3-sequences-9",
-      "grade-3-sequences-10",
-      "grade-3-directions-1",
-      "grade-3-directions-2",
       "grade-3-directions-3",
       "grade-3-directions-4",
-      "grade-3-directions-5",
       "grade-3-directions-6",
-      "grade-3-directions-7",
       "grade-3-directions-8",
-      "grade-3-directions-9",
       "grade-3-directions-10",
+      "grade-3-statements-1",
+      "grade-3-statements-2",
+      "grade-3-statements-3",
+      "grade-3-statements-4",
+      "grade-3-statements-5",
+      "grade-3-statements-6",
       "grade-3-loops-1",
       "grade-3-loops-2",
       "grade-3-loops-3",
@@ -622,6 +598,39 @@ export const progressCatalog = {
       "grade-3-variables-8",
       "grade-3-variables-9",
       "grade-3-variables-10",
+      "grade-3-operators-1",
+      "grade-3-operators-2",
+      "grade-3-operators-3",
+      "grade-3-operators-4",
+      "grade-3-operators-5",
+      "grade-3-operators-6",
+      "grade-3-boolean-1",
+      "grade-3-boolean-2",
+      "grade-3-boolean-3",
+      "grade-3-boolean-4",
+      "grade-3-boolean-5",
+      "grade-3-boolean-6",
+      "grade-3-functions-1",
+      "grade-3-functions-2",
+      "grade-3-functions-3",
+      "grade-3-functions-4",
+      "grade-3-functions-5",
+      "grade-3-functions-6",
+      "grade-3-lists-1",
+      "grade-3-lists-2",
+      "grade-3-lists-3",
+      "grade-3-lists-4",
+      "grade-3-lists-5",
+      "grade-3-lists-6",
+      "grade-3-objects-1",
+      "grade-3-objects-2",
+      "grade-3-objects-3",
+      "grade-3-objects-4",
+      "grade-3-objects-5",
+      "grade-3-objects-6",
+      "grade-3-creative-1",
+      "grade-3-creative-2",
+      "grade-3-creative-3",
       "grade-3-rescue-project"
     ],
     "missions": [
@@ -1038,6 +1047,246 @@ export const progressCatalog = {
         "index": 388,
         "title": "Milo: A bridge is already there",
         "size": 6
+      },
+      {
+        "id": "grade-3-statements-1",
+        "index": 413,
+        "title": "Byte: One statement, one action",
+        "size": 6
+      },
+      {
+        "id": "grade-3-statements-2",
+        "index": 414,
+        "title": "Byte: Change the argument",
+        "size": 6
+      },
+      {
+        "id": "grade-3-statements-3",
+        "index": 415,
+        "title": "Byte: Two inputs",
+        "size": 6
+      },
+      {
+        "id": "grade-3-statements-4",
+        "index": 416,
+        "title": "Byte: Order still matters",
+        "size": 6
+      },
+      {
+        "id": "grade-3-statements-5",
+        "index": 417,
+        "title": "Byte: Reuse a command",
+        "size": 6
+      },
+      {
+        "id": "grade-3-statements-6",
+        "index": 418,
+        "title": "Byte: Choose precise inputs",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-1",
+        "index": 419,
+        "title": "Byte: Keep values together",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-2",
+        "index": 420,
+        "title": "Byte: Find the second item",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-3",
+        "index": 421,
+        "title": "Byte: Read without removing",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-4",
+        "index": 422,
+        "title": "Byte: Append at the end",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-5",
+        "index": 423,
+        "title": "Byte: Choose the index",
+        "size": 6
+      },
+      {
+        "id": "grade-3-lists-6",
+        "index": 424,
+        "title": "Byte: A route from stored values",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-1",
+        "index": 425,
+        "title": "Byte: Meet a data object",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-2",
+        "index": 426,
+        "title": "Byte: Read a named property",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-3",
+        "index": 427,
+        "title": "Byte: Update one property",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-4",
+        "index": 428,
+        "title": "Byte: Keep properties independent",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-5",
+        "index": 429,
+        "title": "Byte: Read after a change",
+        "size": 6
+      },
+      {
+        "id": "grade-3-objects-6",
+        "index": 430,
+        "title": "Byte: Configure a journey",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-1",
+        "index": 485,
+        "title": "Operators: Combine two values",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-2",
+        "index": 486,
+        "title": "Operators: Order in subtraction",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-3",
+        "index": 487,
+        "title": "Operators: Equal groups",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-4",
+        "index": 488,
+        "title": "Operators: Group an expression",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-5",
+        "index": 489,
+        "title": "Operators: Calculate from memory",
+        "size": 6
+      },
+      {
+        "id": "grade-3-operators-6",
+        "index": 490,
+        "title": "Operators: Compose a calculation",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-1",
+        "index": 491,
+        "title": "Boolean logic: A comparison has an answer",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-2",
+        "index": 492,
+        "title": "Boolean logic: Equality is a question",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-3",
+        "index": 493,
+        "title": "Boolean logic: Both conditions",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-4",
+        "index": 494,
+        "title": "Boolean logic: At least one",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-5",
+        "index": 495,
+        "title": "Boolean logic: Reverse the answer",
+        "size": 6
+      },
+      {
+        "id": "grade-3-boolean-6",
+        "index": 496,
+        "title": "Boolean logic: Combine Boolean ideas",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-1",
+        "index": 497,
+        "title": "Functions: Define, then call",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-2",
+        "index": 498,
+        "title": "Functions: Reuse the whole group",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-3",
+        "index": 499,
+        "title": "Functions: A loop can call a function",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-4",
+        "index": 500,
+        "title": "Functions: Definitions do not run themselves",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-5",
+        "index": 501,
+        "title": "Functions: One change, several calls",
+        "size": 6
+      },
+      {
+        "id": "grade-3-functions-6",
+        "index": 502,
+        "title": "Functions: Name the parts",
+        "size": 6
+      },
+      {
+        "id": "grade-3-creative-1",
+        "index": 557,
+        "title": "A character with a plan",
+        "size": 6
+      },
+      {
+        "id": "grade-3-creative-2",
+        "index": 558,
+        "title": "Meet another character",
+        "size": 6
+      },
+      {
+        "id": "grade-3-creative-3",
+        "index": 559,
+        "title": "Bounce and respond",
+        "size": 6
+      },
+      {
+        "id": "grade-3-creative-4",
+        "index": 560,
+        "title": "Byte Lab",
+        "size": 6
       }
     ],
     "drawings": [
@@ -1074,21 +1323,17 @@ export const progressCatalog = {
       "grade-4-sequences-3",
       "grade-4-sequences-4",
       "grade-4-sequences-5",
-      "grade-4-sequences-6",
-      "grade-4-sequences-7",
-      "grade-4-sequences-8",
-      "grade-4-sequences-9",
-      "grade-4-sequences-10",
-      "grade-4-directions-1",
-      "grade-4-directions-2",
       "grade-4-directions-3",
       "grade-4-directions-4",
-      "grade-4-directions-5",
       "grade-4-directions-6",
-      "grade-4-directions-7",
       "grade-4-directions-8",
-      "grade-4-directions-9",
       "grade-4-directions-10",
+      "grade-4-statements-1",
+      "grade-4-statements-2",
+      "grade-4-statements-3",
+      "grade-4-statements-4",
+      "grade-4-statements-5",
+      "grade-4-statements-6",
       "grade-4-loops-1",
       "grade-4-loops-2",
       "grade-4-loops-3",
@@ -1129,6 +1374,39 @@ export const progressCatalog = {
       "grade-4-variables-8",
       "grade-4-variables-9",
       "grade-4-variables-10",
+      "grade-4-operators-1",
+      "grade-4-operators-2",
+      "grade-4-operators-3",
+      "grade-4-operators-4",
+      "grade-4-operators-5",
+      "grade-4-operators-6",
+      "grade-4-boolean-1",
+      "grade-4-boolean-2",
+      "grade-4-boolean-3",
+      "grade-4-boolean-4",
+      "grade-4-boolean-5",
+      "grade-4-boolean-6",
+      "grade-4-functions-1",
+      "grade-4-functions-2",
+      "grade-4-functions-3",
+      "grade-4-functions-4",
+      "grade-4-functions-5",
+      "grade-4-functions-6",
+      "grade-4-lists-1",
+      "grade-4-lists-2",
+      "grade-4-lists-3",
+      "grade-4-lists-4",
+      "grade-4-lists-5",
+      "grade-4-lists-6",
+      "grade-4-objects-1",
+      "grade-4-objects-2",
+      "grade-4-objects-3",
+      "grade-4-objects-4",
+      "grade-4-objects-5",
+      "grade-4-objects-6",
+      "grade-4-creative-1",
+      "grade-4-creative-2",
+      "grade-4-creative-3",
       "grade-4-rescue-project"
     ],
     "missions": [
@@ -1545,6 +1823,246 @@ export const progressCatalog = {
         "index": 396,
         "title": "Milo: A bridge is already there",
         "size": 7
+      },
+      {
+        "id": "grade-4-statements-1",
+        "index": 431,
+        "title": "Byte: One statement, one action",
+        "size": 7
+      },
+      {
+        "id": "grade-4-statements-2",
+        "index": 432,
+        "title": "Byte: Change the argument",
+        "size": 7
+      },
+      {
+        "id": "grade-4-statements-3",
+        "index": 433,
+        "title": "Byte: Two inputs",
+        "size": 7
+      },
+      {
+        "id": "grade-4-statements-4",
+        "index": 434,
+        "title": "Byte: Order still matters",
+        "size": 7
+      },
+      {
+        "id": "grade-4-statements-5",
+        "index": 435,
+        "title": "Byte: Reuse a command",
+        "size": 7
+      },
+      {
+        "id": "grade-4-statements-6",
+        "index": 436,
+        "title": "Byte: Choose precise inputs",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-1",
+        "index": 437,
+        "title": "Byte: Keep values together",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-2",
+        "index": 438,
+        "title": "Byte: Find the second item",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-3",
+        "index": 439,
+        "title": "Byte: Read without removing",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-4",
+        "index": 440,
+        "title": "Byte: Append at the end",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-5",
+        "index": 441,
+        "title": "Byte: Replace one item",
+        "size": 7
+      },
+      {
+        "id": "grade-4-lists-6",
+        "index": 442,
+        "title": "Byte: A route from stored values",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-1",
+        "index": 443,
+        "title": "Byte: Meet a data object",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-2",
+        "index": 444,
+        "title": "Byte: Read a named property",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-3",
+        "index": 445,
+        "title": "Byte: Update one property",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-4",
+        "index": 446,
+        "title": "Byte: Keep properties independent",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-5",
+        "index": 447,
+        "title": "Byte: Read after a change",
+        "size": 7
+      },
+      {
+        "id": "grade-4-objects-6",
+        "index": 448,
+        "title": "Byte: Configure a journey",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-1",
+        "index": 503,
+        "title": "Operators: Combine two values",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-2",
+        "index": 504,
+        "title": "Operators: Order in subtraction",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-3",
+        "index": 505,
+        "title": "Operators: Equal groups",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-4",
+        "index": 506,
+        "title": "Operators: Share equally",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-5",
+        "index": 507,
+        "title": "Operators: Calculate from memory",
+        "size": 7
+      },
+      {
+        "id": "grade-4-operators-6",
+        "index": 508,
+        "title": "Operators: Compose a calculation",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-1",
+        "index": 509,
+        "title": "Boolean logic: A comparison has an answer",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-2",
+        "index": 510,
+        "title": "Boolean logic: Equality is a question",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-3",
+        "index": 511,
+        "title": "Boolean logic: Both conditions",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-4",
+        "index": 512,
+        "title": "Boolean logic: At least one",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-5",
+        "index": 513,
+        "title": "Boolean logic: Reverse the answer",
+        "size": 7
+      },
+      {
+        "id": "grade-4-boolean-6",
+        "index": 514,
+        "title": "Boolean logic: A Boolean chooses a branch",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-1",
+        "index": 515,
+        "title": "Functions: Define, then call",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-2",
+        "index": 516,
+        "title": "Functions: Reuse the whole group",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-3",
+        "index": 517,
+        "title": "Functions: A loop can call a function",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-4",
+        "index": 518,
+        "title": "Functions: Definitions do not run themselves",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-5",
+        "index": 519,
+        "title": "Functions: One change, several calls",
+        "size": 7
+      },
+      {
+        "id": "grade-4-functions-6",
+        "index": 520,
+        "title": "Functions: Name the parts",
+        "size": 7
+      },
+      {
+        "id": "grade-4-creative-1",
+        "index": 561,
+        "title": "A character with a plan",
+        "size": 7
+      },
+      {
+        "id": "grade-4-creative-2",
+        "index": 562,
+        "title": "Meet another character",
+        "size": 7
+      },
+      {
+        "id": "grade-4-creative-3",
+        "index": 563,
+        "title": "Bounce and respond",
+        "size": 7
+      },
+      {
+        "id": "grade-4-creative-4",
+        "index": 564,
+        "title": "Byte Lab",
+        "size": 7
       }
     ],
     "drawings": [
@@ -1581,21 +2099,17 @@ export const progressCatalog = {
       "grade-5-sequences-3",
       "grade-5-sequences-4",
       "grade-5-sequences-5",
-      "grade-5-sequences-6",
-      "grade-5-sequences-7",
-      "grade-5-sequences-8",
-      "grade-5-sequences-9",
-      "grade-5-sequences-10",
-      "grade-5-directions-1",
-      "grade-5-directions-2",
       "grade-5-directions-3",
       "grade-5-directions-4",
-      "grade-5-directions-5",
       "grade-5-directions-6",
-      "grade-5-directions-7",
       "grade-5-directions-8",
-      "grade-5-directions-9",
       "grade-5-directions-10",
+      "grade-5-statements-1",
+      "grade-5-statements-2",
+      "grade-5-statements-3",
+      "grade-5-statements-4",
+      "grade-5-statements-5",
+      "grade-5-statements-6",
       "grade-5-loops-1",
       "grade-5-loops-2",
       "grade-5-loops-3",
@@ -1636,6 +2150,39 @@ export const progressCatalog = {
       "grade-5-variables-8",
       "grade-5-variables-9",
       "grade-5-variables-10",
+      "grade-5-operators-1",
+      "grade-5-operators-2",
+      "grade-5-operators-3",
+      "grade-5-operators-4",
+      "grade-5-operators-5",
+      "grade-5-operators-6",
+      "grade-5-boolean-1",
+      "grade-5-boolean-2",
+      "grade-5-boolean-3",
+      "grade-5-boolean-4",
+      "grade-5-boolean-5",
+      "grade-5-boolean-6",
+      "grade-5-functions-1",
+      "grade-5-functions-2",
+      "grade-5-functions-3",
+      "grade-5-functions-4",
+      "grade-5-functions-5",
+      "grade-5-functions-6",
+      "grade-5-lists-1",
+      "grade-5-lists-2",
+      "grade-5-lists-3",
+      "grade-5-lists-4",
+      "grade-5-lists-5",
+      "grade-5-lists-6",
+      "grade-5-objects-1",
+      "grade-5-objects-2",
+      "grade-5-objects-3",
+      "grade-5-objects-4",
+      "grade-5-objects-5",
+      "grade-5-objects-6",
+      "grade-5-creative-1",
+      "grade-5-creative-2",
+      "grade-5-creative-3",
       "grade-5-rescue-project"
     ],
     "missions": [
@@ -2052,6 +2599,246 @@ export const progressCatalog = {
         "index": 404,
         "title": "Milo: A bridge is already there",
         "size": 8
+      },
+      {
+        "id": "grade-5-statements-1",
+        "index": 449,
+        "title": "Byte: One statement, one action",
+        "size": 8
+      },
+      {
+        "id": "grade-5-statements-2",
+        "index": 450,
+        "title": "Byte: Change the argument",
+        "size": 8
+      },
+      {
+        "id": "grade-5-statements-3",
+        "index": 451,
+        "title": "Byte: Two inputs",
+        "size": 8
+      },
+      {
+        "id": "grade-5-statements-4",
+        "index": 452,
+        "title": "Byte: Order still matters",
+        "size": 8
+      },
+      {
+        "id": "grade-5-statements-5",
+        "index": 453,
+        "title": "Byte: Repeat a call",
+        "size": 8
+      },
+      {
+        "id": "grade-5-statements-6",
+        "index": 454,
+        "title": "Byte: Choose precise inputs",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-1",
+        "index": 455,
+        "title": "Byte: Keep values together",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-2",
+        "index": 456,
+        "title": "Byte: Find the second item",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-3",
+        "index": 457,
+        "title": "Byte: Read without removing",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-4",
+        "index": 458,
+        "title": "Byte: Append at the end",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-5",
+        "index": 459,
+        "title": "Byte: Replace one item",
+        "size": 8
+      },
+      {
+        "id": "grade-5-lists-6",
+        "index": 460,
+        "title": "Byte: A list inside a loop",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-1",
+        "index": 461,
+        "title": "Byte: Meet a data object",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-2",
+        "index": 462,
+        "title": "Byte: Read a named property",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-3",
+        "index": 463,
+        "title": "Byte: Update one property",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-4",
+        "index": 464,
+        "title": "Byte: Keep properties independent",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-5",
+        "index": 465,
+        "title": "Byte: Reuse object data in a loop",
+        "size": 8
+      },
+      {
+        "id": "grade-5-objects-6",
+        "index": 466,
+        "title": "Byte: Configure a journey",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-1",
+        "index": 521,
+        "title": "Operators: Combine two values",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-2",
+        "index": 522,
+        "title": "Operators: Order in subtraction",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-3",
+        "index": 523,
+        "title": "Operators: Equal groups",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-4",
+        "index": 524,
+        "title": "Operators: Find what remains",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-5",
+        "index": 525,
+        "title": "Operators: Calculate from memory",
+        "size": 8
+      },
+      {
+        "id": "grade-5-operators-6",
+        "index": 526,
+        "title": "Operators: Compose a calculation",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-1",
+        "index": 527,
+        "title": "Boolean logic: A comparison has an answer",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-2",
+        "index": 528,
+        "title": "Boolean logic: Equality is a question",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-3",
+        "index": 529,
+        "title": "Boolean logic: Both conditions",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-4",
+        "index": 530,
+        "title": "Boolean logic: At least one",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-5",
+        "index": 531,
+        "title": "Boolean logic: Reverse the answer",
+        "size": 8
+      },
+      {
+        "id": "grade-5-boolean-6",
+        "index": 532,
+        "title": "Boolean logic: Trace a compound condition",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-1",
+        "index": 533,
+        "title": "Functions: Definition and execution",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-2",
+        "index": 534,
+        "title": "Functions: Parameter and argument",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-3",
+        "index": 535,
+        "title": "Functions: Return a result",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-4",
+        "index": 536,
+        "title": "Functions: Independent calls",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-5",
+        "index": 537,
+        "title": "Functions: Reuse a returned value",
+        "size": 8
+      },
+      {
+        "id": "grade-5-functions-6",
+        "index": 538,
+        "title": "Functions: Combine returned numbers",
+        "size": 8
+      },
+      {
+        "id": "grade-5-creative-1",
+        "index": 565,
+        "title": "A character with a plan",
+        "size": 8
+      },
+      {
+        "id": "grade-5-creative-2",
+        "index": 566,
+        "title": "Meet another character",
+        "size": 8
+      },
+      {
+        "id": "grade-5-creative-3",
+        "index": 567,
+        "title": "Bounce and respond",
+        "size": 8
+      },
+      {
+        "id": "grade-5-creative-4",
+        "index": 568,
+        "title": "Byte Lab",
+        "size": 8
       }
     ],
     "drawings": [
@@ -2088,21 +2875,17 @@ export const progressCatalog = {
       "grade-6-sequences-3",
       "grade-6-sequences-4",
       "grade-6-sequences-5",
-      "grade-6-sequences-6",
-      "grade-6-sequences-7",
-      "grade-6-sequences-8",
-      "grade-6-sequences-9",
-      "grade-6-sequences-10",
-      "grade-6-directions-1",
-      "grade-6-directions-2",
       "grade-6-directions-3",
       "grade-6-directions-4",
-      "grade-6-directions-5",
       "grade-6-directions-6",
-      "grade-6-directions-7",
       "grade-6-directions-8",
-      "grade-6-directions-9",
       "grade-6-directions-10",
+      "grade-6-statements-1",
+      "grade-6-statements-2",
+      "grade-6-statements-3",
+      "grade-6-statements-4",
+      "grade-6-statements-5",
+      "grade-6-statements-6",
       "grade-6-loops-1",
       "grade-6-loops-2",
       "grade-6-loops-3",
@@ -2143,6 +2926,39 @@ export const progressCatalog = {
       "grade-6-variables-8",
       "grade-6-variables-9",
       "grade-6-variables-10",
+      "grade-6-operators-1",
+      "grade-6-operators-2",
+      "grade-6-operators-3",
+      "grade-6-operators-4",
+      "grade-6-operators-5",
+      "grade-6-operators-6",
+      "grade-6-boolean-1",
+      "grade-6-boolean-2",
+      "grade-6-boolean-3",
+      "grade-6-boolean-4",
+      "grade-6-boolean-5",
+      "grade-6-boolean-6",
+      "grade-6-functions-1",
+      "grade-6-functions-2",
+      "grade-6-functions-3",
+      "grade-6-functions-4",
+      "grade-6-functions-5",
+      "grade-6-functions-6",
+      "grade-6-lists-1",
+      "grade-6-lists-2",
+      "grade-6-lists-3",
+      "grade-6-lists-4",
+      "grade-6-lists-5",
+      "grade-6-lists-6",
+      "grade-6-objects-1",
+      "grade-6-objects-2",
+      "grade-6-objects-3",
+      "grade-6-objects-4",
+      "grade-6-objects-5",
+      "grade-6-objects-6",
+      "grade-6-creative-1",
+      "grade-6-creative-2",
+      "grade-6-creative-3",
       "grade-6-rescue-project"
     ],
     "missions": [
@@ -2558,6 +3374,246 @@ export const progressCatalog = {
         "id": "grade-6-conditionals-10-world-v2",
         "index": 412,
         "title": "Milo: A bridge is already there",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-1",
+        "index": 467,
+        "title": "Byte: One statement, one action",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-2",
+        "index": 468,
+        "title": "Byte: Change the argument",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-3",
+        "index": 469,
+        "title": "Byte: Two inputs",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-4",
+        "index": 470,
+        "title": "Byte: Order still matters",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-5",
+        "index": 471,
+        "title": "Byte: Repeat a call",
+        "size": 10
+      },
+      {
+        "id": "grade-6-statements-6",
+        "index": 472,
+        "title": "Byte: Choose precise inputs",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-1",
+        "index": 473,
+        "title": "Byte: Keep values together",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-2",
+        "index": 474,
+        "title": "Byte: Find the second item",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-3",
+        "index": 475,
+        "title": "Byte: Read without removing",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-4",
+        "index": 476,
+        "title": "Byte: Append at the end",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-5",
+        "index": 477,
+        "title": "Byte: Replace one item",
+        "size": 10
+      },
+      {
+        "id": "grade-6-lists-6",
+        "index": 478,
+        "title": "Byte: A list inside a loop",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-1",
+        "index": 479,
+        "title": "Byte: Meet a data object",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-2",
+        "index": 480,
+        "title": "Byte: Read a named property",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-3",
+        "index": 481,
+        "title": "Byte: Update one property",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-4",
+        "index": 482,
+        "title": "Byte: Keep properties independent",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-5",
+        "index": 483,
+        "title": "Byte: Reuse object data in a loop",
+        "size": 10
+      },
+      {
+        "id": "grade-6-objects-6",
+        "index": 484,
+        "title": "Byte: List to object",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-1",
+        "index": 539,
+        "title": "Operators: Combine two values",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-2",
+        "index": 540,
+        "title": "Operators: Order in subtraction",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-3",
+        "index": 541,
+        "title": "Operators: Equal groups",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-4",
+        "index": 542,
+        "title": "Operators: Find what remains",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-5",
+        "index": 543,
+        "title": "Operators: Calculate from memory",
+        "size": 10
+      },
+      {
+        "id": "grade-6-operators-6",
+        "index": 544,
+        "title": "Operators: Compose a calculation",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-1",
+        "index": 545,
+        "title": "Boolean logic: A comparison has an answer",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-2",
+        "index": 546,
+        "title": "Boolean logic: Equality is a question",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-3",
+        "index": 547,
+        "title": "Boolean logic: Both conditions",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-4",
+        "index": 548,
+        "title": "Boolean logic: At least one",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-5",
+        "index": 549,
+        "title": "Boolean logic: Reverse the answer",
+        "size": 10
+      },
+      {
+        "id": "grade-6-boolean-6",
+        "index": 550,
+        "title": "Boolean logic: A Boolean chooses a branch",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-1",
+        "index": 551,
+        "title": "Functions: Definition and execution",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-2",
+        "index": 552,
+        "title": "Functions: Parameter and argument",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-3",
+        "index": 553,
+        "title": "Functions: Return a result",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-4",
+        "index": 554,
+        "title": "Functions: Independent calls",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-5",
+        "index": 555,
+        "title": "Functions: Compose calls",
+        "size": 10
+      },
+      {
+        "id": "grade-6-functions-6",
+        "index": 556,
+        "title": "Functions: A function uses another function",
+        "size": 10
+      },
+      {
+        "id": "grade-6-creative-1",
+        "index": 569,
+        "title": "A character with a plan",
+        "size": 10
+      },
+      {
+        "id": "grade-6-creative-2",
+        "index": 570,
+        "title": "Meet another character",
+        "size": 10
+      },
+      {
+        "id": "grade-6-creative-3",
+        "index": 571,
+        "title": "Bounce and respond",
+        "size": 10
+      },
+      {
+        "id": "grade-6-creative-4",
+        "index": 572,
+        "title": "Byte Lab",
         "size": 10
       }
     ],

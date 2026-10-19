@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800" role="img" aria-label="Top-down basketball court">
+  <rect width="800" height="800" fill="#414777"/><rect x="80" y="45" width="640" height="710" fill="#e6ad70"/>
+  <g fill="#ba6254"><path d="M280 45h240v200H280zM280 555h240v200H280z"/></g>
+  <g fill="none" stroke="#fff4d9" stroke-width="5">
+    <path d="M80 45h640v710H80zM80 400h640"/><circle cx="400" cy="400" r="85"/>
+    <path d="M280 45v200h240V45M280 755V555h240v200"/><circle cx="400" cy="245" r="62"/><circle cx="400" cy="555" r="62"/>
+    <path d="M135 45v65a265 265 0 0 0 530 0V45M135 755v-65a265 265 0 0 1 530 0v65M350 100h100M350 700h100"/>
+    <circle cx="400" cy="119" r="18"/><circle cx="400" cy="681" r="18"/>
+  </g>
+</svg>

@@ -34,6 +34,7 @@
 .byte-guide-launch span { margin-left: auto; color: #575472; font-weight: 400; }
 .byte-widget { position: fixed; right: max(20px, env(safe-area-inset-right)); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 65; color: #181339; font: 400 .875rem/1.6 'Segoe UI', sans-serif; }
 .byte-launch { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 6px 16px 6px 8px; border: 0; border-radius: 12px; background: #6237df; color: #fff; font: 600 1rem/1.4 Fredoka, sans-serif; box-shadow: 0 6px 20px #18133933; cursor: pointer; }
+.activity-guide > .byte-launch { flex-shrink: 0; align-self: stretch; justify-content: center; margin: 8px 12px; box-shadow: none; }
 .byte-launch .character-sprite { width: 36px; height: 36px; }
 .byte-chat { display: flex; flex-direction: column; width: min(410px, calc(100vw - 32px)); height: min(700px, calc(100dvh - 40px)); border: 1px solid #c6b6e8; border-radius: 14px; background: #fff; overflow: hidden; }
 .byte-chat > :not(.byte-transcript) { flex-shrink: 0; }

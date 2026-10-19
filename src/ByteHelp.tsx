@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { BookOpen, Bug, Flag, MessageCircle, Send, X } from 'lucide-react';
+import { BookOpen, Bug, Flag, Send, X } from 'lucide-react';
 import { byteTopics, byteQuestionAllowed, byteRedirect, type ByteTopic } from '../shared/byte';
 import { byteProgramCheck, type ByteProgram } from './byteProgramHelp';
 import { localByteAnswer } from './byteQuestionHelp';
@@ -19,9 +19,9 @@ export default function ByteHelp({ topic, goal, program }: { topic: ByteTopic; g
   const id = useId();
   useEffect(() => {
     const controller = new AbortController(); setPilot(false);
-    if (session?.user.principalKind === 'adult') void accountRequest<{ allowed: boolean }>('byte/pilot', undefined, controller.signal).then(data => { if (!controller.signal.aborted) setPilot(data.allowed); }).catch(() => undefined);
+    if (session?.user.principalKind === 'adult' && !program?.relative && !['statements', 'lists', 'objects', 'operators', 'boolean', 'functions', 'creative'].includes(topic)) void accountRequest<{ allowed: boolean }>('byte/pilot', undefined, controller.signal).then(data => { if (!controller.signal.aborted) setPilot(data.allowed); }).catch(() => undefined);
     return () => { controller.abort(); request.current?.abort(); };
-  }, [session?.user.id, session?.user.principalKind]);
+  }, [session?.user.id, session?.user.principalKind, topic, program?.relative]);
   useEffect(() => { request.current?.abort(); request.current = null; setBusy(false); setMessages([]); setQuestion(''); setError(''); }, [topic, goal]);
   useEffect(() => { if (open) input.current?.focus({ preventScroll: true }); }, [open]);
   useEffect(() => { if (open && transcript.current) transcript.current.scrollTop = messages.length || busy ? transcript.current.scrollHeight : 0; }, [messages, busy, open]);
@@ -41,12 +41,11 @@ export default function ByteHelp({ topic, goal, program }: { topic: ByteTopic; g
     } finally { if (request.current === controller) { request.current = null; setBusy(false); } }
   }
   const starters = [
-    { label: 'Explain this topic', question: `Explain ${byteTopics[topic].title} in coding.`, answer: byteTopics[topic].explanation, icon: BookOpen },
+    { label: 'Explain this topic', question: `Explain ${byteTopics[topic].title} in coding.`, answer: program?.relative ? byteTopics[topic].explanation + ' ' + localByteAnswer('Explain the coding topic and forward movement.', topic, goal, program) : byteTopics[topic].explanation, icon: BookOpen },
     { label: 'What is my task?', question: 'What is my activity goal?', answer: `${goal} Predict a step, try it, then compare what happens with your goal.`, icon: Flag },
     { label: 'Help check my code', question: 'Help me check my code.', answer: byteProgramCheck(topic, program), icon: Bug },
   ];
-  return <><button type="button" className="byte-guide-launch" onClick={() => setOpen(true)} aria-expanded={open} aria-controls={id}><MessageCircle size={18} />Ask Byte<span>Coding help</span></button>{createPortal(<div className="byte-widget">
-    {!open && <button ref={launch} type="button" className="byte-launch" onClick={() => setOpen(true)} aria-expanded={false} aria-controls={id}><CharacterSprite concept="Sequences" /><span>Ask Byte</span></button>}
+  return <><button ref={launch} type="button" className="byte-launch" onClick={() => setOpen(true)} aria-expanded={open} aria-controls={id}><CharacterSprite concept="Sequences" /><span>Ask Byte</span></button>{createPortal(<div className="byte-widget">
     {open && <section id={id} className="byte-chat" role="dialog" aria-modal="false" aria-labelledby={`${id}-title`} onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close(); } }}>
       <div className="byte-chat-heading"><CharacterSprite concept="Sequences" /><div><h2 id={`${id}-title`}>Ask Byte</h2><p>{pilot ? 'Experimental AI · adult tester only' : 'Lesson help · on this device'}</p></div><button type="button" aria-label="Close Byte chat" onClick={close}><X size={20} /></button></div>
       <div className="byte-transcript" ref={transcript} role="log" aria-live="polite" aria-relevant="additions text" aria-label="Conversation with Byte">

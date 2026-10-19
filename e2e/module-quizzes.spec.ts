@@ -1,7 +1,11 @@
 import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { moduleQuiz } from '../shared/quizzes';
 import type { ProgressDocument } from '../shared/progress';
 const identity = { learnerId: 'synthetic-quiz-learner', classroomId: 'synthetic-quiz-class' };
+test.beforeEach(async ({ page }) => {
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
+});
 test('quiz drafts, feedback, retries and best results survive authenticated reloads', async ({ page }, info) => {
   let value: ProgressDocument = { version: 1, currentId: 'grade-5-loops-10', view: 'quiz', quizModuleId: 'grade-5-loops', progress: {}, drawings: {}, preferences: { reducedMotion: true, largeText: false, soundEnabled: false, musicEnabled: false }, basicsComplete: [], topicRecords: {} };
   let revision = 0;
@@ -13,6 +17,7 @@ test('quiz drafts, feedback, retries and best results survive authenticated relo
   });
   await page.goto('/#/student-play/grade-5');
   await expect(page.getByRole('heading', { name: 'Loops quiz', exact: true })).toBeVisible();
+  await expect(page.getByText('Previous quiz version', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Submit quiz' }).click();
   await expect(page.getByRole('alert')).toContainText('remaining questions');
   const questions = moduleQuiz('grade-5-loops');
@@ -39,16 +44,44 @@ test('quiz drafts, feedback, retries and best results survive authenticated relo
   await page.getByRole('button', { name: 'Submit quiz' }).click();
   await expect(page.getByRole('heading', { name: 'You answered 0 of 5 correctly' })).toBeVisible();
   await expect(page.locator('.quiz-result')).toContainText('Best result: 4 / 5');
+  await page.getByRole('button', { name: 'Open updated quiz', exact: true }).click();
+  await expect(page.locator('.quiz-question').first()).toContainText('What is the body of a loop?');
+  await expect(page.getByText('0 of 5 answered', { exact: true })).toBeVisible();
+  const revised = moduleQuiz('grade-5-loops@3');
+  await page.locator('.quiz-question').first().getByRole('radio').nth(revised[0].correct).check();
+  await expect.poll(() => value.quizzes?.['grade-5-loops@3']?.answers[0]).toBe(revised[0].correct);
+  await page.reload();
+  await expect(page.locator('.quiz-question').first().getByRole('radio').nth(revised[0].correct)).toBeChecked();
+  for (let i = 1; i < revised.length; i++) await page.locator('.quiz-question').nth(i).getByRole('radio').nth(revised[i].correct).check();
+  await page.getByRole('button', { name: 'Submit quiz' }).click();
+  await expect(page.getByRole('heading', { name: 'You answered 5 of 5 correctly' })).toBeVisible();
+  await expect.poll(() => value.quizzes?.['grade-5-loops@3']?.attempts).toBe(1);
+  expect(value.quizzes?.['grade-5-loops']?.attempts).toBe(2);
+  await page.getByRole('button', { name: 'Open previous quiz', exact: true }).click();
+  await expect(page.locator('.quiz-result')).toContainText('Best result: 4 / 5');
+  await expect(page.getByRole('heading', { name: 'You answered 0 of 5 correctly' })).toBeVisible();
+  await page.getByRole('button', { name: 'Open updated quiz', exact: true }).click();
+  await expect(page.locator('.quiz-result')).toContainText('Best result: 5 / 5');
+  await page.getByRole('button', { name: 'Back to module', exact: true }).click();
+  const entry = page.getByRole('region', { name: 'Loops end-of-module quiz' });
+  await expect(entry).toContainText('Previous quiz: best result 4 / 5');
+  await entry.getByRole('button', { name: 'Review quiz', exact: true }).click();
+  expect((await new AxeBuilder({ page }).include('.module-quiz').analyze()).violations).toEqual([]);
+  await page.evaluate(() => scrollTo(0, 0));
+  await page.screenshot({ path: `.impeccable/review/quiz-versions-${info.project.name}.png`, fullPage: true });
+  await page.locator('.quiz-version').screenshot({ path: `.impeccable/review/quiz-version-controls-${info.project.name}.png` });
   expect(await page.evaluate(() => localStorage.getItem('kodearcade-v1'))).toBeNull();
   await page.getByRole('button', { name: 'Next module: Debugging' }).click();
-  await expect(page.getByRole('heading', { name: 'A bug is a clue' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Debugging module overview' })).toBeVisible();
 });
 test('young learner quiz is discoverable at the end of the module and in the drawer', async ({ page }) => {
   await page.route('**/api/capabilities', route => route.fulfill({ json: {} }));
   await page.goto('/#/learn/grade-1');
-  await expect(page.getByRole('region', { name: 'Sequences end-of-module quiz' })).toBeVisible();
+  await page.locator('.tour-card').getByRole('button', { name: 'Skip tour' }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Sequences, directions & order end-of-module quiz' })).toBeVisible();
   await page.getByRole('button', { name: 'Start quiz', exact: true }).click();
   await expect(page.locator('.quiz-question').first()).toContainText('What is a sequence?');
   await page.getByRole('button', { name: 'Show modules', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Sequences quiz', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sequences, directions & order quiz', exact: true })).toBeVisible();
 });

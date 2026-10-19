@@ -1,0 +1,41 @@
+# Private Byte Lab gallery — 17 October 2026
+
+## Entry and scope
+
+Open Byte Lab from My courses, or use http://127.0.0.1:5173/#/student-play/grade-6/lab when Grade 6 is assigned. Public/device-only preview: http://127.0.0.1:5173/#/learn/grade-6/lab. Grades 3–5 use the corresponding routes. In the editor, select My projects. Returning to the gallery records that view; opening a project records the selected entry. Course navigation and the student account menu remain available.
+
+The gallery belongs to the current learner/class context and assigned course. It is not a public profile, parent account workspace, cross-course collection or sharing system. Public preview never imports into a child's account. Gallery work remains unscored and does not create challenge completion, attempts or stars.
+
+## Behavior
+
+- Create from the three existing starters or a blank project without replacing another entry. First-ever untouched drafts retain the starter choice/tour; later projects respect the existing skip/completion preference.
+- Open each project's independent native Blockly scripts, sprites, costumes, backgrounds and private drawings. Returning to My projects stops its running engine.
+- Rename with a labelled, bounded field and confirmation; duplicate with fresh gallery identity and independently cloned project data.
+- Thumbnails render the authored starting scene from real sprite positions, visibility, sizes, art and background—not invented placeholder scenes or screenshots uploaded elsewhere. Dates reflect edits, not mere opening.
+- Delete only after confirmation. Recently deleted survives saves/reload, supports Restore and individual JSON backup, and requires a second explicit irreversible confirmation for Delete forever. There is no timed purge.
+- Download gallery includes active and deleted entries. Import accepts a single project or gallery JSON additively with fresh entry identities, retaining deleted status. Invalid or over-limit imports leave previous work unchanged.
+- Existing SaveFeedback exposes pending/saving/saved, persistent failures with retry/export, and conflict recovery. A successful local gallery action is not a claim that the remote account save has completed.
+
+## Data and compatibility
+
+`shared/studioGallery.ts` defines a strict version-1 collection wrapped in `byteStudioGallery`: active ID (or null for the gallery), unique project IDs, created/updated/deleted timestamps and independently validated version-1 project bodies. The existing `byteStudio` single-project format remains valid for backup import and older data. Legacy migration is in memory then publishes through the normal save flow, preserving original code/art/tour metadata and the project's retained legacy workspace.
+
+The collection remains inside the unscored lab workspace of the existing course progress document. This deliberately reuses revision compare-and-swap, per-learner authorization, assignment checks, retries, existing course payload bounds and encrypted device recovery. No new table, database migration, external upload store, credentials, analytics or network service is required. Gallery contents are excluded from teacher reports; their current Byte Lab activity label remains available. The server rejects a gallery stored in a normal lesson or drawing slot.
+
+Bounds: 20 entries including Recently deleted, 600,000 serialized UTF-8 bytes for the gallery; each individual project retains its existing 90,000-character and sprite/art/code safety checks. Existing course documents still have the server's 900,000-byte application limit and 1 MiB transport/database limits. Large galleries travel with the course save rather than a per-project API; a future high-volume gallery would warrant independently paged project storage. Capacity errors retain the last valid collection, explain cleanup and offer backup; no silent eviction. Pretty-printed backup inputs may be up to 2 MiB, then validated against the compact project/gallery storage bounds.
+
+Local parsing preserves recognized malformed gallery data for the gallery recovery screen instead of silently dropping it as an oversized ordinary workspace. The recovery screen does not publish a new collection and offers the original JSON. Deploy the updated frontend and backend together so shared validation recognizes the collection. Downgrading to the older one-draft client is not a supported way to edit gallery data; retain a gallery backup before rollback.
+
+## Design and verification
+
+The approved editor's violet KodeArcade toolbar, Fredoka titles, system controls, pale lilac surfaces and existing artwork are preserved. The collection is three columns on desktop, two on tablet, one on phone; editor actions wrap on small screens. No new raster was generated. Impeccable guided the scoped Operate extension and its independent finish/documentation handoffs; global DESIGN.md and its sidecar are not refreshed without approval.
+
+Verification: 1,650 frontend tests across 36 files and 139 synthetic backend tests across 14 files passed. The backend includes a larger-than-100KB gallery round-trip, deleted-entry retention, wrong learner/adult rejection, wrong activity-slot rejection and exclusion from teacher reports. The shared model tests cover migration, malformed collections, unique/active IDs, UTF-8/count limits, larger local/cloud serialization and original-data preservation.
+
+Across the scoped editor/starter matrix and final gallery checks, 58 unique browser checks passed on desktop, phone and tablet; two additional short-wide desktop checks are intentionally skipped on phone/tablet. The gallery confirmation passed 24/24, then a reviewer-directed fix batch passed 12/12 (six existing checks refreshed plus six newly added slot/byte-limit modal checks). Initial failures found a missing accessible name on the hidden-wordmark logo link and a test reload occurring before the saved gallery-view debounce; the label and test wait were corrected. The older single-slot test expectations were intentionally revised to assert additive project creation/import. Browser checks include native editing, private reload, independent scripts, art/drawing, starters/tour, rename/duplicate, confirmed deletion/restore/permanent removal, additive gallery/single imports, full/invalid data, account retry/export, blocked browser storage, exact original recovery export and no document-width overflow. Scoped axe checks are included, not a conformance claim.
+
+Production build and server TypeScript check passed. Known nonfatal dependency-annotation and >500KB bundle warnings remain. One detector run reported no primary findings; its advisories are incumbent compact-studio color/type/radius differences and reused error/success tones. Read-only public/images provenance scan: 26 rasters, zero missing. Desktop/phone/tablet gallery/trash captures were opened, refreshed and independently reviewed; six additional capacity/byte-budget recovery-state captures verify visible feedback after modal closure. The independent review initially issued FIX for an alert hidden behind create/rename modals; that correction closes the modal and focuses an exposed recovery alert in gallery and editor. Final reviewer scoring is recorded in .impeccable/review/gallery-finish.md; global design comparison and preserved hashes are recorded in .impeccable/review/gallery-documentation.md.
+
+All data used in automated tests is synthetic. Production accounts, child records, database, VPS, n8n and AI gateway were not modified. Work remains local on codex/auth, uncommitted/unpushed. The broader browser suite remains paused. These scoped checks do not certify the entire platform, its security/accessibility, or educational outcomes.
+
+Final independent verdict: SHIP at the single-finding scope. The reviewer scored the modal-capacity recovery correction RESOLVED after inspecting corrected source, all six focused recovery captures and the six refreshed gallery/trash captures. This is not a new whole-platform certification. Documentation comparison/recheck is complete; both global design files retain their supplied baseline hashes. Local frontend and proxied API responded with HTTP 200 / status ok at handoff.

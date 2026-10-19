@@ -1,9 +1,9 @@
 import { byteTopics, type ByteTopic } from '../shared/byte';
-export type ByteProgram = { mode: 'blocks' | 'text'; workspace?: Record<string, unknown>; text?: string; requireLoop?: boolean; count?: number; limit?: number; outcome?: boolean | null };
+export type ByteProgram = { mode: 'blocks' | 'text'; relative?: boolean; workspace?: Record<string, unknown>; text?: string; requireLoop?: boolean; count?: number; limit?: number; outcome?: boolean | null };
 type Block = { type?: string; next?: { block?: Block }; inputs?: Record<string, { block?: Block; shadow?: Block }> };
 /** Inspect structure only. Never execute code, solve a route or send work to a server. */
 export function byteProgramCheck(topic: ByteTopic, program?: ByteProgram): string {
-  const general = byteTopics[topic].check;
+  const general = program?.relative ? 'Trace position and facing from the initial right-facing direction. Forward follows the arrow; backward does not turn it. Turns happen in place. Check both again on each loop repetition.' : byteTopics[topic].check;
   if (!program) return general;
   if (program.outcome === true) return `Your last run reached its goal. Can you explain why your instructions worked? ${general}`;
   if (program.mode === 'blocks' && program.limit !== undefined && (program.count ?? 0) > program.limit) return `Your draft is above the ${program.limit}-instruction limit. Look for a repeated pattern you can put inside a loop; do not just remove needed steps. ${general}`;

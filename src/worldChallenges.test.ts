@@ -6,7 +6,7 @@ import { missions, type Mission } from './learning';
 import { modulesFor, moduleFor } from './curriculum';
 import { emptySave, parseSave } from './storage';
 import { drawProgram, parseCode, runText } from './textCoding';
-import { statementCount } from './programLimits';
+import { statementCount, instructionLimit } from './programLimits';
 import { drawingActivities } from './drawingActivities';
 
 const task = (slot: string) => collectionMissions.find(m => m.id === `grade-5-${slot}-world-v2`)!;
@@ -26,7 +26,7 @@ describe('authored core world challenges', () => {
     if (mission.collectibles) expect(outcome.frames.at(-1)?.collected).toHaveLength(mission.collectibles.positions.length);
   });
   it('keeps ten core challenges, no extra practice section, and archives old work', () => {
-    for (const grade of ['grade-3','grade-4','grade-5','grade-6'] as const) for (const module of modulesFor(grade)) expect(module.challengeIds).toHaveLength(module.topicId === 'project' ? 1 : 10);
+    for (const grade of ['grade-3','grade-4','grade-5','grade-6'] as const) for (const module of modulesFor(grade)) expect(module.challengeIds).toHaveLength(module.topicId === 'creative' ? 3 : module.topicId === 'project' ? 1 : ['statements', 'lists', 'objects', 'operators', 'boolean', 'functions'].includes(module.topicId!) ? 6 : 10);
     const changed = task('conditionals-3'), save = emptySave();
     save.course = 'grade-5'; save.current = missions.findIndex(m => m.id === changed.replaces);
     save.progress[changed.replaces!] = {blocks:[],attempts:1,hints:0,complete:true,stars:5,lessonSeen:true};
@@ -115,8 +115,8 @@ describe('instruction budgets', () => {
   it('enforces the same budget in headless Blockly and Text mode', () => {
     const mission = missions.find(m => m.id === 'grade-5-loops-9')!;
     const source = [...Array(2).fill('move_up()'),...Array(2).fill('move_right()'),...Array(20).fill('move_up()')].join('\n');
-    expect(runText(source,mission).message).toContain(`no more than ${mission.maxBlocks}`);
-    expect(runState({...mission,maxBlocks:1},{type:'ka_repeat',fields:{COUNT:2},inputs:{DO:{block:{type:'ka_up'}}}}).message).toContain('no more than 1');
+    expect(runText(source,mission).message).toContain(`no more than ${instructionLimit(mission)}`);
+    expect(runState({...mission,id:'legacy-budget-test',maxBlocks:1},{type:'ka_repeat',fields:{COUNT:2},inputs:{DO:{block:{type:'ka_up'}}}}).message).toContain('no more than 1');
   });
   it('allows every existing drawing reference within a written-instruction budget', () => {
     for (const activities of Object.values(drawingActivities)) for (const activity of activities.filter(a => a.reference)) {

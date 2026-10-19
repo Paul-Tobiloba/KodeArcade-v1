@@ -2,8 +2,11 @@ import * as Blockly from 'blockly/core';
 import { evaluateWorkspace } from './blockly';
 import type { Mission, RunResult } from './learning';
 import { limitMessage, statementCount } from './programLimits';
+import { validRepeatCount, repeatCountMessage } from '../shared/repeats.js';
+import { parseDataStatement } from './dataText';
+import { parseConceptCode } from './conceptText';
 
-export type Statement = { line: number; type: string; value?: number; direction?: string; body?: Statement[]; otherwise?: Statement[] };
+export type Statement = { line: number; type: string; value?: number; direction?: string; fields?: Record<string, string | number>; body?: Statement[]; otherwise?: Statement[] };
 export class CodeError extends Error {
   constructor(public line: number, message: string) { super(`Line ${line}: ${message}`); }
 }
@@ -30,6 +33,7 @@ export function parseCode(source: string, drawing = false): Statement[] {
       const movement = /^move_(right|left|up|down)\(\)$/.exec(current.text);
       const loop = /^for [a-zA-Z_]\w* in range\((\d+)\):$/.exec(current.text);
       const condition = /^if path_clear\(["'](right|left|up|down)["']\):$/.exec(current.text);
+      const relativeCondition = /^if relative_path_clear\(["'](forward|backward|left|right)["']\):$/.exec(current.text);
       const itemCondition = !drawing && current.text === 'if item_here():';
       const obstacleCondition = !drawing && /^if (gate_locked|bridge_missing)\(\):$/.exec(current.text);
       const obstacleAction = !drawing && /^(open_gate|build_bridge)\(\)$/.exec(current.text);
@@ -38,11 +42,16 @@ export function parseCode(source: string, drawing = false): Statement[] {
       const pen = /^(forward|turn)\((-?\d+)\)$/.exec(current.text);
       const distance = /^distance (\+=|=) (-?\d+)$/.exec(current.text);
       const penControl = /^(push|pop|pen_up|pen_down)\(\)$/.exec(current.text);
-      if (movement && !drawing) { node.type = `ka_${movement[1]}`; }
+      let data;
+      try { data = drawing ? undefined : parseDataStatement(current.text); }
+      catch (error) { throw new CodeError(current.line, error instanceof Error ? error.message : 'Check the data inputs.'); }
+      if (data) { node.type = data.type; node.fields = data.fields; }
+      else if (movement && !drawing) { node.type = `ka_${movement[1]}`; }
       else if (loop) {
         node.type = 'ka_repeat'; node.value = Number(loop[1]);
-        if (node.value < 2 || node.value > (drawing ? 12 : 5)) throw new CodeError(current.line, `Use a repeat count from 2 to ${drawing ? 12 : 5} in this lab.`);
+        if (!validRepeatCount(node.value)) throw new CodeError(current.line, repeatCountMessage);
       } else if (condition && !drawing) { node.type = 'ka_if'; node.direction = condition[1]; }
+      else if (relativeCondition && !drawing) { node.type = 'ka_relative_if'; node.direction = relativeCondition[1]; }
       else if (itemCondition) node.type = 'ka_if_item';
       else if (obstacleCondition) node.type = `ka_if_${obstacleCondition[1]}`;
       else if (obstacleAction) node.type = `ka_${obstacleAction[1]}`;
@@ -61,15 +70,15 @@ export function parseCode(source: string, drawing = false): Statement[] {
         node.type = pen[1]; node.value = Number(pen[2]);
         if (node.type === 'forward' && (node.value < 1 || node.value > 150)) throw new CodeError(current.line, 'Choose a distance from 1 to 150.');
         if (node.type === 'turn' && Math.abs(node.value) > 360) throw new CodeError(current.line, 'Choose a turn from −360 to 360 degrees.');
-      } else throw new CodeError(current.line, drawing ? 'Use forward(60), turn(90), or a for loop. Other Python commands are not supported here.' : 'Check the command and punctuation. This lab supports movement, for loops, path_clear and score only.');
+      } else throw new CodeError(current.line, drawing ? 'Use forward(60), turn(90), or a for loop. Other Python commands are not supported here.' : 'Check the command and punctuation. Use Commands & examples for this activity’s supported movement, loop, decision or data syntax.');
       cursor++;
-      if (loop || condition || itemCondition || obstacleCondition) {
+      if (loop || condition || relativeCondition || itemCondition || obstacleCondition) {
         if (!lines[cursor] || indentation(lines[cursor].raw, lines[cursor].line) !== indent + 4) throw new CodeError(current.line, 'Add instructions below this line, indented by four spaces.');
         node.body = group(indent + 4, depth + 1);
-        if ((condition || itemCondition) && lines[cursor]?.text === 'else:' && indentation(lines[cursor].raw, lines[cursor].line) === indent) {
+        if ((condition || relativeCondition || itemCondition) && lines[cursor]?.text === 'else:' && indentation(lines[cursor].raw, lines[cursor].line) === indent) {
           const elseLine = lines[cursor++].line;
           if (!lines[cursor] || indentation(lines[cursor].raw, lines[cursor].line) !== indent + 4) throw new CodeError(elseLine, 'Add an indented instruction inside else.');
-          node.type = itemCondition ? 'ka_if_item_else' : 'ka_if_else'; node.otherwise = group(indent + 4, depth + 1);
+          node.type = itemCondition ? 'ka_if_item_else' : relativeCondition ? 'ka_relative_if_else' : 'ka_if_else'; node.otherwise = group(indent + 4, depth + 1);
         }
       }
       nodes.push(node);
@@ -84,6 +93,10 @@ export function parseCode(source: string, drawing = false): Statement[] {
 export function runText(source: string, mission: Mission): RunResult {
   const workspace = new Blockly.Workspace();
   try {
+    if (mission.conceptTask) {
+      Blockly.serialization.workspaces.load({ blocks: { languageVersion: 0, blocks: [parseConceptCode(source)] } }, workspace);
+      return evaluateWorkspace(workspace, mission);
+    }
     const nodes = parseCode(source);
     const start = workspace.newBlock('ka_start');
     function connect(items: Statement[], connection: Blockly.Connection | null) {
@@ -91,6 +104,7 @@ export function runText(source: string, mission: Mission): RunResult {
         const block = workspace.newBlock(node.type, `line-${node.line}`);
         if (node.value !== undefined) block.setFieldValue(String(node.value), node.type === 'ka_repeat' ? 'COUNT' : 'VALUE');
         if (node.direction) block.setFieldValue(node.direction, 'DIRECTION');
+        for (const [name, value] of Object.entries(node.fields ?? {})) block.setFieldValue(String(value), name);
         connection!.connect(block.previousConnection!);
         if (node.body) connect(node.body, block.getInput('DO')!.connection);
         if (node.otherwise) connect(node.otherwise, block.getInput('ELSE')!.connection);
@@ -99,7 +113,7 @@ export function runText(source: string, mission: Mission): RunResult {
     }
     connect(nodes, start.nextConnection);
     return evaluateWorkspace(workspace, mission);
-  } catch (error) { return { frames: [], success: false, message: error instanceof Error ? error.message : 'Check your code and try again.' }; }
+  } catch (error) { return { frames: [], success: false, message: error instanceof Error ? mission.conceptTask && error.message.includes('Connection checks failed') ? 'Type mismatch: use a number in numeric inputs and a true/false expression in Boolean inputs.' : error.message : 'Check your code and try again.' }; }
   finally { workspace.dispose(); }
 }
 

@@ -26,7 +26,7 @@ describe('typed coding bridge', () => {
   it('gives line-specific errors and never runs arbitrary code', () => {
     expect(() => parseCode('import os')).toThrow('Line 1');
     expect(() => parseCode('for step in range(3):\n  move_right()')).toThrow('four spaces');
-    expect(() => parseCode('for step in range(999):\n    move_right()')).toThrow('2 to 5');
+    expect(parseCode('for step in range(999):\n    move_right()')[0].value).toBe(999);
     expect(() => parseCode('score = 100')).toThrow('−10 to 10');
     expect(() => parseCode('else:\n    move_right()')).toThrow();
     expect(() => parseCode('move_right()\n'.repeat(101))).toThrow('100 lines');

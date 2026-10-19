@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('choose a course, scope the drawer, and learn a concept only once', async ({ page }, testInfo) => {
+test('choose a course, scope the drawer, and read lessons beside the workspace', async ({ page }, testInfo) => {
   await page.goto('/#/learn');
   await expect(page.getByRole('heading', { name: 'Where shall we begin?' })).toBeVisible();
   expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
   await page.screenshot({ path: `.impeccable/review/learning-entry-${testInfo.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Explore courses', exact: true }).click();
   await page.getByRole('link', { name: /Grade 2/ }).click();
-  await expect(page.getByRole('button', { name: 'Listen to lesson' })).toBeVisible();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).count()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await page.locator('#module-drawer').getByRole('button', { name: '2 Byte: A different direction', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Listen to challenge' })).toBeVisible();
@@ -17,7 +17,8 @@ test('choose a course, scope the drawer, and learn a concept only once', async (
   await page.reload();
   await expect(page.getByRole('button', { name: 'Listen to challenge' })).toBeVisible();
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Listen to lesson' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Listen to topic' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Show modules', exact: true }).count().then(async count => { if (count) await page.getByRole('button', { name: 'Show modules', exact: true }).click(); });
   await expect(page.locator('#module-drawer')).toContainText('Grade 2');
   await expect(page.locator('#module-drawer')).not.toContainText('Variables');
@@ -40,10 +41,10 @@ test('read-aloud is opt-in, stops on navigation, and handles missing voices', as
   });
   await page.goto('/#/learn/arrows');
   expect(await page.evaluate(() => (window as unknown as { __speechCalls: string[] }).__speechCalls)).toEqual([]);
-  await page.getByRole('button', { name: 'Listen to lesson' }).click();
+  await page.getByRole('button', { name: 'Listen to this step' }).click();
   await expect(page.getByRole('button', { name: 'Stop reading' })).toBeVisible();
-  expect(await page.evaluate(() => (window as unknown as { __speechCalls: string[] }).__speechCalls.at(-1))).toContain('An arrow tells Byte');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  expect(await page.evaluate(() => (window as unknown as { __speechCalls: string[] }).__speechCalls.at(-1))).toContain('Find your mission');
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { __speechCalls: string[] }).__speechCalls.at(-1))).toBe('cancel');
   await page.evaluate(() => { window.speechSynthesis.getVoices = () => []; });
   await page.getByRole('button', { name: 'Listen to challenge' }).click();

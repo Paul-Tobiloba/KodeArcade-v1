@@ -28,7 +28,7 @@ test('Grade 1 topic teaches, assesses and derives its badge without perfect star
     localStorage.setItem('kodearcade-v1', JSON.stringify(save));
   }, { ids: [...sequenceCore,sequenceExtras[2],sequenceExtras[3]] });
   await page.reload();
-  await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Sequences topic journey' })).toBeVisible();
   await page.getByRole('button', { name: 'Try the mastery mission' }).click();
   await page.getByRole('button', { name: 'Choose left, left', exact: true }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Trace each arrow again' })).toBeVisible();

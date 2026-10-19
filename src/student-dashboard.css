@@ -15,6 +15,16 @@
 .student-welcome > img { width: 100%; height: 250px; object-fit: cover; }
 .student-class-label { display: inline-flex; align-items: center; gap: 10px; color: #372066; font-weight: 600; overflow-wrap: anywhere; }
 .student-class-label svg { flex-shrink: 0; }
+.student-creative-spaces { margin-top: 28px; }
+.student-creative-spaces > p { margin: 8px 0 16px; font-size: .9rem; }
+.student-creative-row { display: grid; grid-template-columns: 100px minmax(0,1fr); align-items: center; gap: 16px; padding: 12px 0; border-top: 1px solid #d7cee9; }
+.student-creative-row h3 { margin: 0; font-size: 1rem; }
+.student-creative-row > div { display: flex; flex-wrap: wrap; gap: 12px; }
+.student-creative-row a { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex: 1 1 220px; min-height: 64px; padding: 12px 16px; color: #372066; background: #fff; border-radius: 12px; text-decoration: none; }
+.student-creative-row a:hover { background: #f5f1ff; }
+.student-creative-row a strong, .student-creative-row a small { display: block; }
+.student-creative-row a small { margin-top: 4px; font-size: .8rem; color: #575472; }
+.student-creative-row a svg { flex-shrink: 0; }
 .student-dashboard-columns { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 40px; margin-top: 40px; }
 .student-course-section > p { margin-bottom: 24px; }
 .student-course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
@@ -53,6 +63,7 @@
   .student-course-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
+  .student-creative-row { grid-template-columns: minmax(0,1fr); gap: 10px; }
   .student-dashboard-header { padding: 12px 16px; gap: 12px; min-height: 68px; }
   .student-dashboard-header .account-brand { gap: 0; }
   .student-dashboard-header .account-brand span { display: none; }

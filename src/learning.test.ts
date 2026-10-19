@@ -64,7 +64,7 @@ describe('stored progress boundaries', () => {
   });
   it('ignores invalid project destination and repeat payload', () => {
     const save = emptySave();
-    save.progress['rescue-project'] = { blocks: [{ ...makeBlock('repeat'), count: 1000 }], attempts: -5, hints: 90, complete: false, end: { x: 2, y: 2 } };
+    save.progress['rescue-project'] = { blocks: [{ ...makeBlock('repeat'), count: -1 }], attempts: -5, hints: 90, complete: false, end: { x: 2, y: 2 } };
     const p = parseSave(JSON.stringify(save)).progress['rescue-project'];
     expect(p.blocks).toEqual([]); expect(p.end).toBeUndefined(); expect(p.hints).toBe(4); expect(p.attempts).toBe(0);
   });

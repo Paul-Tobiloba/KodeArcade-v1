@@ -15,7 +15,7 @@ describe('Grade 1–6 mapping', () => {
       const modules = modulesFor(course.id);
       expect(modules.map(m => m.topicId)).toEqual([...course.topics, 'project']);
       for (const module of modules) {
-        expect(module.challengeIds.length).toBe(module.topicId === 'project' ? 1 : 10);
+        expect(module.challengeIds.length).toBe(module.topicId === 'creative' ? 3 : module.topicId === 'project' ? 1 : ['statements', 'lists', 'objects', 'operators', 'boolean', 'functions'].includes(module.topicId!) ? 6 : 10);
         for (const id of module.challengeIds) {
           expect(moduleFor(id).id).toBe(module.id);
           expect(missions.find(m => m.id === id)?.size).toBe(course.size);

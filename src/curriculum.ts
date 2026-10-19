@@ -2,6 +2,10 @@ import { missions } from './learning';
 import { characterFor } from './characters';
 import { courses, type CourseId } from './courses';
 import { sequenceExtras } from './topicJourney';
+import { dataLessons } from './dataLessons';
+import { conceptLessons } from './conceptLessons';
+import { creativeLesson } from './creativeLesson';
+import { relativeLesson } from './relativeLessons';
 
 export type Lesson = {
   title: string; introduction: string;
@@ -14,6 +18,8 @@ export type LearningModule = {
   status: 'available' | 'upcoming'; lesson: Lesson;
   plannedChallenges?: string[];
   topicId?: string;
+  previousChallengeIds?: string[];
+  sandboxId?: string;
 };
 export const modules: LearningModule[] = [
   { id: 'sequences', title: 'Sequences', description: 'Give clear instructions, one step at a time.', status: 'available', challengeIds: ['first-steps', 'sequence-up', 'sequence-corner'],
@@ -56,20 +62,38 @@ for (const module of modules) {
   module.lesson = { ...l, introduction: adapt(l.introduction), sections: l.sections.map(s => ({ title: s.title, text: adapt(s.text) })), example: { ...l.example, explanation: adapt(l.example.explanation) } };
 }
 const gradedModules = courses.flatMap(course => [...course.topics, 'project'].map(topic => {
-  const base = modules.find(m => m.id === topic)!;
+  const base = [...modules, ...dataLessons, ...conceptLessons(course.grade!), creativeLesson].find(m => m.id === topic)!;
+  const previousChallengeIds = topic === 'sequences' ? missions.filter(m => m.id.startsWith(`${course.id}-sequences-`) || m.id.startsWith(`${course.id}-directions-`)).map(m => m.id) : undefined;
+  const mergedIds = [...Array.from({ length: 5 }, (_, i) => `${course.id}-sequences-${i + 1}`), ...[3, 4, 6, 8, 10].map(i => `${course.id}-directions-${i}`)];
+  const lesson = topic === 'sequences' ? {
+    ...base.lesson, title: 'Sequences: directions in the right order',
+    sections: [
+      { title: 'Instructions and screen directions', text: 'Each movement block is one instruction and moves one square. Up points to the top of the screen; down, left and right follow the screen too. These directions do not turn when the character moves.' },
+      { title: 'Plan the order', text: 'Find the start, destination and obstacles. Trace a safe route through every square, then connect your arrows under the start block in that order. Moving up then right visits a different middle square from moving right then up. A detour may move away from the destination before getting closer.' },
+      { title: 'Predict, run and improve', text: 'Read your connected instructions from top to bottom before pressing Play. Floating blocks are not part of the program. Watch the result, compare it with your prediction, and change the direction, number or order of instructions where needed.' },
+    ],
+    takeaway: 'A sequence runs instructions in order. Choose directions that keep every step of the route safe.',
+  } : base.lesson;
   return { ...base, id: `${course.id}-${topic}`, topicId: topic,
-    description: `Grade ${course.grade} · ${course.size}×${course.size} board. ${base.description}`,
-    challengeIds: topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: 10 }, (_, i) => {
+    ...(topic === 'creative' ? { sandboxId: `${course.id}-creative-4` } : {}),
+    ...(topic === 'sequences' ? { title: 'Sequences, directions & order', previousChallengeIds } : {}),
+    lesson: course.grade! >= 4 && !['operators', 'boolean', 'functions', 'creative'].includes(topic) ? relativeLesson(topic, lesson, course.grade!) : lesson,
+    description: `Grade ${course.grade} · ${topic === 'creative' ? 'Sprite studio' : ['operators', 'boolean', 'functions'].includes(topic) ? 'Concept lab' : `${course.size}×${course.size} board`}. ${base.description}`,
+    challengeIds: topic === 'sequences' ? mergedIds : topic === 'project' ? [`${course.id}-rescue-project`] : Array.from({ length: topic === 'creative' ? 3 : ['statements', 'lists', 'objects', 'operators', 'boolean', 'functions'].includes(topic) ? 6 : 10 }, (_, i) => {
       const original = `${course.id}-${topic}-${i + 1}`;
       return missions.find(m => m.replaces === original)?.id ?? original;
     }) };
 }));
 export function modulesFor(course: CourseId) { return course.startsWith('grade-') ? gradedModules.filter(m => m.id.startsWith(`${course}-`)) : modules; }
-export function moduleFor(missionId: string): LearningModule { return sequenceExtras.includes(missionId) ? gradedModules.find(m => m.id === 'grade-1-sequences')! : [...modules, ...gradedModules].find(m => m.challengeIds.includes(missionId) || m.challengeIds.some(id => missions.find(task => task.id === id)?.replaces === missionId))!; }
+export function moduleFor(missionId: string): LearningModule { return sequenceExtras.includes(missionId) ? gradedModules.find(m => m.id === 'grade-1-sequences')! : [...modules, ...gradedModules].find(m => m.sandboxId === missionId || m.challengeIds.includes(missionId) || m.previousChallengeIds?.includes(missionId) || m.challengeIds.some(id => missions.find(task => task.id === id)?.replaces === missionId))!; }
 export const challengeOrder = modules.flatMap(m => m.challengeIds);
 export function nextChallenge(missionId: string) {
   const course = courses.find(c => missionId.startsWith(`${c.id}-`));
   const order = course ? modulesFor(course.id).flatMap(m => m.challengeIds) : challengeOrder;
+  if (course && !order.includes(missionId)) {
+    const currentModule = moduleFor(missionId);
+    return modulesFor(course.id)[modulesFor(course.id).indexOf(currentModule) + 1]?.challengeIds[0];
+  }
   return order[order.indexOf(missionId) + 1];
 }
 export function missionIndex(id: string) { return missions.findIndex(m => m.id === id); }

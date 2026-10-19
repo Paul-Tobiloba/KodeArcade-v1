@@ -15,7 +15,7 @@ test('signed-in dashboard has student navigation, real profile and assigned cour
   await page.locator('.student-dashboard img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   if (info.project.name === 'phone') {
-    const action = await page.locator('.account-assigned-course span').boundingBox();
+    const action = await page.getByRole('link', { name: 'Open Byte Lab · Grade 4', exact: true }).boundingBox();
     expect(action!.y + action!.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight));
   }
   await page.screenshot({ path: `.impeccable/review/student-dashboard-${info.project.name}.png`, fullPage: true });

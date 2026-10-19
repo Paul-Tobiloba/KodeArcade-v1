@@ -1,4 +1,18 @@
-# Learning entry and concept lessons
+# Learning entry and concept lessons — updated 14 October 2026
+
+## Current workspace-first flow
+
+Fresh Grade 1–6 and retained arrows/words/builder coding courses now open directly in the working interface, without a separate prose page or Start challenge gate. Concept explanations, opt-in reading and worked examples remain in Lesson & instructions beside the board and code. Read lesson expands and focuses that panel without replacing the editor. On small screens the panel folds above the stage.
+
+A five-step, nonmodal workspace tour appears on a course's first challenge when no tour dismissal is saved: mission, commands/palette, code, Play, then help/navigation. Back, Next, Skip tour, optional device-local narration and Replay tour are available. The actual palette, text editor and run controls remain usable during the tour; no demo replaces the learner's code, and no challenge completion or stars are awarded by finishing the tour. The tour temporarily hides behind arrival feedback and returns to the same step.
+
+Completed/skipped state is stored as an optional `workspaceTour` marker on the course's first challenge. Public previews keep it in their existing independent browser saves; student sessions use the existing learner/class/course-scoped cloud snapshots. This introduces no new database table, analytics, microphone access or external narration. Computer Explorers retains its separate mouse/keyboard activities rather than receiving an inapplicable Blockly tour.
+
+Module overview remains reachable from the help panel and module drawer. It contains activity lists, drawing, quizzes and next-module actions; the Grade 1 Sequences journey retains its video, guided practice and mastery evidence. Generic standalone lesson articles no longer render there. Explicit overview navigation is course-bound, so another course's overview does not become a new course's first screen. Older course-less lesson navigation falls back to the working interface without deleting saved programs.
+
+## Historical behavior and verification
+
+The notes below describe the earlier implementation and its original test evidence. The workspace-first flow above supersedes the standalone concept-article behavior and the older age-labelled chooser details.
 
 `/#/learn` now opens an age/course chooser for both new and returning learners. Age ranges are guidance, not identity collection; no birth date is stored. Returning learners also get a coding-course resume link. Direct `/#/learn/arrows`, `words`, `builder`, and `computer` links open the selected course. Change course returns to the chooser, preserving existing independent saves.
 

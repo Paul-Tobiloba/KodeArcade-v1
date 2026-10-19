@@ -16,7 +16,15 @@ test('compact workspace keeps the board, palette and code visible', async ({ pag
     const host = (await page.locator('.blockly-host').boundingBox())!;
     const scrollable = size.width <= 950 || size.height <= 600;
     expect(board.height).toBeGreaterThan(scrollable ? 250 : 300);
-    expect(host.height).toBeGreaterThan(scrollable ? 400 : 450);
+    // The current editor reserves 62px for its title, 33px for keyboard
+    // helpers, 45px for the reference row and 2px for its borders. Check
+    // usable canvas space and allocation, not the old pre-footer 450px floor.
+    const editor = (await page.locator('.editor').boundingBox())!;
+    expect(host.height).toBeGreaterThan(400);
+    expect(editor.height - host.height).toBeLessThanOrEqual(144);
+    // Help must not overlay Clear code or the long-program editing controls.
+    const launcher = (await page.locator('.byte-launch').boundingBox())!;
+    expect(launcher.x + launcher.width <= editor.x || launcher.y + launcher.height <= editor.y).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollHeight > innerHeight)).toBe(scrollable);
     for (const selector of ['.board', '.blockly-host', '.run-button', '.blocklyFlyout .blocklyDraggable']) {
@@ -30,7 +38,9 @@ test('compact workspace keeps the board, palette and code visible', async ({ pag
   // The actual Blockly palette is both draggable and tap-to-append; no duplicate inventory.
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
-  const boardGeometry = () => page.locator('.board').evaluate(el => { const r = el.getBoundingClientRect(); return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height }; });
+  // On stacked screens, expanding the guide intentionally moves the stage
+  // down in normal flow; the map itself must keep its size and alignment.
+  const boardGeometry = () => page.locator('.board').evaluate(el => { const r = el.getBoundingClientRect(); return { x: r.x + scrollX, ...(innerWidth > 950 && innerHeight > 600 ? { y: r.y + scrollY } : {}), width: r.width, height: r.height }; });
   const before = await boardGeometry();
   await page.getByRole('button', { name: 'Get a hint', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Hints' })).toBeVisible();

@@ -17,12 +17,12 @@ describe('drawing curriculum placement', () => {
     });
   }
   it('places sequences, turns, loops, variables and creation by the code being practised', () => {
-    expect(drawingsForTopic('grade-1', 'sequences').map(item => item.activity.id)).toEqual(['trail']);
-    expect(drawingsForTopic('grade-1', 'directions').map(item => item.activity.id)).toEqual(['corner','square','stairs']);
+    expect(drawingsForTopic('grade-1', 'sequences').map(item => item.activity.id)).toEqual(['trail','corner','square','stairs']);
+    expect(drawingsForTopic('grade-1', 'directions')).toEqual([]);
     expect(drawingsForTopic('grade-2', 'loops')).toHaveLength(4);
     expect(drawingsForTopic('grade-6', 'loops').map(item => item.activity.id)).toEqual(['octagon','double-star','dendrite','separate']);
     expect(drawingsForTopic('grade-6', 'variables').map(item => item.activity.id)).toEqual(['spiral']);
-    expect(drawingTopic('grade-5', drawingActivities['grade-5'].find(item => item.id === 'branch')!)).toBe('directions');
+    expect(drawingTopic('grade-5', drawingActivities['grade-5'].find(item => item.id === 'branch')!)).toBe('sequences');
     expect(drawingsForTopic('grade-6', 'project')[0].activity.free).toBe(true);
     expect(drawingsForTopic('words', 'loops')).toEqual([]);
   });

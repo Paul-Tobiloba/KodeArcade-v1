@@ -1,24 +1,31 @@
 import type * as Blockly from 'blockly/core';
 import { directions, same, type Direction, type Frame, type Mission, type RunResult } from './learning';
+import { validRepeatCount } from '../shared/repeats.js';
 import { characterFor } from './characters';
+import { createDataRuntime } from './dataProgram';
+import { relativeMovement, degreeTurns, relativeDirection, turnHeading } from './relativeMovement';
 
 // Conditions and variables must be evaluated at runtime, not expanded before
 // movement: both the character's position and the stored value can change.
 export function runDynamic(first: Blockly.Block | null, mission: Mission): RunResult {
   let position = { ...mission.start }, score: number | undefined;
+  let heading: Direction = 'right';
+  const relative = relativeMovement(mission);
   let error = '', operations = 0, usedIf = false, usedElse = false, usedSet = false, usedChange = false, usedRead = false, usedLoop = false;
   const collected: { x: number; y: number }[] = [];
   let gateOpen = !mission.gate?.locked, bridgeBuilt = !!mission.river?.built, collectedGoal = false;
   const adjacent = (p: { x: number; y: number }) => Math.abs(p.x-position.x) + Math.abs(p.y-position.y) === 1;
   const itemHere = () => !!mission.collectibles?.positions.some(p => same(p, position) && !collected.some(c => same(c, p)));
   const frames: Frame[] = [];
+  const data = createDataRuntime(mission);
   const delta = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] };
   const clear = (direction: Direction) => {
     const [x, y] = delta[direction]; const next = { x: position.x + x, y: position.y + y };
     return next.x >= 0 && next.x < mission.size && next.y >= 0 && next.y < mission.size && !mission.walls.some(w => same(w, next)) && !(mission.gate && !gateOpen && same(next,mission.gate.position)) && !(mission.river && !bridgeBuilt && same(next,mission.river.position));
   };
-  const frame = (block: Blockly.Block, note?: string) => frames.push({ ...position, blockId: block.id, step: frames.length + 1, ...(score !== undefined ? { score } : {}), ...(note ? { note } : {}), ...(mission.collectibles ? { collected: [...collected] } : {}), ...(mission.gate ? { gateOpen } : {}), ...(mission.river ? { bridgeBuilt } : {}) });
+  const frame = (block: Blockly.Block, note?: string) => frames.push({ ...position, ...(relative ? { heading } : {}), blockId: block.id, step: frames.length + 1, ...(score !== undefined ? { score } : {}), ...(note || data.describe() ? { note: note ?? data.describe() } : {}), ...(mission.collectibles ? { collected: [...collected] } : {}), ...(mission.gate ? { gateOpen } : {}), ...(mission.river ? { bridgeBuilt } : {}) });
   function move(block: Blockly.Block, direction: Direction) {
+    if (frames.length >= 120) { error = 'This program runs too many steps. Use fewer repeats.'; return; }
     if (mission.countPickups && score !== collected.length) { error = 'Count each pickup once: SET score to 0 first, then CHANGE by 1 after picking up. Do not count empty squares.'; return; }
     const [dx,dy] = delta[direction], next = { x: position.x+dx, y: position.y+dy };
     if (mission.river && !bridgeBuilt && same(next,mission.river.position)) { position = next; frame(block, 'Splash! Build the bridge before crossing.'); frames.at(-1)!.fell = true; error = 'Splash! The river has no bridge. Build a bridge from the bank before crossing.'; return; }
@@ -32,7 +39,26 @@ export function runDynamic(first: Blockly.Block | null, mission: Mission): RunRe
     while (block && !error && !collectedGoal) {
       if (++operations > 500 || frames.length >= 120) { error = 'This program runs too many steps. Use fewer repeats.'; break; }
       const direction = directions.find(d => block!.type === `ka_${d}` || block!.type === `ka_arrow_${d}`);
-      if (direction) move(block, direction);
+      const dataError = data.execute(block, (d, count) => {
+        for (let i = 0; i < count && !error; i++) {
+          if (frames.length >= 120) { error = 'This program runs too many steps. Use fewer repeats.'; break; }
+          move(block!, d === 'forward' || d === 'backward' ? relativeDirection(heading, d)! : d);
+        }
+      }, text => frame(block!, text));
+      if (dataError !== undefined) { if (dataError) error = dataError; }
+      else if (['ka_forward', 'ka_backward', 'ka_turn_left', 'ka_turn_right', 'ka_turn_degrees'].includes(block.type)) {
+        if (!relative) { error = 'Forward, backward and route turns are introduced in Grades 4–6.'; break; }
+        if (block.type === 'ka_forward' || block.type === 'ka_backward') move(block, relativeDirection(heading, block.type === 'ka_forward' ? 'forward' : 'backward')!);
+        else {
+          const side = block.type === 'ka_turn_degrees' ? block.getFieldValue('SIDE') : block.type === 'ka_turn_left' ? 'left' : 'right';
+          const degrees = block.type === 'ka_turn_degrees' ? Number(block.getFieldValue('DEGREES')) : 90;
+          if (block.type === 'ka_turn_degrees' && !degreeTurns(mission)) { error = 'Use the 90-degree left/right turns in Grade 4. Degree controls start in Grade 5.'; break; }
+          if (!['left', 'right'].includes(side) || ![90, 180, 270].includes(degrees)) { error = 'Grid turns use 90, 180 or 270 degrees. Try other angles in drawing.'; break; }
+          heading = turnHeading(heading, side, degrees);
+          frame(block, `Turn ${side} ${degrees} degrees. Now facing ${heading}.`);
+        }
+      }
+      else if (direction) move(block, direction);
       else if (block.type === 'ka_move_next') {
         const index = mission.trail?.findIndex(p => same(p,position)) ?? -1;
         const next = index >= 0 ? mission.trail?.[index + 1] : undefined;
@@ -43,7 +69,7 @@ export function runDynamic(first: Blockly.Block | null, mission: Mission): RunRe
       }
       else if (block.type === 'ka_repeat') {
         const count = Number(block.getFieldValue('COUNT')), body = block.getInputTargetBlock('DO');
-        if (!mission.loops || !Number.isInteger(count) || count < 2 || count > 5 || !body) { error = 'Repeat needs a body and a count from 2 to 5.'; break; }
+        if (!mission.loops || !validRepeatCount(count) || !body) { error = 'Repeat needs instructions inside and a whole-number count of 0 or more.'; break; }
         usedLoop = true;
         for (let i = 0; i < count && !error && !collectedGoal; i++) visit(body, depth + 1);
       } else if (block.type === 'ka_open_gate' || block.type === 'ka_build_bridge') {
@@ -75,20 +101,25 @@ export function runDynamic(first: Blockly.Block | null, mission: Mission): RunRe
         const answer = itemHere(); usedIf = true; usedElse ||= !!no;
         frame(block, `${mission.collectibles.kind} ${answer ? 'found: run DO' : 'not here: ' + (no ? 'run ELSE' : 'skip DO')}.`);
         visit(answer ? yes : no, depth + 1);
-      } else if (block.type === 'ka_if' || block.type === 'ka_if_else') {
+      } else if (['ka_if', 'ka_if_else', 'ka_relative_if', 'ka_relative_if_else'].includes(block.type)) {
         if (!mission.conditionals) { error = 'Use conditional blocks in the Conditionals topic.'; break; }
-        const direction = block.getFieldValue('DIRECTION') as Direction;
+        const relativeCheck = block.type.startsWith('ka_relative_');
+        if (relativeCheck && !relative) { error = 'Relative path checks are available in Grades 4–6.'; break; }
+        const selectedDirection = block.getFieldValue('DIRECTION');
+        const direction = relativeCheck ? relativeDirection(heading, selectedDirection) : selectedDirection as Direction;
         const yes = block.getInputTargetBlock('DO'), no = block.getInputTargetBlock('ELSE');
-        if (!directions.includes(direction) || !yes || (block.type === 'ka_if_else' && !no)) { error = 'Add instructions to every branch of your IF block.'; break; }
-        usedIf = true; usedElse ||= block.type === 'ka_if_else';
+        if (!direction || !directions.includes(direction) || !yes || (block.type.endsWith('_else') && !no)) { error = 'Add instructions to every branch of your IF block.'; break; }
+        usedIf = true; usedElse ||= block.type.endsWith('_else');
         const answer = clear(direction); frame(block, `${direction} is ${answer ? 'clear: run DO' : 'blocked: skip DO' + (no ? ' and run ELSE' : '')}.`);
         visit(answer ? yes : no, depth + 1);
-      } else if (['ka_set_score', 'ka_change_score', 'ka_move_score'].includes(block.type)) {
+      } else if (['ka_set_score', 'ka_change_score', 'ka_move_score', 'ka_relative_move_score'].includes(block.type)) {
         if (!mission.variables) { error = 'Use score blocks in the Variables topic.'; break; }
-        if (block.type === 'ka_move_score') {
+        if (block.type === 'ka_move_score' || block.type === 'ka_relative_move_score') {
           if (score === undefined) { error = 'Set score before using it to move.'; break; }
-          const direction = block.getFieldValue('DIRECTION') as Direction;
-          if (!directions.includes(direction) || !Number.isInteger(score) || score < 0 || score > 10) { error = 'Use a score from 0 to 10 for movement.'; break; }
+          const selectedDirection = block.getFieldValue('DIRECTION');
+          const relativeRead = block.type === 'ka_relative_move_score';
+          const direction = relativeRead ? relativeDirection(heading, selectedDirection) : selectedDirection as Direction;
+          if (relativeRead && (!relative || !['forward', 'backward'].includes(selectedDirection)) || !direction || !directions.includes(direction) || !Number.isInteger(score) || score < 0 || score > 10) { error = 'Use a score from 0 to 10 and a movement available in this activity.'; break; }
           usedRead = true;
           frame(block, `Read score = ${score}. Move ${direction} ${score} steps.`);
           for (let i = 0; i < score && !error; i++) move(block, direction);
@@ -112,5 +143,6 @@ export function runDynamic(first: Blockly.Block | null, mission: Mission): RunRe
   if (!error && mission.requireLoop && !usedLoop) error = 'Use a Repeat block (for loop) to repeat the pattern, rather than writing every action again.';
   if (!error && mission.conditionals && (!usedIf || (mission.requireElse && !usedElse))) error = `${mission.collectOnly ? 'You found the carrots!' : 'You reached the star!'} Now solve it using ${mission.requireElse ? 'IF / ELSE' : 'IF'} to practise decisions.`;
   if (!error && mission.variables && (!usedSet || score !== mission.targetScore || (mission.requireChange && !usedChange) || (mission.requireVariableRead && !usedRead))) error = `Reach the star with score = ${mission.targetScore}. Use SET${mission.requireChange ? ', CHANGE' : ''}${mission.requireVariableRead ? ' and Move by score' : ''}.`;
-  return { frames, success: !error, message: error || (mission.collectOnly ? `${characterFor(mission.concept).name} collected all ${collected.length} carrots! The collection is the goal—no finish tile needed.` : mission.variables ? `Nova reached the star with score = ${score}. Your variable worked!` : `${characterFor(mission.concept).name} reached the star. Your decisions found a clear path!`) };
+  if (!error) error = data.finish();
+  return { frames, success: !error, message: error || (mission.dataTask ? 'Your program reached the destination with the required inputs and data.' : mission.collectOnly ? `${characterFor(mission.concept).name} collected all ${collected.length} carrots! The collection is the goal—no finish tile needed.` : mission.variables ? `Nova reached the star with score = ${score}. Your variable worked!` : `${characterFor(mission.concept).name} reached the star. Your decisions found a clear path!`) };
 }

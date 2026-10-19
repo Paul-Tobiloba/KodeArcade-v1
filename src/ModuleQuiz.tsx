@@ -1,18 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, ClipboardCheck, RotateCcw } from 'lucide-react';
-import { emptyQuiz, moduleQuiz, quizScore, type QuizRecord } from '../shared/quizzes';
+import { currentQuizId, emptyQuiz, moduleQuiz, quizScore, quizVersion, type QuizRecord } from '../shared/quizzes';
 import type { LearningModule } from './curriculum';
 import ReadAloud from './ReadAloud';
 import './module-quiz.css';
 
-export function QuizEntry({ module, record, onStart }: { module: LearningModule; record?: QuizRecord; onStart: () => void }) {
-  return <section className="module-quiz-entry" aria-label={`${module.title} end-of-module quiz`}><div><h2><ClipboardCheck size={22} />{module.title} quiz</h2><p>Check what you understand with five questions. No timer. You can review your answers and try again.</p>{record?.bestAnswers && <p><strong>Best result: {quizScore(module.id, record.bestAnswers)} / 5</strong> · {record.attempts} submitted {record.attempts === 1 ? 'attempt' : 'attempts'}</p>}</div><button className="primary" onClick={onStart}>{record?.submittedAnswers ? 'Review quiz' : record?.answers.some(answer => answer !== null) ? 'Continue quiz' : 'Start quiz'}<ArrowRight size={18} /></button></section>;
+export function QuizEntry({ module, record, previousRecord, onStart, onPrevious, previousVersions, onVersion }: { module: LearningModule; record?: QuizRecord; previousRecord?: QuizRecord; onStart: () => void; onPrevious?: () => void; previousVersions?: { id: string; record: QuizRecord }[]; onVersion?: (id: string) => void }) {
+  return <section className="module-quiz-entry" aria-label={`${module.title} end-of-module quiz`}><div><h2><ClipboardCheck size={22} />{module.title} quiz</h2><p>Check what you understand with five questions. No timer. You can review your answers and try again.</p>{record?.bestAnswers && <p><strong>Best result: {quizScore(currentQuizId(module.id), record.bestAnswers)} / 5</strong> · {record.attempts} submitted {record.attempts === 1 ? 'attempt' : 'attempts'}</p>}{previousRecord && <p>Previous quiz: {previousRecord.bestAnswers ? `best result ${quizScore(module.id, previousRecord.bestAnswers)} / 5` : 'draft answers saved'}. Kept separately from this updated quiz.</p>}</div><div className="quiz-entry-actions"><button className="primary" onClick={onStart}>{record?.submittedAnswers ? 'Review quiz' : record?.answers.some(answer => answer !== null) ? 'Continue quiz' : 'Start quiz'}<ArrowRight size={18} /></button>{previousRecord && onPrevious && <button className="secondary" onClick={onPrevious}>Open previous quiz</button>}{previousVersions?.filter(item => item.id !== module.id).map(item => <button className="secondary" key={item.id} onClick={() => onVersion?.(item.id)}>Open previous quiz (version {quizVersion(item.id)}){item.record.bestAnswers ? ` · ${quizScore(item.id, item.record.bestAnswers)} / 5` : ' · saved draft'}</button>)}</div></section>;
 }
 
-export default function ModuleQuiz({ module, grade, record = emptyQuiz(), onChange, onBack, onNext, nextTitle }: { module: LearningModule; grade?: number; record?: QuizRecord; onChange: (record: QuizRecord) => void; onBack: () => void; onNext?: () => void; nextTitle?: string }) {
-  const questions = moduleQuiz(module.id, grade);
+export default function ModuleQuiz({ module, quizId = currentQuizId(module.id), grade, record = emptyQuiz(), onChange, onBack, onNext, nextTitle, onPrevious, onCurrent, versions, onVersion }: { module: LearningModule; quizId?: string; grade?: number; record?: QuizRecord; onChange: (record: QuizRecord) => void; onBack: () => void; onNext?: () => void; nextTitle?: string; onPrevious?: () => void; onCurrent?: () => void; versions?: string[]; onVersion?: (id: string) => void }) {
+  const questions = moduleQuiz(quizId, grade);
   const submitted = record.submittedAnswers;
-  const score = quizScore(module.id, submitted, grade);
+  const score = quizScore(quizId, submitted, grade);
   const remaining = record.answers.filter(answer => answer === null).length;
   const [error, setError] = useState('');
   const resultHeading = useRef<HTMLHeadingElement>(null);
@@ -22,13 +22,15 @@ export default function ModuleQuiz({ module, grade, record = emptyQuiz(), onChan
     event.preventDefault();
     if (remaining) { setError(`Choose an answer for ${remaining === 1 ? 'the remaining question' : `all ${remaining} remaining questions`} before submitting.`); return; }
     const answers = record.answers as number[];
-    const bestAnswers = record.bestAnswers && quizScore(module.id, record.bestAnswers, grade) >= quizScore(module.id, answers, grade) ? record.bestAnswers : [...answers];
+    const bestAnswers = record.bestAnswers && quizScore(quizId, record.bestAnswers, grade) >= quizScore(quizId, answers, grade) ? record.bestAnswers : [...answers];
     onChange({ ...record, submittedAnswers: [...answers], bestAnswers, attempts: Math.min(100000, record.attempts + 1) });
     setError('');
   }
   return <section className="module-quiz" aria-label={`${module.title} quiz`}>
     <button className="secondary" onClick={onBack}>Back to module</button>
-    {submitted ? <div className="quiz-result"><h2 ref={resultHeading} tabIndex={-1}>You answered {score} of 5 correctly</h2><p>{score === 5 ? 'You understood every question in this quiz. Well done!' : 'Read the explanations below to see what worked and what to practise.'} Your best result stays saved when you retry.</p><p>Best result: <strong>{quizScore(module.id, record.bestAnswers, grade)} / 5</strong> · Attempt {record.attempts}</p></div> : <p className="quiz-instructions">Five questions about {module.title.toLowerCase()}. Choose one answer for each, then submit to see your result and explanations. You can leave and come back to your answers.</p>}
+    {versions && versions.length > 1 && <label className="quiz-version-picker">Quiz version<select value={quizId} onChange={e => onVersion?.(e.target.value)}>{versions.map(id => <option key={id} value={id}>{id === currentQuizId(module.id) ? "Current topic quiz" : `Previous quiz · version ${quizVersion(id)}`}</option>)}</select></label>}
+    {onCurrent ? <div className="quiz-version"><p><strong>Previous quiz version</strong><br />Your original questions, answers and results are kept here. This version does not count towards the updated course quizzes.</p><button className="secondary" onClick={onCurrent}>Open updated quiz</button></div> : onPrevious ? <div className="quiz-version"><p>This updated quiz tests the module’s coding concepts. Your previous quiz is saved separately.</p><button className="secondary" onClick={onPrevious}>Open previous quiz</button></div> : null}
+    {submitted ? <div className="quiz-result"><h2 ref={resultHeading} tabIndex={-1}>You answered {score} of 5 correctly</h2><p>{score === 5 ? 'You understood every question in this quiz. Well done!' : 'Read the explanations below to see what worked and what to practise.'} Your best result stays saved when you retry.</p><p>Best result: <strong>{quizScore(quizId, record.bestAnswers, grade)} / 5</strong> · Attempt {record.attempts}</p></div> : <p className="quiz-instructions">Five questions about {module.title.toLowerCase()}. Choose one answer for each, then submit to see your result and explanations. You can leave and come back to your answers.</p>}
     <form onSubmit={submit}>
       {questions.map((question, index) => <fieldset className="quiz-question" key={question.id}>
         <legend>{index + 1}. {question.prompt}</legend>

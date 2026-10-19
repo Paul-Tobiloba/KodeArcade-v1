@@ -11,6 +11,10 @@ import type { Database } from './db/client.js';
 import * as s from './db/schema.js';
 import { curriculumVersion, type ProgressDocument } from '../shared/progress.js';
 import { emptyQuiz, moduleQuiz } from '../shared/quizzes.js';
+import { newStudioProject, readStudioProject, saveStudioProject } from '../src/studioProject.js';
+import { galleryEntry, saveStudioGallery } from '../shared/studioGallery.js';
+import { studioStarterProject } from '../src/studioStarters.js';
+import { studioTutorialProject, studioTutorials } from '../src/studioTutorials.js';
 
 const client = new PGlite(), db = drizzle(client, { schema: s });
 const config = loadConfig({ NODE_ENV: 'test', APP_ORIGIN: 'https://learn.example.com', BETTER_AUTH_SECRET: 'synthetic-progress-secret-only-173982a50b72', DATABASE_URL: 'postgresql://test:test@localhost/test' });
@@ -140,7 +144,183 @@ it('persists quiz drafts and submissions, computes teacher scores and protects b
   expect((await request(pupil, { ...scope, revision: saved.revision, document: next })).status).toBe(200);
   const report = await app.request('/api/manage/classes/class-a/progress?course=grade-2', { headers: { Cookie: adult } });
   const data = await report.json();
-  expect(data.students[0]).toMatchObject({ quizCompleted: 1, quizTotal: 5, lastActivity: 'Loops quiz' });
+  expect(data.students[0]).toMatchObject({ quizCompleted: 1, quizTotal: 4, lastActivity: 'Loops quiz' });
   expect(data.students[0].quizResults.find((quiz: { id: string }) => quiz.id === id)).toMatchObject({ best: 5, latest: 0, attempts: 2 });
   expect(JSON.stringify(data)).not.toMatch(/submittedAnswers|bestAnswers/);
+});
+it('persists a tour dismissal for its learner/course without awarding a challenge', async () => {
+  await db.update(s.learner).set({ active: true }).where(eq(s.learner.id, 'other'));
+  other = await session('other', 'other', 'class-b');
+  const own = await (await request()).json(), snapshot = await (await request(other)).json();
+  const next = document();
+  next.progress['grade-2-sequences-1'] = { blocks: [], attempts: 0, hints: 0, complete: false, workspaceTour: 'skipped' };
+  const otherScope = { learnerId: 'other', classroomId: 'class-b' };
+  expect((await request(other, { ...otherScope, revision: snapshot.revision, document: next })).status).toBe(200);
+  expect((await (await request(other)).json()).document.progress['grade-2-sequences-1']).toMatchObject({ workspaceTour: 'skipped', complete: false, attempts: 0 });
+  expect((await (await request()).json()).document).toEqual(own.document);
+});
+it('saves new data-module work and quizzes and reports the revised course without exposing code', async () => {
+  await db.insert(s.courseAssignment).values({ id: 'data-course', classroomId: 'class-a', courseKey: 'grade-6', curriculumVersion });
+  const next = document(), id = 'grade-6-objects-6';
+  next.currentId = id; next.progress = { [id]: { blocks: [], attempts: 1, hints: 0, complete: true, stars: 5, textCode: 'synthetic private data draft', codingMode: 'text' } };
+  const quiz = 'grade-6-objects@3', answers = moduleQuiz(quiz).map(question => question.correct);
+  next.quizzes = { [quiz]: { version: 1, answers, submittedAnswers: answers, bestAnswers: answers, attempts: 1 } };
+  expect((await request(pupil, { ...scope, revision: 0, document: next }, 'grade-6')).status).toBe(200);
+  expect((await (await request(pupil, undefined, 'grade-6')).json()).document).toEqual(next);
+  const response = await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } });
+  expect(response.status).toBe(200);
+  const report = await response.json();
+  expect(report.students[0]).toMatchObject({ completed: 1, total: 90, quizCompleted: 1, quizTotal: 13 });
+  expect(report.students[0].quizResults.find((item: { id: string }) => item.id === quiz)).toMatchObject({ best: 5 });
+  expect(JSON.stringify(report)).not.toContain('synthetic private data draft');
+});
+
+it('keeps original and revised quiz submissions separate through authenticated saves and teacher reports', async () => {
+  await db.insert(s.courseAssignment).values({ id: 'versioned-quizzes', classroomId: 'class-a', courseKey: 'grade-5', curriculumVersion });
+  const oldId = 'grade-5-loops', newId = `${oldId}@3`, oldAnswers = moduleQuiz(oldId).map(q => q.correct), newAnswers = moduleQuiz(newId).map(q => q.correct);
+  const next: ProgressDocument = { ...document(), currentId: 'grade-5-loops-1', progress: {}, view: 'quiz', quizModuleId: oldId, quizzes: { [oldId]: { version: 1, answers: oldAnswers, submittedAnswers: oldAnswers, bestAnswers: oldAnswers, attempts: 1 } } };
+  expect((await request(pupil, { ...scope, revision: 0, document: next }, 'grade-5')).status).toBe(200);
+  const report = async () => (await (await app.request('/api/manage/classes/class-a/progress?course=grade-5', { headers: { Cookie: adult } })).json()).students[0];
+  let row = await report();
+  expect(row).toMatchObject({ quizCompleted: 0, quizTotal: 13, lastActivity: 'Loops quiz (previous version)' });
+  expect(row.previousQuizResults).toEqual([expect.objectContaining({ id: oldId, best: 5, latest: 5, attempts: 1 })]);
+  const snapshot = await (await request(pupil, undefined, 'grade-5')).json();
+  const invalid = structuredClone(next); invalid.quizModuleId = 'grade-5-loops@4';
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: invalid }, 'grade-5')).status).toBe(400);
+  next.quizModuleId = newId;
+  // Old answer indexes deliberately score zero in the new bank, not five.
+  next.quizzes![newId] = { version: 1, answers: oldAnswers, submittedAnswers: oldAnswers, bestAnswers: oldAnswers, attempts: 1 };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-5')).status).toBe(200);
+  row = await report();
+  expect(row).toMatchObject({ quizCompleted: 1, quizTotal: 13, lastActivity: 'Loops quiz' });
+  expect(row.quizResults.find((q: { id: string }) => q.id === newId)).toMatchObject({ best: 0, latest: 0, attempts: 1 });
+  expect(row.previousQuizResults[0]).toMatchObject({ best: 5, attempts: 1 });
+  const current = await (await request(pupil, undefined, 'grade-5')).json();
+  next.quizzes![newId] = { version: 1, answers: newAnswers, submittedAnswers: newAnswers, bestAnswers: newAnswers, attempts: 2 };
+  expect((await request(pupil, { ...scope, revision: current.revision, document: next }, 'grade-5')).status).toBe(200);
+  expect((await (await request(pupil, undefined, 'grade-5')).json()).document.quizzes[oldId]).toEqual(next.quizzes![oldId]);
+  row = await report();
+  expect(row.quizResults.find((q: { id: string }) => q.id === newId)).toMatchObject({ best: 5, attempts: 2 });
+  expect(JSON.stringify(row)).not.toMatch(/submittedAnswers|bestAnswers/);
+});
+
+it('saves a concept-lab program and topic quiz and includes them in a private teacher report', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json();
+  const next: ProgressDocument = snapshot.document, id = 'grade-6-functions-6', quizId = 'grade-6-functions';
+  const answers = moduleQuiz(quizId).map(q => q.correct);
+  next.currentId = id; next.view = 'quiz'; next.quizModuleId = quizId;
+  next.progress[id] = { blocks: [], attempts: 1, hints: 0, complete: true, stars: 5, codingMode: 'text', textCode: 'synthetic private function definition' };
+  next.quizzes![quizId] = { version: 1, answers, submittedAnswers: answers, bestAnswers: answers, attempts: 1 };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(report.students[0]).toMatchObject({ completed: 2, total: 90, quizCompleted: 2, quizTotal: 13, lastActivity: 'Functions quiz' });
+  expect(report.students[0].quizResults.find((q: { id: string }) => q.id === quizId)).toMatchObject({ best: 5 });
+  expect(JSON.stringify(report)).not.toContain('synthetic private function definition');
+});
+
+it('roundtrips a private free-lab workspace without counting it as a completed challenge', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json();
+  const next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  next.currentId = id; next.view = 'challenge'; delete next.quizModuleId;
+  const workspace = { blocks: { languageVersion: 0, blocks: [{ type: 'ka_start', data: JSON.stringify({ character: 'Fix', buddy: 'Gigi', background: 'meadow', buddyX: 50, buddyY: 0 }), next: { block: { type: 'ka_sprite_say', fields: { TEXT: 'Synthetic private creative message' } } } }] } };
+  next.progress[id] = { blocks: [], attempts: 0, hints: 0, complete: false, codingMode: 'blocks', workspace };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const restored = await (await request(pupil, undefined, 'grade-6')).json();
+  expect(restored.document.progress[id]).toMatchObject({ complete: false, attempts: 0, workspace });
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(report.students[0]).toMatchObject({ completed: 2, total: 90, quizCompleted: 2, quizTotal: 13, lastActivity: 'Byte Lab' });
+  expect(JSON.stringify(report)).not.toContain('Synthetic private creative message');
+  expect((await request(other, { ...scope, revision: restored.revision, document: next }, 'grade-6')).status).toBe(401);
+});
+
+it('roundtrips independent sprite scripts and painted art through the authenticated progress API', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  const project = newStudioProject(); project.title = 'Synthetic private studio'; project.onboarding = 'completed'; project.starter = 'story';
+  project.assets.push({ id: 'paint', name: 'My costume', kind: 'drawing', purpose: 'costume', base: { kind: 'character', ref: 'Byte' }, strokes: [{ tool: 'ellipse', filled: true, color: '#6733aa', width: 4, points: [[20, 20], [80, 80]] }] });
+  project.sprites.push({ ...structuredClone(project.sprites[0]), id: 'second', name: 'Second sprite', costume: 'paint', costumes: ['paint'], x: 60, code: { blocks: { languageVersion: 0, blocks: [{ type: 'ka_event_click', next: { block: { type: 'ka_sprite_say', fields: { TEXT: 'Synthetic private second script' } } } }] } } });
+  next.progress[id].workspace = saveStudioProject(project);
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const restored = await (await request(pupil, undefined, 'grade-6')).json();
+  expect(readStudioProject(restored.document.progress[id].workspace)).toEqual(project);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(report.students[0]).toMatchObject({ completed: 2, total: 90 });
+  expect(JSON.stringify(report)).not.toMatch(/Synthetic private studio|Synthetic private second script|My costume/);
+});
+
+it('saves private galleries, deleted work and large collections without exposing them to reports or other pupils', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  const project = newStudioProject(); project.title = 'Synthetic private gallery'; project.sprites[0].code.extra = 'x'.repeat(55000);
+  const first = galleryEntry(project), deleted = galleryEntry(project); deleted.deletedAt = new Date().toISOString();
+  const workspace = saveStudioGallery({ version: 1, activeId: null, projects: [first, deleted] });
+  next.progress[id] = { blocks: [], attempts: 0, hints: 0, complete: false, workspace };
+  const input = { ...scope, revision: snapshot.revision, document: next };
+  expect((await request(pupil, input, 'grade-6')).status).toBe(200);
+  const restored = await (await request(pupil, undefined, 'grade-6')).json(); expect(restored.document.progress[id].workspace).toEqual(workspace);
+  expect((await request(other, input, 'grade-6')).status).toBe(401);
+  expect((await request(adult, input, 'grade-6')).status).toBe(401);
+  const wrong = structuredClone(next); wrong.progress['grade-6-sequences-1'] = wrong.progress[id];
+  expect((await request(pupil, { ...input, revision: restored.revision, document: wrong }, 'grade-6')).status).toBe(400);
+  const invalid = structuredClone(next); (invalid.progress[id].workspace!.byteStudioGallery as { version: number }).version = 999;
+  expect((await request(pupil, { ...input, revision: restored.revision, document: invalid }, 'grade-6')).status).toBe(400);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(JSON.stringify(report)).not.toMatch(/Synthetic private gallery|byteStudioGallery|deletedAt/);
+  expect(report.students[0]).toMatchObject({ completed: 2, total: 90 });
+});
+
+it('persists lesson repeat counts above five and rejects invalid numeric counts', async () => {
+  const snapshot = await (await request()).json(), next: ProgressDocument = snapshot.document, id = 'grade-2-loops-1';
+  next.currentId = id; next.view = 'challenge'; delete next.quizModuleId;
+  next.progress[id] = { blocks: [{ id: 'synthetic-repeat', kind: 'repeat', direction: 'right', count: 25 }], attempts: 0, hints: 0, complete: false };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next })).status).toBe(200);
+  const saved = await (await request()).json(); expect(saved.document.progress[id].blocks[0].count).toBe(25);
+  for (const count of [-1, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+    const invalid = structuredClone(next); invalid.progress[id].blocks[0].count = count;
+    expect((await request(pupil, { ...scope, revision: saved.revision, document: invalid })).status).toBe(400);
+  }
+  expect((await (await request()).json()).document.progress[id].blocks[0].count).toBe(25);
+});
+
+it('keeps imported background pixels private and validates image sources in account saves', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  const imageData = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9Zl1sAAAAASUVORK5CYII=';
+  const project = newStudioProject(); project.assets[0].ref = 'Girl';
+  project.assets.push({ id: 'imported-private', name: 'Synthetic private image', kind: 'image', purpose: 'background', imageData }); project.backdrop = 'imported-private';
+  const entry = galleryEntry(project), workspace = saveStudioGallery({ version: 1, activeId: entry.id, projects: [entry] });
+  next.progress[id].workspace = workspace;
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const saved = await (await request(pupil, undefined, 'grade-6')).json(); expect(saved.document.progress[id].workspace).toEqual(workspace);
+  expect((await request(other, { ...scope, revision: saved.revision, document: next }, 'grade-6')).status).toBe(401);
+  for (const source of ['https://external.test/picture.png', 'data:image/svg+xml;base64,PHN2Zy8+']) {
+    const invalid = structuredClone(next); (invalid.progress[id].workspace!.byteStudioGallery as { projects: { project: { assets: { imageData?: string }[] } }[] }).projects[0].project.assets[2].imageData = source;
+    expect((await request(pupil, { ...scope, revision: saved.revision, document: invalid }, 'grade-6')).status).toBe(400);
+  }
+  expect((await (await request(pupil, undefined, 'grade-6')).json()).document.progress[id].workspace).toEqual(workspace);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(JSON.stringify(report)).not.toContain(imageData); expect(JSON.stringify(report)).not.toContain('Synthetic private image');
+});
+
+it('roundtrips family characters, props and new real-world scenes in private learner projects', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  const project = newStudioProject(); project.title = 'Synthetic family adventure'; project.assets[0].ref = 'Grandma';
+  project.assets[1].ref = 'countryHome'; project.assets[1].name = 'Country home';
+  project.assets.push({ id: 'grandpa', kind: 'character', name: 'Grandpa', ref: 'Grandpa' }, { id: 'house', kind: 'character', name: 'House', ref: 'House' }, { id: 'city-street', kind: 'background', name: 'City street', ref: 'cityStreet' });
+  project.sprites[0].costumes.push('grandpa', 'house');
+  const entry = galleryEntry(project), workspace = saveStudioGallery({ version: 1, activeId: entry.id, projects: [entry] }); next.progress[id].workspace = workspace;
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const saved = await (await request(pupil, undefined, 'grade-6')).json(); expect(saved.document.progress[id].workspace).toEqual(workspace);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(JSON.stringify(report)).not.toMatch(/Synthetic family adventure|countryHome|cityStreet|Grandma|Grandpa/);
+});
+
+it('roundtrips interactive games, tutorials and personal definitions privately without awarding course scores', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document, id = 'grade-6-creative-4';
+  const entries = [...(['racing', 'basketball', 'garden', 'tennis'] as const).map(kind => galleryEntry(studioStarterProject(kind))), ...studioTutorials.map(tutorial => galleryEntry(studioTutorialProject(tutorial.id)))];
+  const workspace = saveStudioGallery({ version: 1, activeId: entries[0].id, projects: entries });
+  next.progress[id] = { blocks: [], attempts: 0, hints: 0, complete: false, workspace };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const restored = await (await request(pupil, undefined, 'grade-6')).json(); expect(restored.document.progress[id]).toEqual(next.progress[id]);
+  expect((await request(other, undefined, 'grade-6')).status).toBe(403); // Valid pupil session, but this class has no Grade 6 assignment.
+  expect((await request(other, { ...scope, revision: restored.revision, document: next }, 'grade-6')).status).toBe(401);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(JSON.stringify(report)).not.toMatch(/Three-lane racer|Basketball bounce|Garden greetings|Tennis rally|TennisBall|TennisRacket|ka_studio_define|RaceCarRed|tutorialQuestions|tutorialTimers|tutorialSprites|tutorialBehaviors|My space hero|Butterfly swarm/);
 });

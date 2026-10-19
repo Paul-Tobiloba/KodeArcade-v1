@@ -10,7 +10,7 @@ export type SaveStatus = 'saved' | 'pending' | 'saving' | 'error' | 'conflict';
 export function hydrateCloud(course: GradeKey, document: ProgressDocument | null): Record<string, string> {
   if (!document) return {};
   const save = { ...emptySave(), ...document.preferences, course, current: missions.findIndex(m => m.id === document.currentId), progress: document.progress, basicsComplete: document.basicsComplete, topicRecords: document.topicRecords, quizzes: document.quizzes ?? {} };
-  return { [SAVE_KEY]: JSON.stringify(save), [NAV_KEY]: JSON.stringify({ view: document.view, drawingId: document.drawingId, quizModuleId: document.quizModuleId }), ...Object.fromEntries(Object.entries(document.drawings).map(([id, drawing]) => [drawingSaveKey(course, id), JSON.stringify(drawing)])) };
+  return { [SAVE_KEY]: JSON.stringify(save), [NAV_KEY]: JSON.stringify({ course, view: document.view, drawingId: document.drawingId, quizModuleId: document.quizModuleId }), ...Object.fromEntries(Object.entries(document.drawings).map(([id, drawing]) => [drawingSaveKey(course, id), JSON.stringify(drawing)])) };
 }
 export function collectCloud(course: GradeKey, entries: Record<string, string>): ProgressDocument | null {
   if (!entries[SAVE_KEY]) return null;

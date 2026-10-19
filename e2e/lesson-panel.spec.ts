@@ -1,0 +1,63 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test('desktop lesson rail reclaims space and preserves reading while mobile stays unchanged', async ({ page }, info) => {
+  const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
+  await page.goto('/#/learn/grade-6');
+  const skip = page.getByRole('button', { name: 'Skip tour', exact: true });
+  await expect(skip).toBeVisible(); await skip.click();
+  await expect(page.locator('.tour-card')).toHaveCount(0);
+  const guide = page.getByRole('complementary', { name: 'Lesson and activity help' });
+  await expect(guide).toBeVisible(); await page.evaluate(() => document.fonts.ready);
+  if (info.project.name === 'desktop') {
+    const content = guide.locator('.activity-guide-content');
+    await expect(guide).toHaveAttribute('data-collapsed', 'false');
+    await expect.poll(async () => (await guide.boundingBox())!.width).toBeLessThanOrEqual(288);
+    const editor = page.getByRole('region', { name: 'Code editor', exact: true });
+    const before = (await editor.boundingBox())!.width;
+    await page.screenshot({ path: '.impeccable/review/lesson-panel-expanded-desktop.png', fullPage: false });
+    await content.evaluate(el => { el.scrollTop = 100; });
+    const scroll = await content.evaluate(el => el.scrollTop);
+    const work = await page.evaluate(() => localStorage.getItem('kodearcade-v1'));
+    const minimize = guide.getByRole('button', { name: 'Minimize lesson panel', exact: true });
+    await minimize.focus(); await page.keyboard.press('Enter');
+    const expand = guide.getByRole('button', { name: 'Expand lesson panel', exact: true });
+    await expect(expand).toBeFocused(); await expect(expand).toHaveAttribute('aria-expanded', 'false');
+    await expect(content).toBeHidden(); await expect(guide.getByRole('button', { name: 'Ask Byte', exact: true })).toBeHidden();
+    await expect.poll(async () => (await guide.boundingBox())!.width).toBe(56);
+    expect((await editor.boundingBox())!.width).toBeGreaterThan(before + 100);
+    await page.screenshot({ path: '.impeccable/review/lesson-panel-collapsed-desktop.png', fullPage: false });
+    expect((await new AxeBuilder({ page }).include('.activity-guide').analyze()).violations).toEqual([]);
+    await page.setViewportSize({ width: 1308, height: 677 });
+    await expect.poll(async () => (await guide.boundingBox())!.width).toBe(56);
+    await page.screenshot({ path: '.impeccable/review/lesson-panel-collapsed-1308.png', fullPage: false });
+    await expand.click(); await expect(content).toBeVisible();
+    expect(await content.evaluate(el => el.scrollTop)).toBe(scroll);
+    expect(await page.evaluate(() => localStorage.getItem('kodearcade-v1'))).toBe(work);
+    await guide.getByRole('button', { name: 'Minimize lesson panel', exact: true }).click();
+    await page.getByRole('button', { name: 'Get a hint', exact: true }).click();
+    await expect(guide).toHaveAttribute('data-collapsed', 'false');
+    await expect(guide.locator('.hint-current')).toBeVisible();
+    await guide.getByRole('button', { name: 'Minimize lesson panel', exact: true }).click();
+    await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
+    await expect(guide).toHaveAttribute('data-collapsed', 'false');
+    await expect(guide.locator('.activity-concept > summary')).toBeFocused();
+    await guide.getByRole('button', { name: 'Minimize lesson panel', exact: true }).click();
+    await page.setViewportSize({ width: 1024, height: 768 });
+    await expect(guide.getByRole('button', { name: 'Expand lesson panel', exact: true })).toHaveCount(0);
+    await expect(guide.getByRole('button', { name: 'Lesson & instructions', exact: true })).toBeVisible();
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await expect(guide.getByRole('button', { name: 'Expand lesson panel', exact: true })).toBeVisible();
+    await guide.getByRole('button', { name: 'Expand lesson panel', exact: true }).click();
+  } else {
+    await expect(guide.getByRole('button', { name: 'Minimize lesson panel', exact: true })).toHaveCount(0);
+    const accordion = guide.getByRole('button', { name: 'Lesson & instructions', exact: true });
+    await expect(accordion).toHaveAttribute('aria-expanded', 'false');
+    await expect(guide.getByRole('button', { name: 'Ask Byte', exact: true })).toBeVisible();
+    await accordion.click(); await expect(guide.locator('.activity-instructions')).toBeVisible();
+    await accordion.click(); await expect(guide.locator('.activity-guide-content')).toBeHidden();
+    await page.screenshot({ path: `.impeccable/review/lesson-panel-unchanged-${info.project.name}.png`, fullPage: false });
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});

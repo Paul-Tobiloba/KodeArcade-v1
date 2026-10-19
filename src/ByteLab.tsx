@@ -33,7 +33,7 @@ export default function ByteLab() {
         catch { if (!controller.signal.aborted) setError('Byte could not answer. Wait a moment and try again, or use the approved lesson help.'); }
         finally { if (request.current === controller) { setBusy(false); request.current = null; } }
       }}>
-        <label className="account-field">Coding topic<select disabled={busy} value={topic} onChange={event => { setTopic(event.target.value as ByteTopic); setAnswer(undefined); }}>{Object.entries(byteTopics).map(([key, value]) => <option key={key} value={key}>{value.title}</option>)}</select></label>
+        <label className="account-field">Coding topic<select disabled={busy} value={topic} onChange={event => { setTopic(event.target.value as ByteTopic); setAnswer(undefined); }}>{Object.entries(byteTopics).filter(([key]) => key !== 'creative').map(([key, value]) => <option key={key} value={key}>{value.title}</option>)}</select></label>
         <label className="account-field">Test question<textarea disabled={busy} value={question} minLength={8} maxLength={300} required placeholder="Why does a loop need a repeat count?" onChange={event => { setQuestion(event.target.value); setAnswer(undefined); }} /></label>
         <button className="account-button primary" disabled={busy} type="submit">{busy ? 'Byte is thinking…' : 'Test explanation'}</button>
         {busy && <><button className="account-button" type="button" onClick={cancel}>Cancel</button><p role="status">This small model can take 10–45 seconds. You can cancel and keep working.</p></>}

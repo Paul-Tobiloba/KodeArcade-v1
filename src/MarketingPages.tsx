@@ -3,8 +3,9 @@ import SchoolFeatureContent from './SchoolFeatureContent';
 import { useAccountSession, dashboardHref } from './SessionProvider';
 import { ArrowRight, BookOpen, Blocks, Check, Gamepad2, Keyboard, Menu, MousePointer2, Play, ShieldCheck, Users, X } from 'lucide-react';
 import { courses } from './courses';
+import { modulesFor } from './curriculum';
 export const adventures = [
-  ...courses.map(course => ({ title: course.title, description: course.description, image: course.arrows ? 'adventure-sky.png' : 'jumping-game.png', style: '', level: `Grade ${course.grade}`, href: `/#/learn/${course.id}`, activities: `${course.topics.length * 10} challenges + project` })),
+  ...courses.map(course => ({ title: course.title, description: course.description, image: course.arrows ? 'adventure-sky.png' : 'jumping-game.png', style: '', level: `Grade ${course.grade}`, href: `/#/learn/${course.id}`, activities: `${modulesFor(course.id).filter(module => module.topicId !== 'project').reduce((total, module) => total + module.challengeIds.length, 0)} challenges + project` })),
   { title: 'Computer Explorers', description: 'Practise clicking, dragging and using a keyboard. Ages 6+.', image: 'space-story.png', style: '', level: 'Ages 6+', href: '/#/learn/computer', activities: '20 activities' },
 ];
 

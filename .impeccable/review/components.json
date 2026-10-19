@@ -1,0 +1,346 @@
+{
+  "schemaVersion": 3,
+  "stage": "components",
+  "id": "components",
+  "title": "Plan and asset review · src/AccountPortal.tsx",
+  "comp": {
+    "path": ".impeccable/mocks/auth/approved-login.png",
+    "width": 1672,
+    "height": 941
+  },
+  "specSha256": "eacba40714ecda232e6f19a4a8e5ece8eab57f9942a7a3a7e784f252e0e03692",
+  "components": [
+    {
+      "id": "code-symbol",
+      "name": "Code symbol",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0.0646,
+        "y": 0.2954,
+        "w": 0.0724,
+        "h": 0.0903
+      },
+      "note": "Resolves owner missing-item missing-7776cf57-ae40-4fc3-975f-77ea0c995cbe: Code Element, The code element on the screen. The selected box contains a small purple monitor with a cream/beige rounded frame and screws, displaying luminous white </> code. The full isolated illustrated monitor is now produced on genuine transparency, retaining its slightly skewed front-facing perspective and soft violet glow. No scenery, building, plants, robot or other text. Layer over the blank screen in the approved scenery without changing that approved file. All six assets have been approved; the owner must clear the resolved missing-item note and confirm the inventory in the next review.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/code-symbol.png"
+      },
+      "dependencies": []
+    },
+    {
+      "id": "scenery",
+      "name": "Scenery",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0,
+        "y": 0.0701,
+        "w": 1,
+        "h": 0.9299
+      },
+      "note": "Pastel 3D illustrated floating-island landscape, blue sky, castles, waterfalls and wooden signpost. Regenerate clean scenery only; remove all UI, panels, text and Byte. Preserve the reference composition and quieter central sky.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/island-world.png"
+      },
+      "dependencies": []
+    },
+    {
+      "id": "byte-peek",
+      "name": "Byte peek",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0.1884,
+        "y": 0.1116,
+        "w": 0.1346,
+        "h": 0.2763
+      },
+      "note": "Friendly glossy white and purple Byte robot leaning diagonally to peek around the left edge of the white panel, cyan happy eyes, purple antenna, one visible hand. Transparent background, no UI or panel. Preserve Byte identity and smiling expression.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/byte-peek.png"
+      },
+      "dependencies": []
+    },
+    {
+      "id": "student-icon",
+      "name": "Student icon",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0.3301,
+        "y": 0.4304,
+        "w": 0.0526,
+        "h": 0.0988
+      },
+      "note": "Glossy purple school backpack with a golden star and tiny yellow accents, transparent background, isolated 3D illustrated icon.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/student-bag.png"
+      },
+      "dependencies": []
+    },
+    {
+      "id": "teacher-icon",
+      "name": "Teacher icon",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0.3313,
+        "y": 0.6121,
+        "w": 0.0538,
+        "h": 0.0818
+      },
+      "note": "Small wooden teaching chalkboard on easel with white code angle brackets and slash, glossy friendly 3D icon, transparent background.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/teacher-board.png"
+      },
+      "dependencies": []
+    },
+    {
+      "id": "parent-icon",
+      "name": "Parent icon",
+      "kind": "plate",
+      "role": "asset",
+      "box": {
+        "x": 0.3283,
+        "y": 0.7598,
+        "w": 0.0604,
+        "h": 0.1137
+      },
+      "note": "Glossy pink and magenta family-of-two abstract people with a small heart and yellow accents, transparent background 3D illustrated icon.",
+      "medium": "raster",
+      "preview": {
+        "kind": "image",
+        "path": "public/images/auth/parent-family.png"
+      },
+      "dependencies": []
+    }
+  ],
+  "codeRegions": [
+    {
+      "id": "header",
+      "name": "Header",
+      "kind": "chrome",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 0.0701
+      },
+      "note": "Deep-purple horizontal brand header; user explicitly requires original KodeArcade K mark and existing brand navigation, not the off-brand controller logo."
+    },
+    {
+      "id": "brand",
+      "name": "Brand",
+      "kind": "control",
+      "box": {
+        "x": 0.0592,
+        "y": 0.0117,
+        "w": 0.1555,
+        "h": 0.0478
+      },
+      "note": "Home link with original three-piece K mark and KodeArcade wordmark; explicit approved exception to reference glyph."
+    },
+    {
+      "id": "header-navigation",
+      "name": "Header navigation",
+      "kind": "control",
+      "box": {
+        "x": 0.6459,
+        "y": 0.0106,
+        "w": 0.2949,
+        "h": 0.051
+      },
+      "note": "Right-side header navigation; preserve truthful existing links and public preview, not invented pricing pages."
+    },
+    {
+      "id": "main-panel",
+      "name": "Main panel",
+      "kind": "chrome",
+      "box": {
+        "x": 0.2937,
+        "y": 0.2009,
+        "w": 0.4157,
+        "h": 0.7205
+      },
+      "note": "One broad white rounded account-choice panel."
+    },
+    {
+      "id": "heading",
+      "name": "Heading",
+      "kind": "text",
+      "box": {
+        "x": 0.3427,
+        "y": 0.2657,
+        "w": 0.323,
+        "h": 0.0584
+      },
+      "note": "Welcome to KodeArcade. Heavy rounded navy heading with flat purple product name."
+    },
+    {
+      "id": "subtitle",
+      "name": "Subtitle",
+      "kind": "text",
+      "box": {
+        "x": 0.3959,
+        "y": 0.3337,
+        "w": 0.2153,
+        "h": 0.0244
+      },
+      "note": "Choose how you want to sign in. Muted purple centred subtitle."
+    },
+    {
+      "id": "student-row",
+      "name": "Student row",
+      "kind": "chrome",
+      "box": {
+        "x": 0.3152,
+        "y": 0.3964,
+        "w": 0.3726,
+        "h": 0.1605
+      },
+      "note": "Pale lavender rounded role row with violet border."
+    },
+    {
+      "id": "student-title",
+      "name": "Student title",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.4293,
+        "w": 0.07,
+        "h": 0.0383
+      },
+      "note": "Student, bold navy rounded type."
+    },
+    {
+      "id": "student-copy",
+      "name": "Student copy",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.474,
+        "w": 0.1669,
+        "h": 0.0574
+      },
+      "note": "Use your classroom code, then log in individually to access your assigned courses. Muted lavender body copy."
+    },
+    {
+      "id": "student-action",
+      "name": "Student action",
+      "kind": "control",
+      "box": {
+        "x": 0.5825,
+        "y": 0.4506,
+        "w": 0.0927,
+        "h": 0.0531
+      },
+      "note": "Continue action, white type and arrow on vivid purple rounded button."
+    },
+    {
+      "id": "teacher-row",
+      "name": "Teacher row",
+      "kind": "chrome",
+      "box": {
+        "x": 0.3152,
+        "y": 0.576,
+        "w": 0.3726,
+        "h": 0.1467
+      },
+      "note": "Pale blue rounded role row."
+    },
+    {
+      "id": "teacher-title",
+      "name": "Teacher title",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.6132,
+        "w": 0.0718,
+        "h": 0.0372
+      },
+      "note": "Teacher, bold navy rounded type."
+    },
+    {
+      "id": "teacher-copy",
+      "name": "Teacher copy",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.6567,
+        "w": 0.1675,
+        "h": 0.0383
+      },
+      "note": "Create classes, manage pupils, choose login methods, and print login cards. Muted purple body copy; planned capabilities must be labelled before public use."
+    },
+    {
+      "id": "teacher-action",
+      "name": "Teacher action",
+      "kind": "control",
+      "box": {
+        "x": 0.5825,
+        "y": 0.6227,
+        "w": 0.0927,
+        "h": 0.0531
+      },
+      "note": "Continue action on vivid blue rounded button."
+    },
+    {
+      "id": "parent-row",
+      "name": "Parent row",
+      "kind": "chrome",
+      "box": {
+        "x": 0.3152,
+        "y": 0.7396,
+        "w": 0.3726,
+        "h": 0.1467
+      },
+      "note": "Pale pink rounded role row."
+    },
+    {
+      "id": "parent-title",
+      "name": "Parent title",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.7747,
+        "w": 0.0688,
+        "h": 0.0372
+      },
+      "note": "Parent, bold navy rounded type."
+    },
+    {
+      "id": "parent-copy",
+      "name": "Parent copy",
+      "kind": "text",
+      "box": {
+        "x": 0.4049,
+        "y": 0.8119,
+        "w": 0.1675,
+        "h": 0.0446
+      },
+      "note": "Connect to your child, support learning at home, and view progress. Planned capabilities must be labelled before public use."
+    },
+    {
+      "id": "parent-action",
+      "name": "Parent action",
+      "kind": "control",
+      "box": {
+        "x": 0.5825,
+        "y": 0.7928,
+        "w": 0.0927,
+        "h": 0.0531
+      },
+      "note": "Continue action on magenta rounded button."
+    }
+  ]
+}

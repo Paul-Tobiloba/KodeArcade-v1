@@ -1,0 +1,57 @@
+# Interactive Byte Lab samples and functions — 18 October 2026
+
+## Try it
+
+Open http://127.0.0.1:5173/#/learn/grade-6/lab for a device-only preview, or the assigned student's http://127.0.0.1:5173/#/student-play/grade-6/lab. Grades 3–5 have the same editor on their corresponding routes. Use **New project** to choose a sample. Existing creations stay in **My projects**.
+
+Eight editable starters are available: the original Space friends, Arrow-key adventure and Bounce around, plus:
+
+- **Three-lane racer:** a strict overhead three-lane road, red player car and two traffic cars. Left/right changes lanes. Traffic moves down, resets to a random lane, and an ordinary sprite-touching conditional ends the game on collision. A visible score increases while the game continues. It is an endless traffic-dodging sample, not a lap simulation.
+- **Basketball bounce:** hoop at the top, player at the bottom, ball moving diagonally. Left/right moves the player; the ball reverses vertical movement when it meets the player while falling. Side/top boundary checks keep it in play. Touching the hoop increases score and resets the ball for another rally; falling below the player ends the game. Movement uses simple block-defined velocities, not hidden gravity or a bespoke physics engine. Basketball boy and girl are available as costume choices.
+- **Catch the fish:** steer a diving cat, catch the falling fish to add score and randomize the next fall, or miss and restart.
+- **Garden greetings:** click Grandma to call her personal `greet` function, broadcast to Grandpa, and let a second message reveal Butterfly's answer.
+- **Rocket rescue:** click Rocket to call the personal `launch` function; its arrival message makes Byte answer and turn.
+
+Run starts scripts and resets runtime counters. Stop ends execution; Reset restores the authored stage without deleting code. After a sample's **stop all scripts** block, press Run to play again. Keyboard arrow events and the existing on-screen arrow controls work in any project containing key hats. Holding a keyboard arrow repeats key events, subject to the normal cooperative task queue. Sample scores are runtime-only; they are not saved achievements or teacher-report scores.
+
+## Blocks, not hidden games
+
+`studioGameStarters.ts` creates ordinary serialized Blockly states. No race/basketball mode, custom scoring shortcut, automatic moving ball or game-specific interpreter branch exists. Changing a sample's speed, collision target, score increment, random lane, message or stopping condition changes its behavior.
+
+New generic blocks are: set/change x or y; point in a numeric direction; touching a chosen other sprite; x/y position of another sprite; a one-arm if; wait until; stop this script/all scripts; show/hide a numeric counter; broadcast; and when I receive. Earlier blocks and saved references remain supported. Collisions use the editor's size-based circular proximity model, not pixel-perfect artwork masks. Decorative court/road SVG geometry does not add physics.
+
+Runtime limits remain four programmable sprites, 64 non-start blocks per sprite, eight numeric variables per sprite, four personal definitions per sprite, three nested calls without recursion, 32 concurrent event tasks and 10,000 scheduler steps per run. Variables remain sprite-local. Game samples fit the ordinary budget; the larger catalog is not an increase in simultaneous actors.
+
+## Functions and Show code
+
+Functions offers **Create function**, **Edit name**, and **View spin_right / View hop**. The palette includes named calls for personal and built-in functions, including a numeric argument input for parameterized personal definitions. Generic numeric-return/value blocks remain available.
+
+Personal definitions open in the coding region with editable name, optional numeric `value` input and an ordinary block body, plus a keyboard builder. Phone uses a horizontal palette so the definition keeps the full width; resizing preserves the unsaved function workspace. **Save function** explicitly applies the draft; Cancel leaves saved code unchanged. Renaming updates statement/value callers on the same sprite. Save validates uniqueness, reserved names and the whole sprite's block budget before replacing the workspace; it reloads the sprite's native Blockly workspace, so do not rely on preceding Blockly undo history across that explicit commit. Deletion requires confirmation and is blocked while calls still reference the function. The definition root cannot be deleted through the keyboard builder. Legacy definitions connected below Run remain editable; new definitions are independent hat-shaped roots. Definitions are registered before event scripts run, so calls do not depend on visual ordering below Run.
+
+Built-in `spin_right` and `hop` are ordinary block definitions in `studioFunctions.ts`. The former repeats four quarter-turns; the latter changes y, waits, then changes y back. The engine executes those same definitions through its normal function/body interpreter. Their inspection workspace is native Blockly read-only with no Save/Delete controls. A saved personal definition cannot override a built-in name; that is also rejected at runtime. User edits never change the system definitions.
+
+**Show code** opens a selectable, read-only JavaScript-style translation below the canvas for the selected sprite, leading with its personal definitions and event handlers, followed only by built-in function bodies it actually uses. It labels the runtime APIs as provided by Byte Lab; it is not advertised as a standalone JavaScript program. `studioCode.ts` translates supported block states and reports missing/unsupported code rather than silently dropping it. It retains legacy definition registration order, positive-modulo semantics and the zero default for changed counters. Strings render as text through React. Nothing is evaluated, downloaded from a provider, sent to an AI service or run through JavaScript `eval`.
+
+## Artwork and persistence
+
+The library now has **33 sprite/prop choices and 19 backgrounds**. Existing references/image mappings are retained. New transparent 384×384 PNGs in `public/images/studio/` are `racecarred.png`, `racecarblue.png`, `racecaryellow.png`, `basketballboy.png`, `basketballgirl.png` and `basketballhoop.png`. The car silhouettes are distinct nose-up orthographic coupe, rally hatchback and compact designs. The native-alpha players/hoop have clear limb/net gaps and opaque white artwork where required. All six were produced with built-in image generation, one call per asset; [exact prompts and saved paths](assets/byte-lab-games-prompts.md) are embedded and verified. Light/dark contact sheets were inspected. `racing-lanes.svg` and `basketball-game.svg` are exact code-native court/road geometry, not generated raster substitutes.
+
+Private project/gallery schemas accept the new artwork references and starter IDs. Code, function definitions and artwork choices travel in existing account saves and JSON backups; live motion/counters do not mutate saved starting state. Frontend and backend must deploy together for the shared allowlists. No database migration, public sharing, third-party asset service, child AI access, telemetry or teacher-report disclosure is added. Device-only preview and signed-in saves keep their existing separation.
+
+## Verification and release boundary
+
+Final full frontend run: 1,707 tests passed in 39 files. Full synthetic backend rerun: 142 tests passed in fourteen files, including authenticated save/read of racing/basketball/garden galleries, another pupil's assignment/write rejection, and report exclusion. A new test initially expected 401 for an authenticated pupil with no course assignment; route evidence showed the intended `NOT_ASSIGNED` 403, and its expectation was corrected while retaining a separate 401 cross-pupil-write assertion. No authentication implementation was changed.
+
+Final production build/server TypeScript passed, with pre-existing nonfatal Zod annotation/large-chunk warnings. The broader scoped editor/assets/onboarding/games browser run passed seventy unique checks across desktop, phone and tablet, with two intentional desktop-only skips. All fifteen game/function cases passed again after the final batch; these are a subset, not fifteen additional unique tests. Axe passed for generated code, editable functions and read-only definitions. A new function-workspace ARIA check initially exposed decorative Blockly connection outlines as listbox children; the existing main-canvas geometry/ownership treatment was applied and verified rather than suppressing the test. This is not complete assistive-technology certification.
+
+Two batched visual rounds covered the same fifteen viewport captures (five states × desktop/phone/tablet). The first found phone definition clipping and an unhelpful unused-helper lead in Show code; one batch corrected the horizontal phone palette, draft-preserving resize, program-first code ordering and new control touch sizes. Final captures wait for the synthetic account-save acknowledgement, and every current file was opened and checked. Browser API fixtures are synthetic; backend tests use synthetic PGlite, not real pupil accounts. These together exercise the UI-save and HTTP/database boundaries without writing to live learner data. A read-only live localhost smoke returned UI200 and API health `ok`. Broader platform browser regression remains paused by the user. Independent finish/documentation handoffs follow these final captures.
+
+The shipping raster provenance scan reports 60 rasters, zero missing. One scoped detector run returned zero primary findings and 36 advisory color/type/radius departures, reflecting the incumbent compact editor vocabulary and its reuse here; no system refresh or suppression was applied. Global `DESIGN.md` / `.impeccable/design.json` remain unchanged. Work is local on `codex/auth`, uncommitted and unpushed.
+
+### Independent review correction and final handoff
+
+The independent Impeccable review found one material gap, F1: excluding the Events category also hid the ordinary broadcast statement from personal-function authoring. The focused correction exposes categories containing usable non-hat blocks while still filtering event hats from both palette and keyboard builder. Children can now add broadcasts to new functions, not merely inspect supplied ones.
+
+After this correction, the build passed and all eighteen game/function browser cases passed across desktop, phone and tablet. The three new cases create a fresh function, add a broadcast through visible controls, save/reopen its message, and run its caller to trigger matching receive scripts on other sprites. These add three to the earlier seventy unique scoped checks: **73 passed**, with the same two intentional desktop-only skips. The eighteen-case rerun overlaps the earlier fifteen and is not added wholesale. All fifteen review captures were refreshed at the same paths/viewports and opened once for validity; provenance remained sixty rasters/zero missing, and no second detector ran.
+
+The same reviewer returned **ship — F1 resolved**, scoring the correction only; see `.impeccable/review/games-finish.md`. The documentation comparison is `.impeccable/review/games-documentation.md`; incumbent design files are preserved. Broader platform regression remains user-paused, and no deployment/commit/push is implied.

@@ -319,6 +319,12 @@
 .step-edit button { width: 36px; min-height: 44px; padding: 6px; border: 1px solid #d8d5e8; background: white; }
 .step-edit label { display: flex; align-items: center; gap: 3px; }
 .step-edit input { width: 36px; padding: 4px; }
+.step-edit input[aria-label="Selected list items"] { width: 140px; max-width: 100%; }
+.data-palette-stacked .program-overview { top: var(--palette-height); left: 4px; }
+.facing-status { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: .8rem; color: #302259; background: #f3efff; }
+.facing-status svg { flex-shrink: 0; }
+.activity-hints .hint-current { white-space: pre-wrap; overflow-wrap: anywhere; }
+.facing-marker { position: absolute; right: 0; top: 0; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: white; color: #302259; border: 1px solid #6d4aff; z-index: 4; }
 .challenge-active .keyboard-tools.overview-tools { left: calc(var(--palette-width) + 50px); bottom: 4px; }
 .challenge-active .keyboard-tools.overview-tools:not([open]) summary { width: 38px; padding: 6px; font-size: 0; }
 .challenge-active .keyboard-tools.overview-tools:not([open]) summary::after { content: 'Keys'; font-size: .65rem; }

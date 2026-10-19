@@ -1,0 +1,30 @@
+.sprite-stage { min-width: 0; }
+.sprite-stage-content { flex: 1; min-height: 0; overflow: auto; padding: 16px; }
+.sprite-theatre { position: relative; width: 100%; aspect-ratio: 1; min-height: 260px; overflow: hidden; background-color: #d8eefa; background-position: center; background-size: cover; border-radius: 12px; border: 1px solid #c6b6e8; }
+.backdrop-sky { background-image: url('/images/auth/island-world.png'); }
+.backdrop-city { background-image: url('/images/adventure-sky.png'); }
+.backdrop-meadow { background-image: url('/images/meadow-board.png'); }
+.backdrop-horizon { background-image: url('/images/journey-horizon.png'); }
+.studio-character, .sprite-buddy { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; width: 64px; border: 0; padding: 0; background: transparent; color: #181339; }
+.studio-character { cursor: pointer; min-height: 64px; transition: left 240ms ease-out, top 240ms ease-out; }
+.studio-character:hover { background: #ffffff80; }
+.studio-character:disabled { opacity: 1; cursor: default; }
+.sprite-theatre .character-sprite { width: 64px; height: 64px; flex-shrink: 0; }
+.sprite-buddy > span:last-child, .sprite-direction { display: flex; align-items: center; background: #fff; padding: 2px 5px; border-radius: 5px; font-size: .8rem; }
+.sprite-bubble { position: absolute; top: 12px; left: 12px; right: 12px; width: auto; z-index: 1; overflow-wrap: anywhere; background: #fff; color: #181339; border: 1px solid #b8a8da; border-radius: 12px; padding: 10px; text-align: center; font-size: .9rem; }
+.sprite-readout { display: block; margin: 12px 0; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.sprite-choices { border: 0; border-top: 1px solid #e0d7f4; padding: 12px 0 0; margin: 16px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.sprite-choices legend { padding-right: 8px; font-weight: 600; }
+.sprite-choices label { display: grid; gap: 6px; font-size: .85rem; min-width: 0; }
+.sprite-choices input, .sprite-choices select, .creative-category select { min-height: 44px; padding: 8px; width: 100%; min-width: 0; font: inherit; color: #181339; background: #fff; border: 1px solid #b8a8da; border-radius: 7px; caret-color: #6237df; }
+.creative-category { display: flex; gap: 12px; align-items: center; flex-shrink: 0; padding: 8px 16px; background: #f7f4fe; font-size: .875rem; }
+.creative-category select { width: auto; flex: 1; }
+.sprite-stage :focus-visible, .creative-category :focus-visible { outline: 3px solid #6237df; outline-offset: 2px; }
+.sprite-trace { font-size: .875rem; line-height: 1.6; }
+@media (max-width: 950px), (max-height: 600px) { .sprite-stage-content { flex: none; overflow: visible; } .sprite-theatre { max-width: 560px; margin: auto; } }
+@media (max-width: 950px), (max-height: 600px) {
+  .learning-world.challenge-active .editor:has(.creative-category) { height: auto; min-height: 560px; overflow: visible; }
+  .editor:has(.creative-category) .blockly-container { flex: none; height: 480px; min-height: 480px; }
+}
+@media (prefers-reduced-motion: reduce) { .studio-character { transition: none; } }
+.reduced-motion .studio-character { transition: none; }

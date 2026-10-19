@@ -7,6 +7,22 @@ related_targets: ["src/LearningEntry.tsx","src/BlockEditor.tsx","src/TextEditor.
 
 # Grade learning workspace — 8 October 2026
 
+## Concept-lab extension — 16 October 2026
+
+Operate refinement: Operators, Boolean logic and Functions in Grades 3–6 reuse the guide/editor/stage/Play shell. The stage displays semantic values, ordered outputs and call traces rather than mascot navigation. Keep existing white/violet surfaces, reading type, labelled native controls, focus, rewards and phone stacking. Numeric/Boolean reporter blocks use typed sockets; the keyboard builder selects a group/input and edits real fields. Grades 3–4 reuse named no-input functions; Grades 5–6 add parameters/returns and Grade 6 composition. Current quizzes assess concepts, with original/@2 history preserved under exact versions and visible previous-version labels. No new artwork, replacement shell, global token rewrite or child AI activation. Scope and evidence: docs/CONCEPT_MODULES_2026_10_16.md.
+
+## Curriculum refinement — 15 October 2026
+
+Quiz follow-up: retain existing quiz surfaces and brand. Grades 4–6 use revised five-question banks keyed separately from original saved answers. Plain-language previous/updated controls preserve exact drafts on reload. Module overviews show previous results separately; teacher and parent reports use a native disclosure table for historical scores, excluded from current totals. No new artwork, global tokens or replacement shell.
+
+Confirmed senior range: Grades 4–6. Show a clear facing readout and a small arrow beside the character. Keep rotations distinct from movement. Use progressive task palettes for new data blocks, the existing phone horizontal data palette, and unchanged brand tokens. Existing saved screen-direction programs remain runnable, never silently converted.
+
+Preserve the existing Operate layout and brand. One Sequences, directions & order module replaces two repetitive required modules across the current grades. Statements & arguments, Lists and introductory data Objects extend Grades 3–6 through existing Blockly/text editors, guide, quizzes and cloud progress. Numeric list/object inputs need readable keyboard editing and bounded execution, not a new learning interface. Earlier saved practice is optional and discoverable without being counted twice. No new artwork, visual-world replacement or global token changes. Scope/compatibility: docs/CURRICULUM_REVISION_2026_10_15.md.
+
+## Approved onboarding refinement — 14 October 2026
+
+The owner approved workspace-first course entry with a short, optional tour of real controls. This supersedes the standalone first-lesson step described in older records, not the three-column/stacked layout or brand. The concept and worked example stay in the guide; manual reading expands/focuses that guide without leaving code. Explicit module overviews retain activity lists, drawing, quizzes and the Grade 1 topic journey without the generic duplicate article. Tour skip/completion saves with course progress, can be replayed and never awards learning results. Owner follow-up removes internal tour-card scrolling and detached bottom docking: content-sized callouts anchor beside their target with a pointer, using above/below placement when side space is insufficient and ordinary page scrolling for extremely short windows. No new assets, replacement identity, global token changes or analytics. Scope and verification: docs/WORKSPACE_ONBOARDING.md. Existing DESIGN.md/sidecar drift is not repaired by this refinement.
+
 Mode: Operate. Ordinary code-led extension of Build & Play, preserving local progress, concept-once lessons and mouse/touch/keyboard affordances. This current contract supersedes the earlier proposal-only grade boundary and obsolete 100px phone toolbar/280–440px board measurements.
 
 ## Direction contract
