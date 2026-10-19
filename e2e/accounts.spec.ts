@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
   await page.route('**/api/capabilities', route => route.fulfill({ json: {
     adultAccounts: true, classroomLogin: false, classManagement: false,
     learnerManagement: false, pdfCards: false, cloudProgress: false,
@@ -37,6 +38,41 @@ test('signup checks password confirmation before sending credentials', async ({ 
   await page.getByRole('button', { name: 'Create adult account' }).click();
   await expect(page.getByRole('alert')).toContainText('passwords do not match');
   expect(requests).toBe(0);
+});
+
+for (const entry of ['signup', 'check-email'] as const) {
+  test(`${entry} confirmation gives clear verification instructions without eligibility or development jargon`, async ({ page }, testInfo) => {
+    const endpoint = entry === 'signup' ? 'sign-up/email' : 'send-verification-email';
+    await page.route(`**/api/auth/${endpoint}`, route => route.fulfill({ json: {} }));
+    await page.goto(`/#/${entry}?role=parent`);
+    if (entry === 'signup') {
+      await page.getByLabel('Your name').fill('Synthetic Parent');
+      await page.getByLabel('Password', { exact: true }).fill('synthetic-password-only');
+      await page.getByLabel('Confirm password', { exact: true }).fill('synthetic-password-only');
+    }
+    await page.getByLabel('Email address').fill('parent@example.test');
+    await page.getByRole('button', { name: entry === 'signup' ? 'Create adult account' : 'Resend verification email', exact: true }).click();
+    const panel = page.locator('.account-panel');
+    await expect(panel.getByRole('heading', { name: 'Check your inbox' })).toBeVisible();
+    await expect(panel).toContainText('Open the KodeArcade verification email and click the link to verify your email address. The link expires in one hour.');
+    await expect(panel).toContainText('Check your spam or junk folder');
+    await expect(panel).not.toContainText(/eligible|development|configured test inbox|we.ve sent/i);
+    await expect(panel.getByRole('link', { name: 'Resend verification email', exact: true })).toHaveAttribute('href', '/#/check-email?role=parent');
+    await expect(panel.getByRole('link', { name: 'Back to sign in' })).toHaveAttribute('href', '/#/adult-login?role=parent');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `.impeccable/review/verification-copy-${entry}-${testInfo.project.name}.png`, fullPage: true });
+  });
+}
+
+test('recovery confirmation preserves account privacy and removes development-only guidance', async ({ page }) => {
+  await page.route('**/api/auth/request-password-reset', route => route.fulfill({ json: {} }));
+  await page.goto('/#/forgot-password?role=teacher');
+  await page.getByLabel('Email address').fill('teacher@example.test');
+  await page.getByRole('button', { name: 'Send recovery link', exact: true }).click();
+  const panel = page.locator('.account-panel');
+  await expect(panel).toContainText('If an eligible adult account matches, a recovery link is on its way. It expires in 15 minutes.');
+  await expect(panel).not.toContainText(/development|configured test inbox/i);
+  await expect(panel.getByRole('link', { name: 'Request another recovery email', exact: true })).toHaveAttribute('href', '/#/forgot-password?role=teacher');
 });
 
 test('recovery tokens are removed from the visible URL and never persisted', async ({ page }) => {
