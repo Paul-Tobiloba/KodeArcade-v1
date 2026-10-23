@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('Grade 2 movement palette stays readable after reload and responsive resizing', async ({ page }, info) => {
   await page.goto('/#/learn/grade-2');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   const arrow = page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right');
   const readable = async () => {

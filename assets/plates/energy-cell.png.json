@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen",
+  "prompt": "Use case: illustration-story. Asset type: production raster game layer, not a screenshot. The reference is the approved KodeArcade game mockup, used ONLY for its central painted game art, color and perspective. Create a sharp polished storybook 2.5D game asset matching that approved art. No app header, panels, borders, controls, numbers, lettering, text, watermark or fake transparency grid. Composition is designed for independent live HTML overlays; do not bake any simulation state into the art. Generate ONLY ONE isolated bright cyan rechargeable energy cell from the reference's input tray: small friendly cylindrical cyan battery with a luminous white lightning-bolt symbol, turquoise side shading, rounded metal cap. Upright, subtle 2.5D front view, entire object within the frame, native transparent alpha with generous margins. No tray, machine, robot, labels, numbers, text or duplicate cells. A single reusable game counter sprite, sharp at small scale.",
+  "reference": ".impeccable/mocks/concept-games/robot-workshop.png",
+  "transparent_background": true
+}

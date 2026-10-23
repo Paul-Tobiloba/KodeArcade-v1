@@ -32,7 +32,7 @@ export default function MissionStage({ stageRef, mission, position, step, score,
     return (x * 11 + y * 7) % 13 === 0 ? 'rocks' : 'hedge';
   };
   if (mission.conceptTask?.creative) return <SpriteStage stageRef={stageRef} mission={mission} position={position} result={result} running={running} settings={spriteSettings} onSettings={onSpriteSettings} onClick={onSpriteClick} notice={notice}>{children}</SpriteStage>;
-  if (mission.conceptTask) return <ConceptStage stageRef={stageRef} mission={mission} position={position} result={result} running={running} runtimeNote={runtimeNote} notice={notice}>{children}</ConceptStage>;
+  if (mission.conceptTask) return <ConceptStage key={mission.id} stageRef={stageRef} mission={mission} position={position} result={result} running={running} arriving={arriving} runtimeNote={runtimeNote} notice={notice}>{children}</ConceptStage>;
   return <section ref={stageRef} className="scene tile-scene" aria-label={`${character.name} challenge board`} data-character={character.name} data-state={state} data-motion-paused={!visible} style={{ '--world-atlas': `url('/images/worlds/${character.name.toLowerCase()}.png')`, '--map-size': mission.size } as CSSProperties}>
     {notice}
     <div className="scene-heading"><div className="stage-heading-copy"><h2><Flag size={20} /> {mission.title}</h2><p className="goal">{mission.goal}</p></div><CharacterSprite concept={mission.concept} />{mission.variables && <output className="score-display" aria-label="Current score">score: {score ?? 'not set'} / {mission.targetScore}</output>}</div>

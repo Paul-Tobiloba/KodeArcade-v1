@@ -4,6 +4,15 @@ dist/
 test-results/
 playwright-report/
 .impeccable/review/*.png
+.impeccable/review/*.wav
+.impeccable/review/*.webm
+.impeccable/review/*.mp4
+.impeccable/review/*.mjs
+.impeccable/review/*.cjs
+.impeccable/review/runtime/
+.impeccable/review/diff/
+.impeccable/assets/retired-byte-sprite/
+.impeccable/assets/retired-typing-hands/
 .impeccable/build/
 .impeccable/mocks/
 output/

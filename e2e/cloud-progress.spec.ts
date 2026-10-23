@@ -2,7 +2,8 @@ import { expect, test } from '@playwright/test';
 import type { ProgressDocument } from '../shared/progress';
 const identity = { learnerId: 'synthetic-learner', classroomId: 'synthetic-class' };
 const recovery = { key: Buffer.from('12345678901234567890123456789012').toString('base64'), slot: 'synthetic-recovery', owner: 'synthetic-owner' };
-const document = (): ProgressDocument => ({ version: 1, currentId: 'grade-5-sequences-1', view: 'challenge', progress: {}, drawings: {}, preferences: { reducedMotion: true, largeText: false, soundEnabled: false, musicEnabled: false }, basicsComplete: [], topicRecords: {} });
+// These scenarios exercise saves after onboarding, not the workspace tour.
+const document = (): ProgressDocument => ({ version: 1, currentId: 'grade-5-sequences-1', view: 'challenge', progress: { 'grade-5-sequences-1': { attempts: 0, hints: 0, blocks: [], complete: false, workspaceTour: 'completed' } }, drawings: {}, preferences: { reducedMotion: true, largeText: false, soundEnabled: false, musicEnabled: false }, basicsComplete: [], topicRecords: {} });
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/capabilities', route => route.fulfill({ json: {} }));
   await page.route('**/api/student/courses', route => route.fulfill({ json: { ...identity, displayName: 'Sample Student', classroomName: 'Sample Class', assignments: [{ id: 'assignment', courseKey: 'grade-5' }] } }));

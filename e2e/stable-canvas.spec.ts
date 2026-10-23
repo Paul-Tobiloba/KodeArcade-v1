@@ -3,7 +3,8 @@ import { test, expect } from '@playwright/test';
 test('selecting, dragging and dropping a block does not shift the existing stack', async ({ page }) => {
   await page.setViewportSize({ width: 1308, height: 677 });
   await page.goto('/#/learn/arrows');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   const palette = page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_down');
   await palette.click();
   await palette.click();

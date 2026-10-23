@@ -144,7 +144,7 @@ export function makeBlock(kind: Block['kind']): Block {
   return { id: crypto.randomUUID(), kind, direction: 'right', count: 2 };
 }
 export function initialProgram(mission: Mission): Block[] { return mission.starter.map(makeBlock); }
-export type Frame = Position & { blockId: string; step: number; heading?: Direction; score?: number; note?: string; durationMs?: number; sprite?: import('./spriteModel').SpriteState; lab?: { output: (number | boolean)[]; calls: number }; collected?: Position[]; gateOpen?: boolean; bridgeBuilt?: boolean; fell?: boolean };
+export type Frame = Position & { blockId: string; step: number; heading?: Direction; score?: number; note?: string; durationMs?: number; sprite?: import('./spriteModel').SpriteState; lab?: import('./conceptTrace').ConceptLabFrame; collected?: Position[]; gateOpen?: boolean; bridgeBuilt?: boolean; fell?: boolean };
 export type RunResult = { frames: Frame[]; success: boolean; message: string };
 const delta: Record<Direction, Position> = { right: { x: 1, y: 0 }, left: { x: -1, y: 0 }, up: { x: 0, y: -1 }, down: { x: 0, y: 1 } };
 

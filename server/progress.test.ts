@@ -15,6 +15,11 @@ import { newStudioProject, readStudioProject, saveStudioProject } from '../src/s
 import { galleryEntry, saveStudioGallery } from '../shared/studioGallery.js';
 import { studioStarterProject } from '../src/studioStarters.js';
 import { studioTutorialProject, studioTutorials } from '../src/studioTutorials.js';
+import { appStarter } from '../src/appLabStarters.js';
+import { emptyTyping } from '../shared/typing.js';
+import { emptyPractical } from '../shared/codingPractical.js';
+import { completePractice } from '../shared/codingPractice.js';
+import { emptyAppPractical } from '../shared/appPractical.js';
 
 const client = new PGlite(), db = drizzle(client, { schema: s });
 const config = loadConfig({ NODE_ENV: 'test', APP_ORIGIN: 'https://learn.example.com', BETTER_AUTH_SECRET: 'synthetic-progress-secret-only-173982a50b72', DATABASE_URL: 'postgresql://test:test@localhost/test' });
@@ -23,6 +28,7 @@ let pupil = '', other = '', adult = '';
 const scope = { learnerId: 'pupil', classroomId: 'class-a' };
 const document = (): ProgressDocument => ({ version: 1, currentId: 'grade-2-sequences-1', view: 'challenge', progress: { 'grade-2-sequences-1': { blocks: [], attempts: 1, hints: 0, complete: true, stars: 5, textCode: 'move_right()' } }, drawings: {}, preferences: { reducedMotion: false, largeText: false, soundEnabled: true, musicEnabled: false }, basicsComplete: [], topicRecords: {} });
 const request = (cookie = pupil, body?: unknown, course = 'grade-2') => app.request(`/api/student/progress/${course}`, { method: body === undefined ? 'GET' : 'POST', headers: { Cookie: cookie, Origin: config.APP_ORIGIN, 'Content-Type': 'application/json' }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+
 async function session(id: string, learnerId?: string, classroomId?: string) {
   const saved = await (await auth.$context).internalAdapter.createSession(id);
   if (learnerId) await db.insert(s.learnerSession).values({ sessionId: saved!.id, organizationId: 'school', classroomId: classroomId!, learnerId, credentialVersion: 1 });
@@ -323,4 +329,64 @@ it('roundtrips interactive games, tutorials and personal definitions privately w
   expect((await request(other, { ...scope, revision: restored.revision, document: next }, 'grade-6')).status).toBe(401);
   const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
   expect(JSON.stringify(report)).not.toMatch(/Three-lane racer|Basketball bounce|Garden greetings|Tennis rally|TennisBall|TennisRacket|ka_studio_define|RaceCarRed|tutorialQuestions|tutorialTimers|tutorialSprites|tutorialBehaviors|My space hero|Butterfly swarm/);
+});
+
+it('roundtrips App Lab privately, preserves legacy work and rejects unauthorized or malformed app data', async () => {
+  const snapshot = await (await request(pupil, undefined, 'grade-6')).json(), next: ProgressDocument = snapshot.document;
+  const project = appStarter('data'); project.title = 'Synthetic private App Lab'; project.tables[0].rows[0][1] = 'Synthetic private app fact'; project.codeDraft = 'onEvent('; // Incomplete text stays private and round-trips independently of applied code.
+  project.code.blocks!.blocks.push({ type: 'al_start', inputs: { DO: { block: {
+    type: 'al_set_property', fields: { ID: 'fact', PROPERTY: 'font-size' }, inputs: { VALUE: { block: {
+      type: 'al_number_fn', fields: { FN: 'randomNumber' }, inputs: { A: { block: { type: 'al_number', fields: { NUM: 20 } } }, B: { block: { type: 'al_number', fields: { NUM: 24 } } } },
+    } } }, next: { block: { type: 'al_add_row', fields: { TABLE: 'animals' } } },
+  } } } });
+  const before = structuredClone(next.progress);
+  next.appLab = { version: 1, activeId: project.id, projects: [project] };
+  expect((await request(pupil, { ...scope, revision: snapshot.revision, document: next }, 'grade-6')).status).toBe(200);
+  const saved = await (await request(pupil, undefined, 'grade-6')).json();
+  expect(saved.document.appLab).toEqual(next.appLab); expect(saved.document.progress).toEqual(before);
+  expect((await request(other, { ...scope, revision: saved.revision, document: next }, 'grade-6')).status).toBe(401);
+  expect((await request(adult, { ...scope, revision: saved.revision, document: next }, 'grade-6')).status).toBe(401);
+  const malformed = structuredClone(next); malformed.appLab!.projects[0].elements[0].screen = 'missing';
+  expect((await request(pupil, { ...scope, revision: saved.revision, document: malformed }, 'grade-6')).status).toBe(400);
+  const report = await (await app.request('/api/manage/classes/class-a/progress?course=grade-6', { headers: { Cookie: adult } })).json();
+  expect(JSON.stringify(report)).not.toMatch(/Synthetic private App Lab|Synthetic private app fact/);
+  const oldClient = structuredClone(next); delete oldClient.appLab;
+  expect((await request(pupil, { ...scope, revision: saved.revision, document: oldClient }, 'grade-6')).status).toBe(200);
+  expect((await (await request(pupil, undefined, 'grade-6')).json()).document.appLab).toEqual(next.appLab);
+});
+
+it('saves bounded typing results privately and preserves them when an older coding client omits the field', async () => {
+  const snapshot = await (await request()).json(), next = structuredClone(snapshot.document ?? document());
+  next.typing = emptyTyping(2); const id = next.typing.currentId;
+  next.typing.results[id] = { attempts:1, complete:true, bestStars:5, bestAccuracy:100, durationMs:4000, independent:false };
+  expect((await request(pupil,{...scope,revision:snapshot.revision,document:next})).status).toBe(200);
+  const saved = await (await request()).json(); expect(saved.document.typing.results[id].bestStars).toBe(5);
+  expect((await (await request(other)).json()).document?.typing).toBeUndefined();
+  const malformed=structuredClone(next); malformed.typing.currentId='typing-g6-u01-a01';
+  expect((await request(pupil,{...scope,revision:saved.revision,document:malformed})).status).toBe(400);
+  const oldClient=structuredClone(next);delete oldClient.typing;
+  expect((await request(pupil,{...scope,revision:saved.revision,document:oldClient})).status).toBe(200);
+  expect((await (await request()).json()).document.typing.results[id].bestStars).toBe(5);
+});
+
+it('keeps versioned practice and practical mastery private and compatible with older coding clients', async () => {
+  const snapshot=await (await request()).json(),next=structuredClone(snapshot.document ?? document());
+  next.practical=emptyPractical(2);next.practical.steps.fill(true);next.practical.mastery={demonstrated:true,transfer:true,attempts:1,last:'demonstrated'};
+  next.progress['grade-2-sequences-1'].practice=completePractice(undefined,true);
+  expect((await request(pupil,{...scope,revision:snapshot.revision,document:next})).status).toBe(200);
+  const saved=await (await request()).json();expect(saved.document.practical.mastery.demonstrated).toBe(true);
+  const crossGrade=structuredClone(next);crossGrade.practical=emptyPractical(4);
+  expect((await request(pupil,{...scope,revision:saved.revision,document:crossGrade})).status).toBe(400);
+  expect((await (await request(other)).json()).document?.practical).toBeUndefined();
+  const oldClient=structuredClone(next);delete oldClient.practical;delete oldClient.progress['grade-2-sequences-1'].practice;
+  expect((await request(pupil,{...scope,revision:saved.revision,document:oldClient})).status).toBe(200);
+  const protectedCopy=await (await request()).json();expect(protectedCopy.document.practical.mastery.demonstrated).toBe(true);expect(protectedCopy.document.progress['grade-2-sequences-1'].practice.supportUsed).toBe(true);
+});
+
+it('stores Grade 3 App Lab lessons separately and preserves them through old-client omission',async()=>{
+  await db.insert(s.courseAssignment).values({id:'g3-app-unit',classroomId:'class-a',courseKey:'grade-3',curriculumVersion});
+  const snapshot=await(await request(pupil,undefined,'grade-3')).json(),next:ProgressDocument={...document(),currentId:'grade-3-sequences-1',progress:{},appPractical:emptyAppPractical()};next.appPractical!.steps.fill(true);next.appPractical!.mastery={demonstrated:true,transfer:true,attempts:1,last:'demonstrated'};
+  expect((await request(pupil,{...scope,revision:snapshot.revision,document:next},'grade-3')).status).toBe(200);const saved=await(await request(pupil,undefined,'grade-3')).json();expect(saved.document.appPractical.mastery.demonstrated).toBe(true);expect(saved.document.appLab).toBeUndefined();
+  const crossGrade={...document(),appPractical:emptyAppPractical()};const g2=await(await request()).json();expect((await request(pupil,{...scope,revision:g2.revision,document:crossGrade})).status).toBe(400);
+  expect((await request(other,undefined,'grade-3')).status).toBe(403);const old={...next};delete old.appPractical;expect((await request(pupil,{...scope,revision:saved.revision,document:old},'grade-3')).status).toBe(200);expect((await(await request(pupil,undefined,'grade-3')).json()).document.appPractical.mastery.demonstrated).toBe(true);
 });

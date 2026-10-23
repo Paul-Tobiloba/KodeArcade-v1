@@ -5,7 +5,8 @@ import { activityStorage } from './activityStorage';
 import { validRepeatCount } from '../shared/repeats.js';
 import { validWorkspace } from '../shared/studioGallery.js';
 import { courseQuizIds, quizRecord, type QuizRecord } from '../shared/quizzes';
-export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; lessonSeen?: boolean; workspaceTour?: 'completed' | 'skipped'; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
+import { readPractice, type CodingPractice } from '../shared/codingPractice';
+export type Progress = { blocks: Block[]; attempts: number; hints: number; complete: boolean; stars?: number; practice?: CodingPractice; lessonSeen?: boolean; workspaceTour?: 'completed' | 'skipped'; end?: Position; workspace?: Record<string, unknown>; textCode?: string; codingMode?: 'blocks' | 'text'; worldLayout?: 'tiles-v1' | 'open-v1' };
 export type CourseProgress = { current: number; progress: Record<string, Progress> };
 export type Save = { version: 1; nickname: string; reducedMotion: boolean; largeText: boolean; soundEnabled: boolean; musicEnabled: boolean; current: number; progress: Record<string, Progress>; course: CourseId; courseProgress: Partial<Record<CourseId, CourseProgress>>; basicsComplete: string[]; topicRecords: Record<string, TopicRecord>; quizzes: Record<string, QuizRecord> };
 export const SAVE_KEY = 'kodearcade-v1';
@@ -73,6 +74,7 @@ export function parseSave(raw: string | null): Save {
     if (p.lessonSeen === true) progress.lessonSeen = true;
     if (p.workspaceTour === 'completed' || p.workspaceTour === 'skipped') progress.workspaceTour = p.workspaceTour;
     if (progress.complete && Number.isInteger(p.stars) && Number(p.stars) >= 1 && Number(p.stars) <= 5) progress.stars = Number(p.stars);
+    const practice = readPractice(p.practice); if (practice) progress.practice = practice;
     if (mission.id.endsWith('rescue-project') && object(p.end)) {
       const end = { x: Number(p.end.x), y: Number(p.end.y) };
       if (Number.isInteger(end.x) && Number.isInteger(end.y) && end.x >= 0 && end.x < mission.size && end.y >= 0 && end.y < mission.size && !same(end, mission.start) && !mission.walls.some(w => same(w, end))) progress.end = end;

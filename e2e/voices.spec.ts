@@ -9,7 +9,8 @@ test('prefers a female local voice and remembers a manually chosen child voice',
     Object.defineProperty(window, 'speechSynthesis', { value: { getVoices: () => voices, speak: (u: { voice: { name: string }, onend?: () => void }) => { calls.push(u.voice.name); setTimeout(() => u.onend?.(), 25); }, cancel: () => {}, addEventListener: () => {}, removeEventListener: () => {} } });
   });
   await page.goto('/#/learn/grade-1');
-  await page.getByRole('button', { name: 'Listen to lesson' }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Listen to challenge', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { __voiceCalls: string[] }).__voiceCalls.at(-1))).toBe('Microsoft Zira');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('combobox', { name: 'Voice', exact: true }).selectOption('child');
@@ -19,6 +20,6 @@ test('prefers a female local voice and remembers a manually chosen child voice',
   await page.screenshot({ path: `.impeccable/review/grades-${info.project.name}-voice-settings.png`, fullPage: true });
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.reload();
-  await page.getByRole('button', { name: 'Listen to lesson' }).click();
+  await page.getByRole('button', { name: 'Listen to challenge', exact: true }).click();
   expect(await page.evaluate(() => (window as unknown as { __voiceCalls: string[] }).__voiceCalls.at(-1))).toBe('Story voice');
 });

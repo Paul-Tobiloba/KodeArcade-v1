@@ -18,7 +18,7 @@ test('activity widget uses the allowlisted adult pilot, keeps code checks local 
     if (mode === 'error') return route.fulfill({ status: 503, json: { error: 'private gateway details' } });
     return route.fulfill({ json: { answer: 'Synthetic pilot hint: check your loop count.' } });
   });
-  await page.goto('/#/learn/grade-2'); await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.goto('/#/learn/grade-2'); await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.locator('.byte-launch').click(); await expect(page.locator('.byte-chat')).toContainText('adult tester only');
   await page.getByLabel('Your coding question').fill('Why does my coding loop need a count?');
   await page.locator('.byte-chat button[type=submit]').click(); await expect(page.locator('.byte-transcript')).toContainText('Synthetic pilot hint');
@@ -38,7 +38,7 @@ test('Byte offers local help without bypassing hints, with responsive keyboard a
   page.on('pageerror', error => errors.push(error.message));
   await page.route('**/api/byte/**', route => { calls++; return route.fulfill({ status: 403, json: {} }); });
   await page.goto('/#/learn/grade-2');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name !== 'desktop') await page.getByRole('button', { name: 'Lesson & instructions', exact: true }).click();
   else await page.locator('.activity-concept > summary').click();
   const summary = page.locator('.byte-launch');
@@ -89,7 +89,7 @@ test('Byte keeps the composer visible in short windows and scrolls only the conv
   test.skip(info.project.name !== 'desktop', 'Short-window check supplements the three device layouts.');
   await page.setViewportSize({ width: 1024, height: 438 });
   await page.goto('/#/learn/grade-2');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.locator('.byte-launch').click();
   await page.getByRole('button', { name: 'Explain this topic' }).click();
   for (let i = 0; i < 4; i++) {
@@ -127,6 +127,8 @@ test('adult lab is visibly disabled by default and never submits on load', async
 
 test('drawing receives its own explanation rather than movement-route help', async ({ page }, info) => {
   await page.goto('/#/learn/grade-1');
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
   if (info.project.name !== 'desktop') await page.getByRole('button', { name: 'Lesson & instructions', exact: true }).click();
   await page.locator('.byte-launch').click();

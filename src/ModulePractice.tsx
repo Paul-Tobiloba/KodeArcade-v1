@@ -5,6 +5,7 @@ import { drawingsForTopic } from './drawingActivities';
 import { missions } from './learning';
 import type { LearningModule } from './curriculum';
 import type { Save } from './storage';
+import PracticalCards from './PracticalCards';
 
 export function DrawingPractice({ save, module, onDrawing }: { save: Save; module: LearningModule; onDrawing: (index: number) => void }) {
   const activities = drawingsForTopic(save.course, module.topicId ?? module.id);
@@ -35,5 +36,6 @@ export default function ModulePractice({ save, module, onActivity, onDrawing }: 
     <div className="module-section-heading"><div><h2>{module.title === 'Build project' ? 'Your project' : 'Your challenges'}</h2><p>{completed} of {items.length} complete. Your best results stay saved when you practise again.</p></div></div>
     <ActivityList items={items} label="Core activities" onSelect={onActivity} />
     <DrawingPractice save={save} module={module} onDrawing={onDrawing} />
+    {((save.course==='grade-2' && (module.topicId??module.id)==='sequences') || (save.course==='grade-3' && (module.topicId??module.id)==='variables') || (save.course==='grade-4' && (module.topicId??module.id)==='functions')) && <PracticalCards grades={[Number(save.course.split('-')[1])]} student={location.hash.startsWith('#/student-play/')}/>}
   </section>;
 }

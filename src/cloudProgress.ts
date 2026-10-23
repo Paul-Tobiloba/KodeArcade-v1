@@ -5,12 +5,16 @@ import { missions } from './learning';
 import { progressCatalog } from '../shared/progress-catalog';
 import { type CloudSnapshot, type GradeKey, type ProgressDocument } from '../shared/progress';
 import type { OfflineDraft, RecoveryDraft } from './offlineDraft';
+import { appLabStorageKey, readAppGallery } from '../shared/appLab';
+import { readTyping, typingStorageKey } from '../shared/typing';
+import { practicalKey, readPractical } from '../shared/codingPractical';
+import { appPracticalKey, readAppPractical } from '../shared/appPractical';
 export const NAV_KEY = 'kodearcade-navigation-v1';
 export type SaveStatus = 'saved' | 'pending' | 'saving' | 'error' | 'conflict';
-export function hydrateCloud(course: GradeKey, document: ProgressDocument | null): Record<string, string> {
-  if (!document) return {};
+export function hydrateCloud(course: GradeKey, document: ProgressDocument | null, create = false): Record<string, string> {
+  if (!document) return create ? { [SAVE_KEY]: JSON.stringify({ ...emptySave(), course, current: missions.findIndex(m => m.id === progressCatalog[course].missions[0].id) }) } : {};
   const save = { ...emptySave(), ...document.preferences, course, current: missions.findIndex(m => m.id === document.currentId), progress: document.progress, basicsComplete: document.basicsComplete, topicRecords: document.topicRecords, quizzes: document.quizzes ?? {} };
-  return { [SAVE_KEY]: JSON.stringify(save), [NAV_KEY]: JSON.stringify({ course, view: document.view, drawingId: document.drawingId, quizModuleId: document.quizModuleId }), ...Object.fromEntries(Object.entries(document.drawings).map(([id, drawing]) => [drawingSaveKey(course, id), JSON.stringify(drawing)])) };
+  return { ...(document.appPractical ? { [appPracticalKey]: JSON.stringify(document.appPractical) } : {}), ...(document.practical ? { [practicalKey(course)]: JSON.stringify(document.practical) } : {}), [SAVE_KEY]: JSON.stringify(save), ...(document.typing ? { [typingStorageKey(course)]: JSON.stringify(document.typing) } : {}), ...(document.appLab ? { [appLabStorageKey(course)]: JSON.stringify(document.appLab) } : {}), [NAV_KEY]: JSON.stringify({ course, view: document.view, drawingId: document.drawingId, quizModuleId: document.quizModuleId }), ...Object.fromEntries(Object.entries(document.drawings).map(([id, drawing]) => [drawingSaveKey(course, id), JSON.stringify(drawing)])) };
 }
 export function collectCloud(course: GradeKey, entries: Record<string, string>): ProgressDocument | null {
   if (!entries[SAVE_KEY]) return null;
@@ -25,7 +29,10 @@ export function collectCloud(course: GradeKey, entries: Record<string, string>):
     if (raw) { const value = JSON.parse(raw); drawings[drawing.id] = { ...value, attempts: value.attempts ?? 0, complete: value.complete === true, ...(value.stars ? { stars: value.stars } : { stars: undefined }) }; }
   }
   const quizzes = Object.fromEntries(Object.entries(save.quizzes).filter(([id]) => id.startsWith(`${course}-`)));
-  return { version: 1, currentId: missions[save.current].id, view: navigation.view ?? 'challenge', ...(navigation.drawingId ? { drawingId: navigation.drawingId } : {}), ...(navigation.quizModuleId ? { quizModuleId: navigation.quizModuleId } : {}), ...(Object.keys(quizzes).length ? { quizzes } : {}),
+  const typing = entries[typingStorageKey(course)] ? readTyping(JSON.parse(entries[typingStorageKey(course)]), Number(course.split('-')[1])) : undefined;
+  const practical = entries[practicalKey(course)] ? readPractical(JSON.parse(entries[practicalKey(course)]), Number(course.split('-')[1])) : undefined;
+  const appPractical=course==='grade-3'&&entries[appPracticalKey]?readAppPractical(JSON.parse(entries[appPracticalKey])):undefined;
+  return { version: 1, ...(appPractical?{appPractical}:{}), ...(practical ? { practical } : {}), ...(typing ? { typing } : {}), ...(entries[appLabStorageKey(course)] ? { appLab: readAppGallery(JSON.parse(entries[appLabStorageKey(course)])) } : {}), currentId: missions[save.current].id, view: navigation.view ?? 'challenge', ...(navigation.drawingId ? { drawingId: navigation.drawingId } : {}), ...(navigation.quizModuleId ? { quizModuleId: navigation.quizModuleId } : {}), ...(Object.keys(quizzes).length ? { quizzes } : {}),
     progress: Object.fromEntries(Object.entries(save.progress).filter(([id]) => catalog.missions.some(m => m.id === id))), drawings,
     preferences: { reducedMotion: save.reducedMotion, largeText: save.largeText, soundEnabled: save.soundEnabled, musicEnabled: save.musicEnabled }, basicsComplete: save.basicsComplete, topicRecords: save.topicRecords };
 }

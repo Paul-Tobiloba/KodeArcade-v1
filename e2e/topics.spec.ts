@@ -5,11 +5,12 @@ import { topicSolutions } from '../src/topicMissions';
 test('Milo decisions and Nova variables run, animate and persist', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/#/learn/words');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await page.locator('.module-button').filter({ hasText: 'Conditionals' }).click();
-  await expect(page.getByText('Milo the Monkey', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Milo’s decision jungle', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue learning', exact: true }).click();
   await expect(page.locator('.blocklyFlyout .ka_if_else')).toBeVisible();
   if (info.project.name === 'desktop') await page.locator('.blocklyFlyout .ka_if').click({ position: { x: 12, y: 12 } });
   else await page.locator('.blocklyFlyout .ka_if').tap({ position: { x: 12, y: 12 } });
@@ -35,8 +36,8 @@ test('Milo decisions and Nova variables run, animate and persist', async ({ page
   await page.getByRole('button', { name: 'Close feedback' }).click();
   await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await page.locator('.module-button').filter({ hasText: 'Variables' }).click();
-  await expect(page.getByText('Nova the Squirrel', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1, name: 'Nova’s treasure memory', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue learning', exact: true }).click();
   await expect(page.locator('.blocklyFlyout .ka_set_score')).toBeVisible();
   await load('variables-9');
   await expect(page.getByLabel('Current score')).toContainText('not set');

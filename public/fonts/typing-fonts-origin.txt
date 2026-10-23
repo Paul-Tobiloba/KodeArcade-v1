@@ -1,0 +1,1 @@
+Typing design fonts are locally hosted from the exact Google Fonts families specified in the owner-supplied typing-design.html. Retrieved from fonts.gstatic.com via the Google Fonts stylesheet on 21 October 2026. Baloo 2 Bold/ExtraBold, Nunito SemiBold/Bold. OFL licenses are adjacent. No remote font request is required by the application.

@@ -1,0 +1,9 @@
+# Public learning entry Labs — 21 October 2026
+
+Mode: Operate. Narrow extension of the incumbent course chooser, using the owner's screenshot and the just-approved dashboard cards. Preserve the violet header, lavender ground, course layout, artwork, typography and grade/explore behavior. Context has already been loaded in this session; no rerun.
+
+Replace the plain App Lab text link below Computer Explorers with a Labs heading, concise device-only preview guidance and exactly three shared cards: Byte Lab, App Lab, Artist Lab. Reuse the dashboard's icon panels and responsive layout through `LabCards` and its shared CSS. Public routes must open real preview editors, never signed-in student routes. Byte uses the last public Grade 3–6 course or Grade 3; Artist uses the last supported public grade or Grade 1; App Lab uses its independent browser-preview route. Preserve private student assignment/eligibility/save rules and the dashboard selector.
+
+The owner also asked why course cards had no pictures/icons. Existing character atlases load and render locally, so the screenshot's exact request/deployment state is unconfirmed. Add immediate topic icons while each course character loads or if its image request fails; do not invent a confirmed deployment cause. Retain the artwork when it loads. Use existing Lucide icons and existing approved rasters; no new generated assets or global sprite redesign. CharacterSprite's fallback is opt-in and non-entry callers keep their existing rendering.
+
+Verify actual card launches, last public-course selection, loaded artwork, intentionally failed image requests, icons, private route regressions, accessible links and desktop/phone/tablet layout. Bounded visual review only. No push/deployment, curriculum changes, backend expansion or hibernation implied.

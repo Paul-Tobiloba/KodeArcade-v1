@@ -47,7 +47,7 @@ test('parent reports retain previous results without inflating current quiz comp
   await page.route('**/api/manage/management/status', route => route.fulfill({ json: { unlockedForSeconds: 1800 } }));
   await page.route(`**/api/family/${classId}`, route => route.fulfill({ json: family }));
   await page.goto('/#/family');
-  await expect(page.getByText('1 / 12 quizzes', { exact: true })).toBeVisible();
+  await expect(page.getByText('1 / 13 quizzes', { exact: true })).toBeVisible();
   await page.getByText('View challenge & quiz results', { exact: true }).click();
   await checkHistory(page, page.locator('.family-course'), `parent-${info.project.name}`);
 });

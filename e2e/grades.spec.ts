@@ -8,7 +8,8 @@ test('six grade courses, optional music and a brief success celebration', async 
   await page.goto('/#/learn');
   for (const course of courses) await expect(page.locator(`a[href="/#/learn/${course.id}"]`)).toBeVisible();
   await page.locator('a[href="/#/learn/grade-1"]').click();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await expect(page.getByLabel('Background music', { exact: true })).not.toBeChecked();
   await page.getByLabel('Background music', { exact: true }).check();
@@ -33,7 +34,8 @@ test('six grade courses, optional music and a brief success celebration', async 
 
 test('grade six keeps its larger board, real variable program and scoped modules', async ({ page }, info) => {
   await page.goto('/#/learn/grade-6');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   const id = 'grade-6-variables-9';
   await page.evaluate(({ id, current, solution }) => {
     const save = JSON.parse(localStorage.getItem('kodearcade-v1')!);

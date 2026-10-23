@@ -6,7 +6,8 @@ test('compact workspace keeps the board, palette and code visible', async ({ pag
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   const sizes = info.project.name === 'desktop' ? [{ width: 1308, height: 677 }, { width: 1366, height: 768 }] : [page.viewportSize()!];
   await page.goto('/#/learn/arrows');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.evaluate(async () => { const image = new Image(); image.src = '/images/meadow-board.png'; await image.decode(); await document.fonts.ready; });
   for (const size of sizes) {
     await page.setViewportSize(size);
@@ -90,7 +91,7 @@ test('compact workspace keeps the board, palette and code visible', async ({ pag
   expect((await new AxeBuilder({ page }).exclude('.blockly-container').withTags(['wcag2a', 'wcag2aa']).analyze()).violations).toEqual([]);
   await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await page.locator('.module-button').filter({ hasText: 'Loops' }).click();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Continue learning', exact: true }).click();
   await page.evaluate(() => {
     const save = JSON.parse(localStorage.getItem('kodearcade-v1')!);
     save.progress['on-repeat'].blocks = [{ id: 'loop-fixture', kind: 'repeat', direction: 'right', count: 4 }];

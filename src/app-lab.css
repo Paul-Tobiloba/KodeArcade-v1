@@ -1,0 +1,437 @@
+.app-lab { min-height: 100dvh; background: #eeebf8; color: #181339; font-family: 'Segoe UI', system-ui, sans-serif; }
+.app-lab * { box-sizing: border-box; }
+.app-lab ::selection { background: #ded3ff; color: #241259; }
+.app-lab button, .app-lab input, .app-lab select, .app-lab textarea { font: inherit; }
+.app-lab button, .app-lab select, .app-lab input:not([type='checkbox']):not([type='range']), .app-lab textarea { min-height: 44px; border: 1px solid #c6b6e8; border-radius: 7px; padding: 9px 12px; color: #181339; background: #ffffff; }
+.app-lab button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; font-weight: 600; }
+.app-lab button:hover:not(:disabled) { background: #f0eafd; border-color: #6237df; }
+.app-lab button:disabled, .app-lab fieldset:disabled { opacity: .55; cursor: not-allowed; }
+.app-lab :focus-visible { outline: 3px solid #6237df; outline-offset: 3px; }
+.app-lab a { color: #5136ab; text-underline-offset: 3px; }
+.app-lab input, .app-lab textarea { caret-color: #6237df; }
+.app-lab h1, .app-lab h2, .app-lab h3, .app-lab p { margin: 0; }
+.app-lab h1, .app-lab h2 { font-family: Fredoka, 'Segoe UI', sans-serif; font-weight: 600; }
+.app-lab h1 { font-size: 1.4rem; }
+.app-lab h2 { font-size: 1.12rem; }
+.app-lab h3 { font-size: .95rem; }
+.app-lab p, .app-lab small { color: #575472; line-height: 1.6; }
+.app-lab .al-primary { background: #6237df; color: white; border-color: #6237df; }
+.app-lab .al-primary:hover:not(:disabled) { background: #5332d6; color: white; }
+.app-lab .al-danger { color: #ad2435; }
+.al-header { min-height: 88px; padding: 12px 20px; background: #241259; color: white; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.al-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font: 600 1.45rem Fredoka, sans-serif; }
+.app-lab .al-brand { color: white; }
+.al-brand img { flex: none; }
+.al-project-name { display: grid; grid-template-columns: minmax(170px, 280px); gap: 2px; }
+.al-project-name label, .al-project-name small { color: #e6ddff; font-size: .75rem; }
+.app-lab .al-project-name input { background: #352269; color: white; border-color: #8972bd; min-height: 32px; padding: 4px 8px; }
+.al-header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+.al-header :focus-visible { outline-color: #ffe28c; }
+.al-navigation { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 20px; }
+.al-navigation > a { display: flex; gap: 6px; align-items: center; font-size: .85rem; }
+.al-navigation > h1 { margin-right: auto; }
+.al-project-picker { display: flex; align-items: center; gap: 8px; font-size: .85rem; }
+.al-project-picker select { max-width: 210px; }
+.al-navigation nav { display: flex; gap: 4px; }
+.al-navigation nav button[aria-pressed='true'] { color: white; background: #6237df; border-color: #6237df; }
+.app-lab .al-navigation nav button[aria-pressed='true']:hover { color: white; background: #5332d6; border-color: #5332d6; }
+.al-main { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 12px; padding: 0 16px 16px; max-width: 1900px; margin: auto; align-items: start; }
+.al-preview-panel, .al-tools { min-width: 0; border: 1px solid #c6b6e8; border-radius: 12px; background: white; overflow: hidden; }
+.al-panel-heading, .al-workspace-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px 14px; border-bottom: 1px solid #ded9ed; background: #f7f4fe; }
+.al-panel-heading h2, .al-workspace-heading h2 { margin-right: auto; }
+.al-panel-heading span, .al-workspace-heading > span { font-size: .75rem; color: #575472; }
+.al-workspace-heading > button { min-height: 36px; padding: 6px 10px; }
+.al-phone { padding: 8px; }
+.al-screen-picker { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; font-size: .8rem; }
+.al-screen-picker select { width: 100%; min-width: 0; }
+.al-preview-width { max-width: 320px; width: 100%; margin: auto; overflow: hidden; }
+.al-preview { position: relative; width: 320px; height: 480px; transform-origin: top left; overflow: hidden; }
+.al-designing { outline: 1px solid #ded9ed; outline-offset: -1px; }
+.al-empty-screen { padding: 90px 28px; font-size: .95rem; text-align: center; pointer-events: none; }
+.app-lab .al-control { position: absolute; padding: 0; border-radius: 7px; overflow-wrap: anywhere; }
+.app-lab .al-design-control { border: 1px dashed #8972bd; white-space: pre-wrap; touch-action: none; cursor: move; font-weight: 400; }
+.app-lab .al-design-control:hover { background: var(--control-background); border-color: #6237df; }
+.app-lab .al-design-control.al-selected { outline: 3px solid #6237df; outline-offset: -3px; }
+.al-hidden-control { opacity: .55; }
+.al-control > button, .al-control > input, .al-control > select, .al-control > textarea, .al-control > label, .al-control > span { width: 100%; height: 100%; min-height: 0 !important; color: inherit !important; background: inherit !important; font: inherit !important; white-space: pre-wrap; }
+.al-control > span { display: flex; align-items: center; padding: 8px; }
+.al-control > label { display: flex; align-items: center; gap: 8px; padding: 8px; }
+.al-control textarea { resize: none; }
+.al-checkbox-shape { width: 18px !important; height: 18px !important; border: 1px solid currentColor; padding: 0 !important; }
+.al-slider-shape { width: 80% !important; height: 4px !important; padding: 0 !important; background: #6237df !important; }
+.al-run-controls { display: flex; gap: 8px; padding-top: 10px; }
+.al-run-controls .al-primary { flex: 1; min-height: 48px; }
+.al-tools { display: flex; flex-direction: column; min-height: 650px; }
+.al-design-workspace, .al-data-workspace { display: grid; grid-template-columns: 210px minmax(0, 1fr); min-height: 580px; flex: 1; }
+.al-toolbox { padding: 18px 14px; border-right: 1px solid #ded9ed; background: #f7f4fe; }
+.al-toolbox > p { margin: 10px 0 16px; font-size: .8rem; }
+.al-control-palette { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 24px; }
+.al-control-palette button { flex-direction: column; min-height: 76px; font-size: .78rem; padding: 10px 4px; }
+.al-control-palette svg { color: #6237df; }
+.al-toolbox > button { width: 100%; margin-top: 8px; font-size: .85rem; }
+.al-screen-list { padding: 0; list-style: none; display: grid; gap: 6px; margin: 12px 0; }
+.al-screen-list button { width: 100%; justify-content: space-between; overflow-wrap: anywhere; }
+.al-screen-list button[aria-pressed='true'], .app-lab .al-table-choice[aria-pressed='true'] { background: #e8e0ff; border-color: #6237df; }
+.al-properties { min-width: 0; }
+.al-properties fieldset { border: 0; margin: 0; padding: 20px; display: grid; gap: 18px; max-width: 680px; }
+.al-properties label, .al-table-editor details label, .al-keyboard-builder label { display: grid; gap: 6px; font-size: .85rem; font-weight: 600; min-width: 0; }
+.al-properties input, .al-properties textarea, .al-properties select { width: 100%; min-width: 0; }
+.al-properties input[type='color'] { padding: 4px; }
+.al-properties .al-toggle { display: flex; align-items: center; gap: 8px; }
+.al-properties .al-toggle input { width: 20px; height: 20px; accent-color: #6237df; }
+.al-field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.al-property-actions, .al-data-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.al-code { display: flex; flex-direction: column; min-height: 580px; }
+.al-code-categories { display: flex; gap: 6px; overflow-x: auto; padding: 10px; border-bottom: 1px solid #ded9ed; }
+.al-code-categories button { flex: none; font-size: .8rem; }
+.al-code-categories button span { display: block; width: 9px; height: 9px; border-radius: 50%; }
+.al-code-categories button[aria-pressed='true'] { background: #e8e0ff; border-color: #6237df; }
+.al-code-main { min-width: 0; position: relative; }
+.al-blockly { height: 490px; width: 100%; position: relative; }
+.al-edit-note { padding: 12px; background: #f7f4fe; }
+.al-keyboard-builder { padding: 10px 14px; }
+.al-keyboard-builder summary, .al-console summary, .al-table-editor summary { cursor: pointer; min-height: 44px; padding: 8px 0; font-weight: 600; }
+.al-keyboard-builder label { max-width: 300px; margin: 10px 0; }
+.al-keyboard-builder p { max-width: 70ch; font-size: .8rem; margin-top: 10px; }
+.al-console { border-top: 1px solid #ded9ed; padding: 4px 16px; background: #f7f4fe; margin-top: auto; }
+.al-console > div { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 8px 0 14px; }
+.al-console pre { white-space: pre-wrap; overflow-wrap: anywhere; font: .8rem/1.6 ui-monospace, monospace; color: #241259; }
+.al-console p { font-size: .8rem; }
+.al-console dl { margin: 8px 0; font-size: .85rem; font-variant-numeric: tabular-nums; }
+.al-console dl div { display: flex; gap: 16px; }
+.al-console dd { margin: 0; overflow-wrap: anywhere; }
+.al-starters { padding-bottom: 24px; flex: 1; }
+.al-starters > p, .al-starters > small { display: block; margin: 20px; max-width: 70ch; }
+.al-starters > div:not(.al-workspace-heading) { display: grid; gap: 0; margin: 0 20px; }
+.al-starters > div > button { display: grid; grid-template-columns: 1fr auto; gap: 6px 20px; text-align: left; justify-items: start; padding: 20px; border-radius: 0; border-width: 0 0 1px; }
+.al-starters button strong { font-size: 1.1rem; }
+.al-starters button span { font-weight: 400; color: #575472; grid-column: 1; }
+.al-starters button svg { grid-column: 2; grid-row: 1 / 3; align-self: center; color: #6237df; }
+.al-table-choice { justify-content: flex-start !important; }
+.al-table-choice small { margin-left: auto; font-size: .7rem; }
+.al-table-editor { min-width: 0; padding-bottom: 20px; }
+.al-table-editor > p, .al-table-editor > details { margin: 16px; font-size: .85rem; }
+.al-table-editor details label { margin-bottom: 12px; max-width: 300px; }
+.al-table-scroll { margin: 16px; overflow: auto; max-height: 430px; }
+.al-table-scroll table { border-collapse: collapse; min-width: 100%; font-size: .8rem; font-variant-numeric: tabular-nums; }
+.al-table-scroll th, .al-table-scroll td { padding: 8px; border: 1px solid #ded9ed; text-align: left; }
+.al-table-scroll th { background: #f7f4fe; }
+.al-table-scroll input { min-width: 150px; width: 100%; }
+.al-data-actions { margin: 16px; }
+.al-data-empty { padding: 60px 30px; max-width: 65ch; }
+.al-data-empty svg { color: #6237df; margin-bottom: 20px; }
+.al-data-empty h3 { font-size: 1.15rem; margin-bottom: 12px; }
+.al-error { background: #fff4f5; color: #8c1d2b; padding: 14px 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.app-lab .al-field-error { color: #8c1d2b; }
+.al-help { max-width: 700px; width: calc(100vw - 32px); max-height: calc(100dvh - 40px); overflow: auto; border: 1px solid #c6b6e8; border-radius: 16px; padding: 0 0 20px; color: #181339; box-shadow: 0 20px 80px #11182740; }
+.al-help::backdrop { background: #11182780; }
+.al-help ol, .al-help > p { margin: 20px 28px; line-height: 1.7; }
+.al-help li { margin-bottom: 10px; }
+@media (min-width: 951px) { .al-tools { max-height: none; } }
+@media (max-width: 1100px) { .al-brand span { display: none; } .al-main { grid-template-columns: 300px minmax(0,1fr); } .al-design-workspace, .al-data-workspace { grid-template-columns: 170px minmax(0,1fr); } .al-control-palette { grid-template-columns: 1fr; } .al-control-palette button { flex-direction: row; min-height: 44px; } }
+@media (max-width: 950px) { .al-header { gap: 12px; padding: 12px; } .al-header-actions { gap: 6px; } .al-header-actions button span { display: none; } .al-main { grid-template-columns: 1fr; padding: 0 8px 12px; } .al-preview-panel { width: min(100%, 420px); justify-self: center; } .al-navigation { padding: 12px; gap: 8px; } .al-navigation nav { width: 100%; } .al-navigation nav button { flex: 1; } .al-project-name { grid-template-columns: minmax(150px, 230px); } .al-tools { min-height: 0; } .al-design-workspace, .al-data-workspace { grid-template-columns: 150px minmax(0,1fr); } .al-properties fieldset { padding: 14px; } .al-field-pair { grid-template-columns: 1fr; } .al-toolbox { padding: 14px 8px; } .al-code-categories { flex-wrap: wrap; } .al-blockly { height: 560px; } .al-console > div { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .al-header-actions { width: 100%; margin-left: 0; } .al-navigation > a { width: 100%; } .al-design-workspace, .al-data-workspace { grid-template-columns: 1fr; } .al-toolbox { border-right: 0; border-bottom: 1px solid #ded9ed; } .al-control-palette { grid-template-columns: 1fr 1fr; margin-bottom: 16px; } .al-screen-list { display: flex; overflow-x: auto; } .al-screen-list li { flex: 1; } .al-project-picker select { max-width: 180px; } }
+
+/* Owner's App Lab reference: task areas remain distinct, with the real app inside the phone frame. */
+.app-lab { background: #f1efff; }
+.al-header { min-height: 108px; padding: 10px 32px; gap: 30px; }
+.al-brand { font-size: 2rem; gap: 12px; padding-right: 28px; border-right: 1px solid #8972bd; }
+.al-project-name { grid-template-columns: minmax(210px, 355px); gap: 4px; }
+.al-project-name label { font-size: .875rem; }
+.al-name-field { position: relative; }
+.app-lab .al-name-field input { width: 100%; background: #ffffff; color: #181339; min-height: 40px; padding: 7px 36px 7px 14px; border-color: #ded9ed; }
+.al-name-field > svg { position: absolute; right: 14px; top: 12px; color: #5136ab; pointer-events: none; }
+.al-project-name small { display: flex; align-items: center; gap: 8px; }
+.al-project-name small svg { color: #bce7d4; }
+.al-header-actions { gap: 12px; }
+.al-header-actions > button { min-height: 52px; padding: 12px 20px; font-size: 1rem; border-radius: 12px; }
+.app-lab .al-help-button { background: transparent; color: #ffffff; padding: 12px; }
+.app-lab .al-help-button:hover { background: #352269; }
+.al-navigation { min-height: 68px; padding: 10px 24px; gap: 16px; }
+.al-navigation > a { font-size: 1rem; text-decoration: none; padding-right: 18px; border-right: 1px solid #c6b6e8; }
+.al-navigation > h1 { font-size: 1.6rem; margin-right: 0; }
+.al-navigation nav { margin-left: auto; background: #faf9ff; border-radius: 12px; padding: 3px; gap: 4px; }
+.al-navigation nav button { min-width: 125px; border: 0; background: transparent; font-weight: 600; }
+.al-navigation nav button[aria-pressed='true'] { background: #6237df; border-radius: 10px; }
+.al-library { position: relative; font-size: .85rem; }
+.al-library summary { display: flex; align-items: center; gap: 5px; cursor: pointer; min-height: 44px; color: #5136ab; padding: 10px; border-radius: 7px; }
+.al-library summary::-webkit-details-marker { display: none; }
+.al-library > div { position: absolute; z-index: 12; background: white; border: 1px solid #c6b6e8; border-radius: 12px; padding: 16px; width: 280px; box-shadow: 0 12px 32px #24125925; }
+.al-project-picker { display: grid; margin-bottom: 12px; }
+.al-project-picker select { width: 100%; max-width: none; }
+.al-main { grid-template-columns: minmax(285px, 22fr) minmax(0, 75fr); padding: 0 24px 12px; gap: 12px; align-items: stretch; }
+.al-preview-panel { border-color: #ded9ed; background: #fdfcff; border-radius: 16px; }
+.al-panel-heading { background: transparent; border: 0; padding: 14px 18px 4px; gap: 10px; }
+.al-panel-heading > svg, .al-workspace-heading > svg, .al-toolbox h2 > svg { color: #6237df; flex-shrink: 0; }
+.al-panel-heading > button { padding: 0; border: 0; min-height: 44px; width: 32px; background: transparent; color: #716596; }
+.al-phone { padding: 8px 16px 12px; }
+.al-screen-picker { font-size: .9rem; margin-bottom: 12px; }
+.al-device { position: relative; max-width: 338px; margin: 0 auto; border: 8px solid #263348; border-radius: 46px; padding: 22px 4px 12px; background: #ffffff; box-shadow: 0 5px 8px #24125930, inset 0 0 0 2px #a1adbb; overflow: hidden; }
+.al-device-camera { width: 88px; height: 14px; background: #263348; border-radius: 0 0 12px 12px; position: absolute; left: calc(50% - 44px); top: 0; }
+.al-device .al-preview-width { border-radius: 8px 8px 25px 25px; overflow: hidden; }
+.al-designing { outline: 0; }
+.al-empty-screen { display: grid; align-content: center; justify-items: center; gap: 20px; height: 100%; padding: 36px; color: #575472; line-height: 1.7; }
+.al-empty-screen svg { color: #8972bd; }
+.al-run-controls { padding-top: 18px; gap: 10px; }
+.al-run-controls .al-primary { min-height: 52px; border-radius: 10px; }
+.al-run-controls > button:last-child { width: 48px; padding: 8px; }
+.al-tools { border: 0; border-radius: 0; background: transparent; min-height: 0; overflow: visible; gap: 8px; }
+.al-tools:has(.al-design-workspace) { display: grid; grid-template-columns: minmax(240px, 25fr) minmax(0, 75fr); gap: 8px 12px; align-content: start; }
+.al-design-workspace { display: contents; }
+.al-design-workspace > .al-toolbox { grid-column: 1; grid-row: 1 / span 2; }
+.al-tools:has(.al-design-workspace) > .al-console { grid-column: 2; }
+.al-toolbox, .al-properties, .al-code, .al-data-workspace, .al-starters { border: 1px solid #ded9ed; border-radius: 16px; background: #fdfcff; overflow: hidden; }
+.al-toolbox { padding: 18px 16px; }
+.al-toolbox h2, .al-toolbox h3 { display: flex; align-items: center; gap: 10px; }
+.al-toolbox h3 { padding-top: 18px; border-top: 1px solid #ded9ed; }
+.al-toolbox h3 > svg { color: #716596; }
+.al-toolbox > p { font-size: .875rem; }
+.al-control-palette { grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.al-control-palette button { flex-direction: column; min-height: 88px; font-size: .875rem; border-color: #e9e3f8; border-radius: 12px; background: #ffffff; padding: 12px 4px; }
+.al-control-palette svg { stroke-width: 2.5; }
+.al-palette-input svg { color: #08796e; }
+.al-palette-textarea svg { color: #b63a26; }
+.al-palette-dropdown svg { color: #a16908; }
+.al-palette-slider svg { color: #2666cf; }
+.al-screen-list { display: grid; gap: 6px; }
+.al-screen-list button { justify-content: flex-start; font-weight: 500; min-height: 50px; }
+.al-screen-list button > svg { color: #6237df; flex: none; }
+.al-screen-list button > span { flex: 1; text-align: left; }
+.al-screen-list small { background: #eeebf8; padding: 2px 6px; border-radius: 5px; font-size: .75rem; }
+.app-lab .al-add-screen { border-style: dashed; background: transparent; }
+.al-properties { padding: 10px 16px; }
+.al-properties .al-workspace-heading { border: 0; border-radius: 12px; gap: 10px; padding: 12px; min-height: 68px; }
+.al-properties .al-workspace-heading > label { display: flex; align-items: center; gap: 12px; font-size: .8rem; }
+.al-properties .al-workspace-heading select { width: auto; max-width: 220px; }
+.al-property-intro { display: flex; gap: 20px; padding: 22px; margin: 20px 0; background: #ede8ff; border-radius: 12px; align-items: center; color: #5136ab; }
+.al-property-intro > svg { flex-shrink: 0; color: #6237df; }
+.al-property-intro h3 { color: #5136ab; margin-bottom: 4px; }
+.al-property-intro p { font-size: .875rem; color: #5136ab; }
+.al-properties fieldset { padding: 0; gap: 8px; max-width: none; }
+.al-property-group { border: 1px solid #e6e0f4; border-radius: 12px; padding: 14px 20px; }
+.al-property-group > p { font-size: .85rem; margin: 4px 0 10px; }
+.al-property-group > label { gap: 10px; }
+.al-property-group:first-child > p { margin-bottom: 0; }
+.al-colour-field { display: flex; align-items: center; gap: 12px; border: 1px solid #c6b6e8; border-radius: 7px; padding: 2px 12px; }
+.app-lab .al-colour-field > input[type='color'] { width: 36px; min-width: 36px; min-height: 40px; height: 40px; border: 0; padding: 2px; }
+.al-colour-field label { flex: 1; font-size: 0; }
+.app-lab .al-colour-field label > input { border: 0; padding-left: 0; font-size: .9rem; }
+.al-colour-field > svg { color: #5136ab; flex: none; }
+.app-lab .al-set-start { width: 100%; background: #ede8ff; color: #5136ab; border-color: #ded3ff; }
+.app-lab .al-set-start:disabled { opacity: 1; color: #575472; background: #f7f4fe; }
+.al-delete-screen { display: flex; align-items: center; gap: 20px; padding: 14px 20px; margin-top: 4px; background: #fff1f3; border-radius: 12px; }
+.al-delete-screen > svg, .al-delete-screen h3 { color: #ad2435; flex-shrink: 0; }
+.al-delete-screen > div { flex: 1; }
+.al-delete-screen p { font-size: .85rem; }
+.al-delete-screen button { border-color: #d75666; flex: none; }
+.al-console { border: 1px solid #ded9ed; border-radius: 12px; margin-top: 0; padding: 0 16px; }
+.al-console summary { font-size: .85rem; }
+.al-draft-note { margin: 8px 16px; font-size: .8rem; }
+.al-draft-note button { display: inline; min-height: 32px; padding: 2px 4px; }
+.al-code-toggle, .al-code-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.al-code-toggle button[aria-pressed='true'] { background: #ede8ff; border-color: #6237df; }
+.al-js-editor { display: grid; grid-template-columns: 245px minmax(0, 1fr); min-height: 620px; }
+.al-code-toolbox { background: #ffffff; border-right: 1px solid #ded9ed; padding: 16px 12px; min-width: 0; }
+.al-code-toolbox > h3 { margin-bottom: 10px; }
+.al-code-toolbox > p, .al-code-toolbox details p { font-size: .8rem; margin: 14px 0; }
+.al-code-toolbox details { margin-top: 20px; font-size: .8rem; }
+.al-code-toolbox summary { min-height: 44px; cursor: pointer; padding: 12px 0; }
+.al-code-toolbox code { font: .75rem/1.7 ui-monospace, Consolas, monospace; overflow-wrap: anywhere; }
+.al-code-categories { display: grid; grid-template-columns: 1fr 1fr; padding: 0 0 12px; gap: 4px; }
+.al-code-categories button { padding: 8px 4px; border: 0; background: transparent; justify-content: flex-start; font-size: .75rem; }
+.al-code-categories button span { border-radius: 2px; width: 6px; height: 22px; flex-shrink: 0; }
+.al-category-ui { background: #f59e0b; }.al-category-control { background: #3b82f6; }.al-category-variable { background: #a855f7; }.al-category-data { background: #22c55e; }
+.al-code-examples { display: grid; gap: 8px; max-height: 480px; overflow: auto; padding: 3px; scrollbar-color: #b7a7d5 #f7f4fe; }
+.al-js-ui { --al-block-accent: #f59e0b; --al-block-hat: #a85403; }.al-js-control { --al-block-accent: #3b82f6; --al-block-hat: #2563c5; }.al-js-variable { --al-block-accent: #a855f7; }.al-js-data { --al-block-accent: #22c55e; }
+.al-js-block, .al-example { --al-block-fill: color-mix(in srgb,var(--al-block-accent) 13%,#ffffff); --al-block-stroke: color-mix(in srgb,var(--al-block-accent) 35%,#ffffff); }
+.app-lab .al-example { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-start; text-align: left; padding: 10px 12px; min-height: 44px; border-radius: 11px; background: var(--al-block-fill); border: 1px solid var(--al-block-stroke); border-left: 4px solid var(--al-block-accent); gap: 8px; }
+.al-example-label { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 600 13.5px/1.5 'Segoe UI',system-ui,sans-serif; }
+.al-example-socket { color: #14141f; background: #ffffff; border: 1px solid var(--al-block-stroke); border-radius: 7px; padding: 2px 6px; font: 600 12.5px/1.5 ui-monospace,Consolas,monospace; overflow-wrap: anywhere; }
+.al-example-body { border: 1px dashed #d3d3e2; border-radius: 8px; background: #f0f0f6; color: #626279; padding: 10px; font-size: 12px; font-weight: 400; }
+.al-js-canvas { min-width: 0; background: #ffffff; }
+.al-code-actions { padding: 10px 14px; border-bottom: 1px solid #ded9ed; font-size: .8rem; min-height: 64px; }
+.al-code-actions > span { margin-right: auto; }
+.al-js-program { --al-indent: 25px; overflow: auto; max-height: 650px; min-height: 480px; scrollbar-color: #b7a7d5 #f0f0f6; background-color: #f0f0f6; background-image: radial-gradient(#d3d3e2 1.2px,transparent 1.4px); background-size: 22px 22px; }
+.al-program-sheet { position: relative; min-height: 480px; padding: 22px 16px 28px 64px; }
+.al-number-gutter { position: absolute; inset: 0 auto 0 0; width: 48px; background: #f6f6fa; border-right: 1px solid #e4e4ee; pointer-events: none; }
+.al-js-list { min-width: 0; }
+.al-js-block { position: relative; width: 100%; max-width: 100%; border: 1px solid var(--al-block-stroke); border-left: 4px solid var(--al-block-accent); border-radius: 11px; padding: 0; color: #14141f; background: var(--al-block-fill); box-shadow: 0 1px 2px #0a0a1e12; }
+.al-js-block:hover { border-color: color-mix(in srgb,var(--al-block-accent) 65%,#ffffff); border-left-color: var(--al-block-accent); }
+.al-js-head { position: relative; display: flex; align-items: flex-start; gap: 3px; padding: 10px 8px; }
+.al-code-grip { display: flex; align-items: center; min-height: 30px; cursor: grab; color: #626279; flex: none; }
+.al-js-line { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 6px; flex: 1; min-width: 0; font: 600 13.5px/1.5 'Segoe UI',system-ui,sans-serif; }
+.al-js-syntax { flex: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-height: 30px; min-width: 0; }
+.al-js-fragment { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; white-space: pre-wrap; max-width: 100%; overflow-wrap: anywhere; }
+.al-js-socket { display: inline-flex; align-items: center; max-width: 100%; background: #ffffff; border: 1px solid var(--al-block-stroke); border-radius: 7px; padding: 0 6px; color: #14141f; }
+.app-lab .al-js-line .al-js-socket input, .app-lab .al-js-line .al-js-socket select { font: 600 12.5px/1.5 ui-monospace,Consolas,monospace; text-align: center; min-height: 28px; height: 28px; padding: 0; border: 0; border-radius: 3px; background: transparent; min-width: 3ch; max-width: 100%; color: inherit; }
+.app-lab .al-js-line .al-command-source { flex: 1; font: 13px/1.6 ui-monospace,Consolas,monospace; color: #14141f; min-height: 32px; border: 1px solid var(--al-block-stroke); border-radius: 7px; padding: 2px 6px; background: #ffffff; width: 100%; min-width: 100px; }
+.al-js-line small { flex-basis: 100%; display: block; color: #8c1d2b; background: #fff4f5; padding: 4px; }
+.app-lab .al-delete-command, .app-lab .al-edit-command, .app-lab .al-insert-command { flex: none; min-width: 28px; min-height: 30px; padding: 4px; background: transparent; border: 0; color: #626279; }
+.app-lab .al-edit-command[aria-pressed='true'] { background: #ffffff; }
+.al-js-body { position: relative; background: #f0f0f6; color: #14141f; margin: 0 8px 0 12px; padding: 8px; border-radius: 9px; border: 1px solid color-mix(in srgb,var(--al-block-accent) 22%,#ffffff); }
+.al-js-body > .al-js-list > .al-js-entry + .al-js-entry { margin-top: 6px; }
+.al-program-sheet > .al-js-list > .al-js-entry + .al-js-entry { margin-top: 18px; }
+.al-js-close { position: relative; min-height: 26px; padding: 4px 8px 2px; font: 12px/22px ui-monospace,Consolas,monospace; }
+.al-js-else { padding-top: 10px; }
+.al-js-hat, .app-lab .al-example.al-js-hat { background: var(--al-block-hat); color: #ffffff; border-color: transparent; border-left-color: var(--al-block-hat); box-shadow: 0 4px 14px #0a0a1e1a; }
+.al-js-hat > .al-js-head { font-weight: 700; }
+.al-js-hat > .al-js-head .al-code-grip, .app-lab .al-js-hat > .al-js-head .al-delete-command, .app-lab .al-js-hat > .al-js-head .al-edit-command, .app-lab .al-js-hat > .al-js-head .al-insert-command { color: #ffffff; }
+.app-lab .al-js-hat > .al-js-head button:hover:not(:disabled), .app-lab .al-js-hat > .al-js-head .al-edit-command[aria-pressed='true'] { background: #ffffff26; color: #ffffff; }
+.al-js-disabled { opacity: .6; }
+.app-lab .al-code-gap { position: relative; display: block; z-index: 3; width: 100%; height: 8px; min-height: 8px; margin: -4px 0; border: 0; background: transparent; color: transparent; padding: 0; font-size: .75rem; border-radius: 0; }
+.app-lab .al-code-gap:hover:not(:disabled), .app-lab .al-code-gap:focus-visible, .app-lab .al-code-gap[aria-pressed='true'] { background: #6237df; color: #ffffff; outline: none; box-shadow: inset 0 3px #ffffff, inset 0 -3px #ffffff; }
+.app-lab .al-code-gap-empty { height: auto; min-height: 46px; margin: 0; white-space: normal; font-weight: 400; padding: 10px 12px; color: #626279; background: transparent; border: 1px dashed #d3d3e2; border-radius: 8px; }
+.app-lab .al-code-gap-empty[aria-pressed='true'], .app-lab .al-code-gap-empty:hover:not(:disabled), .app-lab .al-code-gap-empty:focus-visible { color: #5136ab; background: #ede8ff; box-shadow: inset 0 0 0 1px #8972bd; }
+.app-lab .al-source { display: block; border: 0; border-radius: 0; padding: 20px; width: 100%; min-height: 470px; resize: vertical; font: .875rem/1.8 ui-monospace, Consolas, monospace; tab-size: 2; background: #ffffff; }
+.al-code-note, .al-code-status { padding: 12px 16px; font-size: .8rem; background: #f7f4fe; border-top: 1px solid #ded9ed; }
+.al-code-status { color: #5136ab !important; }
+.al-block-line { position: absolute; top: 10px; left: calc(-64px - var(--al-depth) * var(--al-indent)); width: 35px; font: 12px/22px ui-monospace,Consolas,monospace; color: #626279; text-align: right; white-space: nowrap; user-select: none; }
+.al-js-close > .al-block-line { top: 6px; }
+.al-js-else > .al-block-line { top: 10px; }
+.al-gutter-marker { position: absolute; left: 0; font-weight: 700; }
+.al-gutter-error { color: #8c1d2b; }.al-gutter-warning { color: #775000; }
+.al-code-issues { padding: 10px 16px; border-top: 1px solid #ded9ed; background: #fffaf0; }
+.al-code-issues p { padding: 5px 0; font-size: .8rem; }
+.al-code-issues .al-issue-error, .al-line-issue.al-issue-error { color: #8c1d2b; }
+.al-code-issues .al-issue-warning, .al-line-issue.al-issue-warning { color: #775000; }
+.al-line-issue { background: #fffaf0; margin: 0 0 0 20px; border-radius: 0; font-size: .75rem; padding: 4px 8px; }
+.al-line-issue summary { min-height: 28px; cursor: pointer; padding: 5px 0; font-weight: 600; }
+.al-line-issue p { font-size: .8rem; color: inherit; }
+.al-source-editor { min-width: 0; max-height: 550px; overflow: auto; }
+.al-source-editor .cm-editor { outline-offset: -3px; }
+.app-lab .cm-tooltip button, .app-lab .cm-panel button { min-height: 28px; padding: 3px 7px; font-size: .8rem; }
+@media (pointer: coarse) {
+  .app-lab .al-delete-command, .app-lab .al-edit-command, .app-lab .al-insert-command { min-width: 44px; min-height: 44px; }
+  .app-lab .al-js-line .al-js-socket input, .app-lab .al-js-line .al-js-socket select { min-height: 44px; height: 44px; font-size: 16px; }
+  .al-js-head { flex-wrap: wrap; }.al-js-line { flex-basis: calc(100% - 24px); }.al-code-grip { min-height: 44px; }
+}
+@media (max-width: 1300px) {
+  .al-header { gap: 20px; padding: 12px 24px; }.al-brand { font-size: 1.6rem; padding-right: 20px; }.al-brand span { display: inline; }.al-project-name { grid-template-columns: minmax(170px, 260px); }.al-header-actions > button { padding: 10px 14px; }
+  .al-main { grid-template-columns: 285px minmax(0,1fr); padding: 0 16px 12px; }.al-tools:has(.al-design-workspace) { grid-template-columns: 220px minmax(0,1fr); }.al-toolbox { padding: 16px 12px; }.al-properties { padding: 10px; }.al-properties .al-workspace-heading > label { width: 100%; justify-content: space-between; }.al-property-group { padding: 14px; }.al-delete-screen { gap: 10px; flex-wrap: wrap; padding: 14px; }.al-js-editor { grid-template-columns: 210px minmax(0,1fr); }
+}
+@media (max-width: 1050px) {
+  .al-header { gap: 16px; }.al-brand span { display: none; }.al-brand { padding-right: 16px; }.al-header-actions { gap: 8px; }.al-header-actions > button { min-height: 48px; }.al-navigation nav button { min-width: 100px; }
+  .al-tools:has(.al-design-workspace) { grid-template-columns: 180px minmax(0,1fr); }.al-control-palette { gap: 6px; }.al-control-palette button { font-size: .8rem; }.al-property-intro { padding: 16px; gap: 12px; }
+}
+@media (max-width: 950px) {
+  .al-main { grid-template-columns: 1fr; padding: 0 12px 12px; }.al-preview-panel { width: min(100%, 390px); }.al-header { padding: 12px 16px; min-height: 100px; }.al-project-name { grid-template-columns: minmax(160px, 250px); }.al-header-actions button span { display: inline; }.al-brand { border: 0; padding: 0; }.al-navigation { padding: 12px; }.al-navigation nav { width: auto; }.al-navigation nav button { min-width: 90px; }.al-tools:has(.al-design-workspace) { grid-template-columns: 240px minmax(0,1fr); }.al-control-palette { gap: 10px; }.al-properties .al-workspace-heading > label { flex-wrap: wrap; }.al-field-pair { grid-template-columns: 1fr 1fr; }.al-js-editor { grid-template-columns: 220px minmax(0,1fr); }
+}
+@media (max-width: 620px) {
+  .al-header { gap: 12px; }.al-project-name { flex: 1; grid-template-columns: minmax(0,1fr); }.al-brand img { width: 32px; height: 36px; }.al-header-actions { width: 100%; margin: 0; gap: 8px; }.al-header-actions > button { flex: 1; padding: 10px 8px; font-size: .875rem; min-height: 44px; }.al-header-actions > .al-help-button { flex: 0; }.al-header-actions > button > svg { width: 18px; }.al-navigation > a { width: auto; font-size: .875rem; padding-right: 12px; }.al-navigation > h1 { font-size: 1.4rem; }.al-navigation .al-library { margin-left: auto; }.al-library > div { right: 0; }.al-navigation nav { width: 100%; }.al-navigation nav button { min-width: 0; flex: 1; }.al-tools:has(.al-design-workspace) { grid-template-columns: 1fr; }.al-design-workspace > .al-toolbox { grid-column: 1; grid-row: auto; }.al-properties, .al-tools:has(.al-design-workspace) > .al-console { grid-column: 1; }.al-control-palette { grid-template-columns: repeat(3,minmax(0,1fr)); }.al-screen-list { display: grid; grid-template-columns: 1fr 1fr; }.al-property-intro { margin: 12px 0; }.al-property-group { padding: 14px; }.al-delete-screen > svg { display: none; }.al-js-editor { grid-template-columns: 1fr; }.al-code-toolbox { border-right: 0; border-bottom: 1px solid #ded9ed; }.al-code-categories { grid-template-columns: repeat(4,minmax(0,1fr)); }.al-code-examples { display: flex; overflow: auto; padding-bottom: 8px; }.al-example { flex: 0 0 210px; }.al-code-toolbox details { margin-top: 4px; }.al-js-program { padding: 8px; }.al-js-body { margin-left: 8px; padding: 0 4px; }.al-js-line input { font-size: .75rem; }.al-code-toggle { width: 100%; }.al-code-toggle button { flex: 1; }.al-js-program { max-height: none; }.al-source { min-height: 400px; }
+}
+@media (max-width: 620px) {
+  .al-js-program { --al-indent: 19px; padding: 0; }
+  .al-js-body { margin: 0 6px 0 8px; padding: 6px; }
+  .al-program-sheet { padding-right: 8px; }
+}
+
+/* Desktop is a workbench, not a long page. Short/zoomed and narrow windows
+   retain document scrolling so controls never become unreachable. */
+@media (min-width: 951px) and (min-height: 600px) {
+  .app-lab { height: 100dvh; min-height: 0; display: flex; flex-direction: column; }
+  .app-lab > :not(.al-main) { flex-shrink: 0; }
+  .al-header { min-height: 76px; padding: 6px 20px; gap: 20px; flex-wrap: nowrap; }
+  .al-brand { font-size: 1.5rem; padding-right: 20px; gap: 8px; }
+  .al-brand img { width: 32px; height: 36px; }
+  .al-project-name { grid-template-columns: minmax(160px, 280px); gap: 2px; }
+  .al-project-name label { font-size: .75rem; line-height: 1.2; }
+  .al-project-name small { font-size: .6875rem; line-height: 1.2; gap: 4px; }
+  .al-project-name small svg { width: 14px; height: 14px; }
+  .app-lab .al-name-field input:not([type='checkbox']) { min-height: 30px; padding: 4px 30px 4px 10px; font-size: .875rem; }
+  .al-name-field > svg { top: 7px; right: 10px; width: 16px; height: 16px; }
+  .al-header-actions { gap: 8px; }
+  .app-lab :is(.al-header-actions > button, .al-navigation nav button, .al-workspace-heading button,
+    .al-run-controls > button, .al-toolbox > button, .al-screen-list button, .al-code-actions button,
+    .al-property-actions button, .al-delete-screen button, .al-set-start, .al-data-actions button, .al-table-scroll button) {
+    min-height: 32px; padding: 6px 10px; font-size: .8125rem; gap: 6px;
+  }
+  .al-header-actions > button { border-radius: 8px; }
+  .al-header-actions > button > svg { width: 18px; height: 18px; }
+  .al-navigation { min-height: 48px; padding: 4px 16px; gap: 12px; }
+  .al-navigation > a { font-size: .8125rem; padding-right: 12px; }
+  .al-navigation > h1 { font-size: 1.25rem; }
+  .al-navigation nav { border-radius: 9px; padding: 2px; }
+  .al-navigation nav button { min-width: 96px; }
+  .al-library summary { min-height: 32px; padding: 4px 8px; font-size: .8125rem; }
+  .al-main { flex: 1; min-height: 0; width: 100%; margin: 0 auto; padding: 0 16px 10px; gap: 10px; grid-template-columns: 308px minmax(0, 1fr); }
+  .al-tools, .al-tools:has(.al-design-workspace) { min-height: 0; overflow: hidden; gap: 8px; }
+  .al-tools:has(.al-design-workspace) { grid-template-columns: 208px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; align-content: stretch; }
+  .al-preview-panel { display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+  .al-panel-heading { flex: none; padding: 6px 12px 0; }
+  .al-panel-heading h2, .al-workspace-heading h2, .al-toolbox h2 { font-size: 1rem; }
+  .al-panel-heading > button { min-height: 32px; }
+  .al-phone { display: flex; flex-direction: column; flex: 1; min-height: 200px; padding: 6px 12px 12px; }
+  .al-screen-picker { flex: none; margin-bottom: 8px; font-size: .8125rem; }
+  .al-screen-picker select, .app-lab .al-properties :is(input:not([type='checkbox']), select), .al-project-picker select, .app-lab .al-table-scroll input:not([type='checkbox']) {
+    min-height: 32px; padding: 5px 8px; font-size: .8125rem;
+  }
+  .al-device-space { flex: 1; min-height: 0; display: grid; place-items: center; container-type: size; }
+  /* Frame adds 24px horizontally and 50px vertically to the 320 × 480 canvas. */
+  .al-device { width: min(100%, calc((100cqh - 50px) * 2 / 3 + 24px)); max-width: 338px; margin: 0; }
+  .al-run-controls { flex: none; padding-top: 10px; gap: 8px; }
+  .al-run-controls > button:last-child { width: 36px; }
+  .al-draft-note { margin: 4px 12px; }
+  .al-toolbox { min-height: 0; overflow: auto; padding: 12px; }
+  .al-toolbox > p { margin: 6px 0 10px; font-size: .75rem; }
+  .al-control-palette { gap: 6px; margin-bottom: 12px; }
+  .al-control-palette button { min-height: 60px; padding: 6px 4px; font-size: .75rem; gap: 4px; border-radius: 8px; }
+  .al-control-palette svg { width: 24px; height: 24px; }
+  .al-toolbox h3 { padding-top: 12px; font-size: .8125rem; }
+  .al-screen-list { margin: 8px 0; gap: 4px; }
+  .al-properties { min-height: 0; overflow: auto; padding: 8px 10px; }
+  .al-properties .al-workspace-heading { min-height: 44px; padding: 6px 8px; gap: 8px; }
+  .al-properties .al-workspace-heading > label { width: auto; gap: 8px; margin-left: auto; }
+  .al-properties .al-workspace-heading select { max-width: 180px; }
+  .al-property-intro { padding: 10px 12px; margin: 10px 0; gap: 12px; }
+  .al-property-intro p, .al-property-group > p, .al-delete-screen p { font-size: .75rem; line-height: 1.45; }
+  .al-property-intro h3, .al-property-group h3, .al-delete-screen h3 { font-size: .875rem; }
+  .al-property-group { padding: 10px 12px; }
+  .al-property-group > p { margin: 3px 0 6px; }
+  .al-property-group > label, .al-properties label { gap: 4px; font-size: .8125rem; }
+  .al-properties .al-colour-field label { font-size: 0; }
+  .al-colour-field { gap: 8px; padding: 0 8px; }
+  .app-lab .al-colour-field > input[type='color'] { min-height: 30px; height: 30px; width: 30px; min-width: 30px; }
+  .al-delete-screen { padding: 10px 12px; gap: 10px; }
+  .al-console { flex: none; max-height: min(32dvh, 260px); overflow: auto; padding: 0 12px; }
+  .al-console summary { min-height: 32px; padding: 6px 0; font-size: .75rem; position: sticky; top: 0; background: #f7f4fe; z-index: 1; }
+  .al-console > div { gap: 12px; padding: 6px 0 10px; }
+  .al-code { flex: 1; min-height: 0; }
+  .al-code > .al-workspace-heading { flex: none; padding: 6px 10px; }
+  .al-js-editor { flex: 1; min-height: 0; grid-template-columns: 220px minmax(0, 1fr); }
+  .al-code-toolbox { min-height: 0; overflow: auto; padding: 10px; display: flex; flex-direction: column; }
+  .al-code-toolbox > :not(.al-code-examples) { flex-shrink: 0; }
+  .al-code-toolbox > h3 { margin-bottom: 6px; font-size: .8125rem; }
+  .al-code-categories { padding-bottom: 6px; gap: 2px; overflow: visible; }
+  .al-code-categories button { min-height: 30px; padding: 4px; }
+  .al-code-categories button span { height: 16px; }
+  .al-code-toolbox > p, .al-code-toolbox details p { margin: 8px 0; font-size: .75rem; line-height: 1.45; }
+  .al-code-examples { flex: 1; min-height: 80px; max-height: none; gap: 6px; align-content: start; grid-auto-rows: max-content; }
+  .app-lab .al-example { padding: 8px; gap: 6px; }
+  .al-code-toolbox details { margin-top: 6px; }
+  .al-code-toolbox summary { min-height: 30px; padding: 6px 0; }
+  .al-js-canvas { min-height: 0; display: flex; flex-direction: column; }
+  .al-code-actions { flex: none; min-height: 44px; padding: 6px 10px; }
+  .al-js-program { flex: 1; min-height: 0; max-height: none; }
+  .al-js-head { padding-top: 6px; padding-bottom: 6px; }
+  .al-block-line { top: 6px; }
+  .al-code-note, .al-code-status { flex: none; padding: 6px 10px; font-size: .75rem; line-height: 1.45; }
+  .al-code-issues { flex: 0 1 auto; min-height: 0; max-height: 25%; overflow: auto; padding: 6px 10px; }
+  .al-source-editor { flex: 1; min-height: 0; max-height: none; display: flex; overflow: hidden; }
+  .al-source-editor .cm-editor { width: 100%; height: 100%; min-height: 0; }
+  .al-source-editor .cm-content { min-height: 100%; }
+  .al-source-editor .cm-scroller { min-height: 0; }
+  .al-data-workspace { flex: 1; min-height: 0; }
+  .al-table-editor { min-height: 0; overflow: auto; padding-bottom: 10px; }
+  .al-table-scroll { max-height: none; }
+  .al-starters { min-height: 0; overflow: auto; }
+  .al-starters > div > button { padding: 12px; }
+  .al-starters button strong { font-size: 1rem; }
+  :is(.al-toolbox, .al-properties, .al-preview-panel, .al-code-toolbox, .al-console, .al-table-editor, .al-starters) { scrollbar-width: thin; scrollbar-color: #b7a7d5 #f7f4fe; }
+}
+/* Density must not make a touch-operated desktop harder to use. */
+@media (min-width: 951px) and (min-height: 600px) and (pointer: coarse) {
+  .app-lab :is(.al-header-actions > button, .al-navigation nav button, .al-workspace-heading button,
+    .al-run-controls > button, .al-toolbox > button, .al-screen-list button, .al-code-actions button,
+    .al-property-actions button, .al-delete-screen button, .al-set-start, .al-data-actions button, .al-table-scroll button,
+    .al-code-categories button, .al-screen-picker select, .al-properties input:not([type='checkbox']), .al-properties select) { min-height: 44px; }
+}

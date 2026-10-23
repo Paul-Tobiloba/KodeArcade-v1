@@ -55,6 +55,7 @@ test('school signup preserves verification intent and does not create a school a
 });
 
 test('school sign-in continues through MFA to an expanded explicit school setup', async ({ page }, info) => {
+  await page.route('**/api/account', route => route.fulfill({ json: { profile: { name: 'Sample Administrator', email: 'admin@example.test', twoFactorEnabled: true }, workspaces: [], classes: [] } }));
   await page.route('**/api/auth/sign-in/email', route => route.fulfill({ json: { twoFactorRedirect: true } }));
   await page.route('**/api/auth/two-factor/verify-totp', route => route.fulfill({ json: {} }));
   await page.goto('/#/adult-login?role=school');
@@ -71,7 +72,7 @@ test('school sign-in continues through MFA to an expanded explicit school setup'
   await page.screenshot({ path: `.impeccable/review/school-entry-setup-${info.project.name}.png`, fullPage: true });
 });
 
-test('existing school administrators can sign in without MFA and recovery keeps school intent', async ({ page }) => {
+test('school recovery keeps its intent and an unenrolled account must enable MFA before setup', async ({ page }) => {
   await page.route('**/api/auth/sign-in/email', route => route.fulfill({ json: {} }));
   await page.route('**/api/auth/request-password-reset', route => {
     expect(route.request().postDataJSON().redirectTo).toContain('/#/reset-password?role=school');
@@ -86,7 +87,8 @@ test('existing school administrators can sign in without MFA and recovery keeps 
   await page.getByLabel('Password', { exact: true }).fill('synthetic-passphrase-only');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
   await expect(page).toHaveURL(/#\/schools\?setup=1$/);
-  await expect(page.getByLabel('School name', { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Protect your school with two-step verification' })).toBeVisible();
+  await expect(page.getByLabel('School name', { exact: true })).toHaveCount(0);
 });
 
 test('ordinary adult login still opens dashboard and public school route stays public', async ({ page }) => {

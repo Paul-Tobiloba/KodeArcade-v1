@@ -1,0 +1,37 @@
+# App Lab first release
+
+Mode: Operate. Owner confirmed 20 October: build drag-and-drop multi-screen design, editable event blocks, live preview, save/export and project-local tables. Keep the established KodeArcade identity; leave the curriculum unchanged. Code.org screenshots specify the functional three-area composition, not copied branding or a full compatibility promise. Precisely specified code-led extension; no new visual world or concept seed.
+
+## Direction contract
+
+THESIS: children design an interface and inspect the blocks that make it respond; the real preview and editing tools lead, not a marketing page or a static mockup.
+
+OWN-WORLD: follow the owner's supplied KodeArcade reference: deep violet header, lavender ground, white bordered panels, prominent K wordmark, white project-name field, phone-shaped preview, colourful control pictograms and spacious property groups. Other learning surfaces keep their existing visual system.
+
+STORY: choose a starter → design screens and controls → connect events → Run → inspect output → save privately or export. Data belongs to the project, not a shared online database.
+
+FIRST VIEWPORT: at the owner's 1672px reference width, a 108px dark header and 70px navigation frame preview/toolbox/properties columns of approximately 368/310/remaining pixels. Run sits under the framed live screen, controls use two-column tiles, screen properties have contextual guidance, full-width ID/colour/start groups and a red deletion row. Debug console is below the properties. Saved-app management remains reachable without crowding the reference's navigation. Narrow screens stack these roles without page overflow.
+
+FORM: precisely screenshot-directed, code-led incumbent editor extension; no seed applies. On 20 October the owner explicitly chose JavaScript-shaped blocks plus editable text instead of Blockly. Both views edit the same bounded program; old project code is preserved. Signature interaction: design a control, attach onEvent code, edit its argument in blocks or text, then Run in the same phone preview. Do not claim this independent editor is Droplet or full Code.org compatibility.
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+
+Boundaries: no eval, arbitrary JavaScript, external requests, camera/microphone, public publishing, shared databases, new curriculum scores or automatic changes to existing projects. Reuse student-scoped cloud progress and recovery with additive shared validation. Browser preview storage is explicitly separate. No new raster artwork is needed.
+
+## Earlier block styling follow-up (superseded below)
+
+The owner selected the revised “Roomy interlocking” sample: connected puzzle seams, larger inline argument sockets and a separate left margin for numbering. Apply only to the App Lab code workspace. The surrounding approved shell, text editor, existing program format, runtime and save boundaries remain unchanged. Event containers use lavender, variables blue, control flow amber and UI actions green. Nested statement seams have no layout gap; insertion targets sit at seams with keyboard focus and an additional Insert-after action for touch. The fixed-width gutter aligns nested statement, branch and closing-line numbers and shows diagnostic markers. A code-icon toggle retains full command-head editing alongside sockets and the existing Show text view. This is still an independent bounded editor, not Droplet or expression-socket dragging.
+
+## Current code-block authority: supplied Claude HTML
+
+The owner subsequently supplied `applab-blocks.html` and `App Lab_ stackable blocks.html` (identical files) and asked to implement their code-block styling. This replaces the puzzle-shaped Roomy treatment, not the approved App Lab shell. Match rounded 11px blocks, 4px category rails, amber UI/blue Control/purple Variables/green Data, solid startup/event hats, white rectangular sockets, grey inset nested lists with 6px sibling separation, a 22px dotted workspace and a dark live JavaScript panel. Solid hats are slightly darker than the source to retain white-text contrast. Friendly labels are presentation-only; the saved bounded program and typed JavaScript remain unchanged. Use the incumbent interface and monospace fonts; no remote font dependency is added. Retain the left number gutter, warnings, source-command toggle, real Show text editing, category navigation, drag/tap insertion, explicit deletion, undo/redo and account saves. The reference's toy generator and drag-left deletion script are not imported. At wide sizes the live code panel sits beside blocks; smaller sizes stack it below. All samples and the curriculum boundary are preserved.
+
+## Latest owner refinement: more blocks, no read-only panel
+
+The owner approved the Claude block styling, requested more blocks, then explicitly chose “Remove the panel” for the dark read-only JavaScript preview. That panel and its third-column layout are now removed. Keep Show blocks / Show text and the real editable CodeMirror view. The toolbox has 54 complete templates across UI controls, Control, Variables, Text, Math and Data. Desktop palettes scroll within a 480px area; mobile retains horizontal palette access. Keep the approved block visuals. Boolean arguments use true/false selects. Text/Math templates assign results to visible named variables; do not imply free expression-socket dragging. The shared allowlisted model adds bounded properties/geometry, text/number helpers, Boolean values/not and local row actions; frontend and backend must be deployed together for new saves. Preserve all existing account, execution and curriculum boundaries.
+
+## Current desktop density and height contract
+
+The owner subsequently requested smaller buttons/items and an editor that fits desktop height instead of scrolling the whole platform. This supersedes the original 108px header, oversized tiles and fixed-height desktop editors. At widths of at least 951px and heights of at least 600px, use a 100dvh flex workbench: 76px header, approximately 48px navigation, 32px pointer controls, 60px design tiles and tighter property spacing. The phone canvas scales proportionally into the remaining preview height without changing its 320 × 480 design coordinates. Keep Run and the view switch reachable. Properties, long toolbox lists, blocks/text, data and expanded debug output scroll within bounded panels; ordinary desktop use must not scroll the document. The desktop code palette uses its remaining height rather than the earlier 480px cap. Preserve the approved block shapes, gutter and editing behavior. Touch-operated desktops retain 44px controls. Narrow or very short/zoomed windows keep the existing document-scrolling fallback and touch sizes. No runtime, account, curriculum or deployment changes are implied. See `docs/APP_LAB_COMPACT_DESKTOP_2026_10_20.md` for evidence.
+
+The latest preview refinement removes the bulb tip/text and the “Saving & design tips” disclosure beneath Run on all sizes. Existing Help still explains Run/reset, private/device saves, pretend data and keyboard movement. The desktop preview column is 308px instead of 276px and the phone frame cap is 338px instead of 314px, allowing a taller proportional canvas rather than stretching its contents. Reclaimed footer height goes to the preview, with 12px bottom padding under Run/reset. Keep the separate Apply/discard draft warning, save feedback and real errors.

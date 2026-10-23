@@ -3,6 +3,7 @@ import type { ProgressDocument } from '../shared/progress';
 import { creativeSolutions } from '../src/creativeMissions';
 import { parseConceptCode } from '../src/conceptText';
 import { moduleQuiz } from '../shared/quizzes';
+import { readStudioGallery } from '../shared/studioGallery';
 const identity = { learnerId: 'synthetic-creative-pupil', classroomId: 'synthetic-creative-class' };
 async function fixture(page: Page, grade: number, id: string, program?: ReturnType<typeof parseConceptCode>) {
   let value: ProgressDocument = { version: 1, currentId: id, view: 'challenge', progress: {}, drawings: {}, basicsComplete: [], topicRecords: {}, preferences: { reducedMotion: true, largeText: false, soundEnabled: false, musicEnabled: false } }, revision = 0;
@@ -39,10 +40,13 @@ test('student dashboard opens the separate free lab without changing a course ac
   const saved = await fixture(page, 4, 'grade-4-sequences-1');
   await page.goto('/#/student-courses');
   await page.getByRole('link', { name: 'Open Byte Lab · Grade 4' }).click();
+  const blankProject = page.getByRole('button', { name: 'Start with a blank project', exact: true });
+  await expect(blankProject).toBeVisible({ timeout: 20000 });
   await expect(page.getByRole('heading', { name: 'Byte Lab project editor', exact: true })).toHaveCount(1);
+  await blankProject.click();
   await page.getByRole('button', { name: 'Run', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Click Byte sprite', exact: true })).toBeEnabled({ timeout: 10000 });
   await expect.poll(() => saved().currentId).toBe('grade-4-creative-4');
-  await expect.poll(() => saved().progress['grade-4-creative-4']?.workspace?.byteStudio).toBeTruthy();
+  await expect.poll(() => readStudioGallery(saved().progress['grade-4-creative-4']?.workspace).projects.length).toBe(1);
   expect(saved().progress['grade-4-creative-4'].complete).toBe(false);
 });

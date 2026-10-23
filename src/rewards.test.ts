@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { challengeStars } from './rewards';
 import { emptySave, freshProgress, parseSave, switchCourse } from './storage';
 
-describe('mastery rewards', () => {
-  it.each([[1,5],[2,5],[3,4],[4,4],[5,3],[7,3],[8,2],[11,2],[12,1],[100000,1]])('attempt %i earns %i stars', (attempt, stars) => {
+describe('retry-friendly practice rewards', () => {
+  it.each([[1,5],[2,5],[3,5],[4,5],[5,5],[7,5],[8,5],[11,5],[12,5],[100000,5]])('attempt %i earns %i stars', (attempt, stars) => {
     expect(challengeStars(attempt, 0)).toBe(stars);
   });
-  it('reduces help gradually without zero-star completions', () => {
-    expect([0,1,2,3,4].map(hints => challengeStars(1, hints))).toEqual([5,5,4,3,2]);
-    expect(challengeStars(1, 0, true)).toBe(1);
-    for (let attempt = 1; attempt < 30; attempt++) for (let hint = 0; hint <= 4; hint++) expect(challengeStars(attempt, hint)).toBeGreaterThanOrEqual(1);
+  it('welcomes all hints and examples without reducing completion stars', () => {
+    expect([0,1,2,3,4].map(hints => challengeStars(1, hints))).toEqual([5,5,5,5,5]);
+    expect(challengeStars(1, 0, true)).toBe(5);
+    for (let attempt = 1; attempt < 30; attempt++) for (let hint = 0; hint <= 4; hint++) expect(challengeStars(attempt, hint)).toBe(5);
   });
   it('persists completed rewards independently for each course', () => {
     let save = switchCourse(emptySave(), 'arrows');

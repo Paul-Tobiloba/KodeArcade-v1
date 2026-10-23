@@ -1,0 +1,58 @@
+import { expect, test } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test('expanded toolbox inserts real commands without the read-only panel', async ({ page }, info) => {
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
+  await page.goto('/#/app-lab'); await page.getByRole('button', { name: /^Blank app/ }).click();
+  for (const name of ['Button', 'Label', 'Checkbox', 'Slider']) await page.getByRole('button', { name, exact: true }).click();
+  await page.getByRole('button', { name: 'Select button1, button', exact: true }).click();
+  await page.getByRole('button', { name: 'Add event blocks', exact: true }).click();
+  await expect(page.getByLabel('Live JavaScript preview', { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('navigation', { name: 'App block categories' }).getByRole('button')).toHaveCount(6);
+  const event = page.locator('.al-js-block').filter({ has: page.getByRole('button', { name: 'Edit event command as text', exact: true }) }).last();
+  await event.locator('.al-code-gap').last().click();
+  await page.getByRole('button', { name: 'Math', exact: true }).click();
+  await expect(page.locator('.al-code-examples > button')).toHaveCount(12);
+  await page.getByRole('button', { name: 'var roll = randomNumber(1, 6);', exact: true }).click();
+  await page.getByRole('button', { name: 'Text', exact: true }).click();
+  await page.getByRole('button', { name: 'var loud = upperCase("hello");', exact: true }).click();
+  await page.getByRole('button', { name: 'UI controls', exact: true }).click();
+  for (const source of ['setProperty("label1", "background-color", "#6d4aff");', 'setPosition("label1", 20, 100);', 'setSize("label1", 200, 60);', 'setChecked("checkbox1", true);']) await page.getByRole('button', { name: source, exact: true }).click();
+  const checked = page.getByRole('combobox', { name: 'set property argument 3', exact: true });
+  await checked.selectOption('false'); await checked.blur();
+  await checked.selectOption('true'); await checked.blur();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await page.locator('.al-preview').getByRole('button', { name: 'Tap me', exact: true }).click();
+  const label = page.locator('.al-runtime-label');
+  await expect(label).toHaveCSS('background-color', 'rgb(109, 74, 255)');
+  await expect(label).toHaveCSS('left', '20px'); await expect(label).toHaveCSS('width', '200px');
+  await expect(page.locator('.al-preview input[type="checkbox"]')).toBeChecked();
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+  await page.getByRole('button', { name: 'Math', exact: true }).click();
+  await page.locator('.al-code').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: `.impeccable/review/app-lab-expanded-${info.project.name}.png`, fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect((await new AxeBuilder({ page }).include('.al-code').analyze()).violations).toEqual([]);
+  await page.getByRole('button', { name: 'Show text', exact: true }).click();
+  const editor = page.getByRole('textbox', { name: 'App JavaScript code', exact: true });
+  await expect(editor).toContainText('randomNumber(1, 6)'); await expect(editor).toContainText('upperCase("hello")');
+  await editor.fill('textLen'); await editor.press('Control+Space');
+  await expect(page.locator('.cm-tooltip-autocomplete')).toContainText('textLength');
+});
+
+test('new text and row commands apply, run and persist through the text editor', async ({ page }) => {
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
+  await page.goto('/#/app-lab'); await page.getByRole('button', { name: /^Animal explorer/ }).click();
+  await page.getByRole('button', { name: 'Code', exact: true }).click(); await page.getByRole('button', { name: 'Show text', exact: true }).click();
+  await page.getByRole('textbox', { name: 'App JavaScript code', exact: true }).fill('onStart(function() {\n addRow("animals");\n setCell("animals", 3, "name", "New");\n deleteRow("animals", 0);\n console.log(getRowCount("animals"));\n console.log(containsText(upperCase("hello"), "HEL"));\n});');
+  await page.getByRole('button', { name: 'Apply code', exact: true }).click();
+  await page.getByRole('button', { name: 'Show blocks', exact: true }).click();
+  await expect(page.locator('.al-js-program')).toContainText('add blank row to');
+  await page.reload(); await page.getByRole('button', { name: 'Code', exact: true }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await page.locator('.al-console summary').click();
+  await expect(page.locator('.al-console pre')).toHaveText('3\ntrue');
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await expect(page.locator('.al-console pre')).toHaveText('3\ntrue');
+});

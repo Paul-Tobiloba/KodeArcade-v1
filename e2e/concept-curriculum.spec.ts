@@ -24,6 +24,7 @@ for (const scenario of [
   });
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto(`/#/student-play/grade-${scenario.grade}`);
+  await expect(page.getByRole('status', { name: 'Loading KodeArcade', exact: true })).toHaveCount(0, { timeout: 20000 });
   await expect(page.getByRole('region', { name: `${scenario.title} results lab` })).toBeVisible();
   if (scenario.keyboard) {
     await page.getByText('Build & edit with keyboard', { exact: true }).click();

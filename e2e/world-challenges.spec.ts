@@ -4,6 +4,7 @@ import { emptySave } from '../src/storage';
 import { missions } from '../src/learning';
 import { collectionSolutions } from '../src/collectionMissions';
 import { gradeSolutions } from '../src/gradeMissions';
+import { instructionLimit } from '../src/programLimits';
 
 async function seed(page: Page, id: string, options: { code?: string; empty?: boolean } = {}) {
   const save = emptySave();
@@ -76,11 +77,13 @@ test('native palette and keyboard additions stop at the activity budget', async 
 });
 
 test('Text mode cannot bypass the limit and existing core slots link to new tasks', async ({page}) => {
-  await seed(page,'grade-5-conditionals-3-world-v2',{code:'move_right()\n'.repeat(6)});
-  await expect(page.locator('.program-budget')).toContainText('6 / 5 instructions');
+  const id = 'grade-5-conditionals-3-world-v2';
+  const limit = instructionLimit(missions.find(mission => mission.id === id)!);
+  await seed(page,id,{code:'move_right()\n'.repeat(limit + 1)});
+  await expect(page.locator('.program-budget')).toContainText(`${limit + 1} / ${limit} instructions`);
   await page.getByRole('button',{name:'Run code',exact:true}).click();
-  await expect(page.locator('.retry-toast')).toContainText('no more than 5');
-  await page.getByRole('button',{name:'Read lesson',exact:true}).click();
+  await expect(page.locator('.retry-toast')).toContainText(`no more than ${limit}`);
+  await page.getByRole('button',{name:'Module overview',exact:true}).click();
   const core = page.getByRole('list',{name:'Core activities'});
   await expect(core.locator('li')).toHaveCount(10);
   await expect(core.locator('li').nth(2)).toContainText('Carrot or clear path');
@@ -109,18 +112,19 @@ test('Dash wins by collecting five carrots without reaching a finish tile', asyn
 
 test('old over-budget drafts stay intact and can be repaired', async ({page}) => {
   const id = 'grade-5-loops-9';
-  await seed(page,id,{code:'move_right()\n'.repeat(12)});
+  const code = 'move_right()\n'.repeat(instructionLimit(missions.find(mission => mission.id === id)!) + 1);
+  await seed(page,id,{code});
   const input = page.getByRole('textbox',{name:'Your text program'});
-  await expect(input).toHaveValue('move_right()\n'.repeat(12));
+  await expect(input).toHaveValue(code);
   await page.getByRole('button',{name:'Run code',exact:true}).click();
   await expect(page.locator('.retry-toast')).toContainText('no more than');
-  await expect(input).toHaveValue('move_right()\n'.repeat(12));
+  await expect(input).toHaveValue(code);
 });
 
 test('loop drawing counts written instructions and rejects unrolled duplicates', async ({page}) => {
   const id = 'grade-5-loops-1';
   await seed(page,id,{empty:true});
-  await page.getByRole('button',{name:'Read lesson',exact:true}).click();
+  await page.getByRole('button',{name:'Module overview',exact:true}).click();
   await page.getByRole('list',{name:'Drawing activities'}).getByRole('button',{name:/Type a hexagon/}).click();
   await expect(page.locator('.program-budget')).toContainText('0 / 3 instructions');
   const input = page.getByRole('textbox',{name:'Your text program'});

@@ -5,8 +5,9 @@ test('legacy arrow course, stage Play, delayed feedback and independent saves', 
   const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/learn/arrows');
-  await expect(page.getByRole('region', { name: 'Current course' })).toContainText('Little Explorers');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.locator('.game-course-title')).toContainText('Little Explorers', { timeout: 15000 });
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await expect(page.locator('.blocklyFlyout image')).toHaveCount(4);
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();

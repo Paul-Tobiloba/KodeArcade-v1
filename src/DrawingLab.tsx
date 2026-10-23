@@ -8,6 +8,7 @@ import BlockEditor, { type EditorHandle } from './BlockEditor';
 import TextEditor from './TextEditor';
 import FeedbackDialog from './FeedbackDialog';
 import { challengeStars } from './rewards';
+import { completePractice, readPractice, type CodingPractice } from '../shared/codingPractice';
 import type { Mission } from './learning';
 import type { SoundCue } from './sound';
 import ActivityGuide from './ActivityGuide';
@@ -16,13 +17,13 @@ import useStageVisible from './useStageVisible';
 import { activityStorage } from './activityStorage';
 
 const start: PenPoint = { x: 150, y: 260, heading: 0, line: 0 };
-type Work = { code?: string; workspace?: Record<string,unknown>; blockCode?: string; mode?: 'blocks'|'text'; complete?: boolean; ink?: string; width?: number; attempts?: number; stars?: number };
+type Work = { code?: string; workspace?: Record<string,unknown>; blockCode?: string; mode?: 'blocks'|'text'; complete?: boolean; ink?: string; width?: number; attempts?: number; stars?: number; practice?: CodingPractice };
 export function readDrawingWork(grade: string, id: string): Work {
   try {
     const value: unknown = JSON.parse(activityStorage.getItem(drawingSaveKey(grade,id)) ?? '{}');
     if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
     const v = value as Record<string,unknown>;
-    return { code: typeof v.code === 'string' ? v.code.slice(0,10000) : undefined, blockCode: typeof v.blockCode === 'string' ? v.blockCode.slice(0,10000) : undefined, workspace: v.workspace && typeof v.workspace === 'object' && !Array.isArray(v.workspace) ? v.workspace as Record<string,unknown> : undefined, mode: v.mode === 'text' ? 'text' : 'blocks', complete: v.complete === true, ink: ['#6d4aff','#08796e','#b53e75'].includes(String(v.ink)) ? String(v.ink) : '#6d4aff', width: [2,4,6].includes(Number(v.width)) ? Number(v.width) : 4, attempts: Math.max(0,Math.min(1000,Number(v.attempts)||0)), stars: Math.max(0,Math.min(5,Number(v.stars)||0)) };
+    return { practice: readPractice(v.practice), code: typeof v.code === 'string' ? v.code.slice(0,10000) : undefined, blockCode: typeof v.blockCode === 'string' ? v.blockCode.slice(0,10000) : undefined, workspace: v.workspace && typeof v.workspace === 'object' && !Array.isArray(v.workspace) ? v.workspace as Record<string,unknown> : undefined, mode: v.mode === 'text' ? 'text' : 'blocks', complete: v.complete === true, ink: ['#6d4aff','#08796e','#b53e75'].includes(String(v.ink)) ? String(v.ink) : '#6d4aff', width: [2,4,6].includes(Number(v.width)) ? Number(v.width) : 4, attempts: Math.max(0,Math.min(1000,Number(v.attempts)||0)), stars: Math.max(0,Math.min(5,Number(v.stars)||0)) };
   } catch { return {}; }
 }
 type Props = { grade: string; selected: number; activityIndices: number[]; moduleTitle: string; backLabel?: string; onBack: () => void; reduced: boolean; hint: number; onHint: () => void; onSelect: (index: number) => void; onComplete: () => void; onRunning: (running: boolean) => void; onCelebrating: (open: boolean) => void; onSound: (cue: SoundCue) => void };
@@ -50,6 +51,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
   const stage = useRef<HTMLElement>(null);
   const visible = useStageVisible(stage);
   const complete = useRef(saved.complete === true), attempts = useRef(saved.attempts ?? 0), best = useRef(saved.stars ?? 0);
+  const practice = useRef(saved.practice);
   const editor = useRef<EditorHandle>(null), timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const target = useMemo(() => activity.free ? [] : drawProgram(activity.reference),[activity]);
   const mission = useMemo<Mission>(() => ({id:`drawing-${grade}-${activity.id}`,title:activity.title,concept:'Drawing',description:activity.objective,goal:activity.objective,size:5,start:{x:0,y:0},end:{x:0,y:0},walls:[],loops:true,starter:[],hints:[],reflection:'',...(activity.reference.includes('for ') ? {maxBlocks:statementCount(parseCode(activity.reference,true)),requireLoop:true} : {})}),[grade,activity]);
@@ -58,7 +60,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
   useEffect(() => { if (!toast) return; const id = setTimeout(() => setToast(''),3000); return () => clearTimeout(id); },[toast]);
   useEffect(() => { if (hint) setGuide(true); },[hint]);
   function persist() {
-    try { activityStorage.setItem(drawingSaveKey(grade,activity.id),JSON.stringify({code,workspace,blockCode,mode,ink,width,complete:complete.current,attempts:attempts.current,stars:best.current})); setWarning(''); }
+    try { activityStorage.setItem(drawingSaveKey(grade,activity.id),JSON.stringify({code,workspace,blockCode,mode,ink,width,complete:complete.current,attempts:attempts.current,stars:best.current,practice:practice.current})); setWarning(''); }
     catch { setWarning('Your drawing cannot save in this browser. Keep this tab open.'); }
   }
   useEffect(() => { persist(); /* Persist tool-only choices as well as code changes. */
@@ -90,7 +92,7 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
         else {
           stop();
           if (activity.free || drawingMatches(frames,target)) {
-            complete.current = true; const stars = challengeStars(attempts.current,0); best.current = Math.max(best.current,stars); setReward(stars);
+            complete.current = true; practice.current = completePractice(practice.current, hint > 0); const stars = challengeStars(attempts.current,0); best.current = Math.max(best.current,stars); setReward(stars);
             persist(); setArrived(true); setMessage(`${activity.title} complete! Dash followed your instructions.`); setFeedback(true); onSound('success'); onComplete();
           } else retry('Compare Dash’s lines with the dotted target. Change your code and try again.');
         }
@@ -128,6 +130,6 @@ function DrawingChallenge({ grade, selected, activity, activityIndices, moduleTi
       </section>
     </div>
     {warning && <p className="warning" role="alert">{warning}</p>}
-    <FeedbackDialog open={feedback} stars={reward} message={`${activity.title} complete! Dash followed your instructions.`} reduced={reduced} nextTitle={nextIndex === undefined ? backLabel ?? moduleTitle : drawingActivities[grade][nextIndex].title} nextLabel={nextIndex === undefined ? backLabel ?? 'Back to module' : 'Next drawing'} onStar={() => onSound('star')} onClose={() => setFeedback(false)} onNext={() => { setFeedback(false); if (nextIndex === undefined) onBack(); else onSelect(nextIndex); }}/>
+    <FeedbackDialog open={feedback} stars={reward} practiceNote="Five stars for completed practice. Retrying and asking for help are part of learning." message={`${activity.title} complete! Dash followed your instructions.`} reduced={reduced} nextTitle={nextIndex === undefined ? backLabel ?? moduleTitle : drawingActivities[grade][nextIndex].title} nextLabel={nextIndex === undefined ? backLabel ?? 'Back to module' : 'Next drawing'} onStar={() => onSound('star')} onClose={() => setFeedback(false)} onNext={() => { setFeedback(false); if (nextIndex === undefined) onBack(); else onSelect(nextIndex); }}/>
   </>;
 }

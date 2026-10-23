@@ -7,7 +7,7 @@ test('choose a course, scope the drawer, and read lessons beside the workspace',
   expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
   await page.screenshot({ path: `.impeccable/review/learning-entry-${testInfo.project.name}.png`, fullPage: true });
   await page.getByRole('button', { name: 'Explore courses', exact: true }).click();
-  await page.getByRole('link', { name: /Grade 2/ }).click();
+  await page.getByRole('link', { name: /^Grade 2 · Pattern Explorers/ }).click();
   await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).count()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();

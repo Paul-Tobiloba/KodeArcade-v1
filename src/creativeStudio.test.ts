@@ -70,6 +70,20 @@ describe('creative projects and free Byte Lab', () => {
   it('go_to checks its destination, unlike continuous movement', () => {
     const result = execute('on_touch:\n    say("hello")\ngo_to(90, 0)'); expect(result.frames.at(-1)?.sprite?.events).toEqual([]);
   });
+  it.each([
+    ['show_boolean(not touching_edge())', [true]],
+    ['show_boolean(touching_edge() or touching_character())', [false]],
+    ['show_boolean(not touching_edge() and not touching_character())', [true]],
+    ['go_to(100, 0)\nshow_boolean(not touching_edge())', [false]],
+  ] as const)('keeps collision predicates composable after adding concept traces: %s', (code, output) => {
+    const blocks = execute(code), text = runText(code, free);
+    expect(blocks.success, blocks.message).toBe(true);
+    expect(text.success, text.message).toBe(true);
+    expect(blocks.frames.at(-1)?.lab?.output).toEqual(output);
+    expect(text.frames.at(-1)?.lab?.output).toEqual(output);
+    // Creative projects keep their existing lab-frame shape, not game metadata.
+    expect(blocks.frames.at(-1)?.lab).toEqual({ calls: 0, output: [...output] });
+  });
   it('turns by degrees and backward preserves facing', () => {
     const result = execute('turn_left(90)\nforward(20)\nbackward(10)');
     expect(result.frames.at(-1)?.sprite?.y).toBeCloseTo(10); expect(result.frames.at(-1)?.sprite?.angle).toBe(90);

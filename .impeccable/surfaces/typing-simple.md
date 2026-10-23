@@ -1,0 +1,45 @@
+# Simple typing and moving finger guide — 21 October 2026
+
+## Superseded by owner-supplied light interface and platform header — 22 October 2026
+
+Current visual authority is [Typing Claude light platform interface](typing-claude-light.md), following the owner's rejection of the landing-page header and supplied `typing-design.html`. It replaces this document's sparse neutral layout/system typing title/public-header split with a navy platform shell, forced light violet/white body, scoped Baloo 2/Nunito lesson hero, real grouped metrics, larger exercise stage and keyboard/finger-name panels. The owner explicitly keeps hands removed; no capsule art or abandoned rig returns. Existing curriculum, focused input, native repair/writing, sound, scoring and preview/private-save boundaries remain. All scoped `ship` verdicts and verification below are historical evidence for earlier simple-scene/removal builds, not finish clearance of the replacement or owner acceptance. Current evidence: `../../docs/TYPING_CLAUDE_PLATFORM_INTERFACE.md`.
+
+## Owner-directed hands removal — current amendment, 21 October 2026
+
+The owner ended the unfinished hand work: “Just remove the hands if you can't come up with something better.” Hands, rig, motor, event plumbing, setting and hand-specific styling/padding are removed. Retain next-key/opposite-Shift keyboard highlights, recommended-finger text including “Either thumb” for Space, simple exercise layout, original clicks and all learning/save boundaries. Old saved `hands` preferences remain readable and inert. The articulated candidate is abandoned and not shipped. Its first `fix` and earlier scoped `ship` remain history, not owner acceptance. Further hand-animation correction/rescoring below is superseded. Removal checks pass 42/42 browser cases across desktop/phone/tablet, thirteen focused units and build/types; all six required captures are valid. The same reviewer's disposition is `ship` strictly for owner-directed removal and retained simple scene, not hand-animation acceptance or a whole-product review. See `../../docs/TYPING_HAND_ANIMATION_2026_10_21.md`.
+
+## Historical hand-motion amendment
+
+### Superseding hand-motion amendment — 21 October 2026
+
+First replacement scoring in `../review/typing-hand-motion-finish.md` is `fix`: item 1's visible skin/caps/thumb join and item 2's modifier-sensitive release identity remain partial; items 3–5 are resolved. Those corrections and hand-animation rescoring were abandoned at owner direction. The earlier 48/48 checks establish the tested mechanism, not clearance of these newly identified defects.
+
+The owner subsequently rejected hand motion: “Use a proper animation to work on the hand. Figure it out and implement something better.” The historical scoped `ship` below cleared three scored fixes and is not owner acceptance. The replacement contract is [Articulated typing-hand motion](typing-hand-motion.md); the candidate and further hand-animation scoring were subsequently abandoned at owner direction. This amendment supersedes the hand-mechanism and current-disposition claims below while preserving the approved simple page, sound and product boundaries.
+
+The abandoned candidate used fixed-length three-bone 3D digits, analytical inverse kinematics, a 140-degree proximal/middle curl limit, rigid knuckle spacing and palm travel bounded to 1.8 F-key widths. SVG skin follows solved joints. Focused passage keydown/keyup/cancel signals drive one interruptible reach/contact/hold/release motor without delaying entry or clicks. Space demonstrates one left thumb; either thumb remains valid. System/saved reduced motion jumps to solved/contact states; settled/held poses sleep and hidden/offscreen/removed guidance cancels. The corrected browser rerun passes 48/48 checks across three device projects; sixteen focused unit tests and build/types pass. Fifteen required captures were opened and valid, and a built-preview physical-key video was recorded. Further hand-animation scoring was subsequently abandoned at owner direction. Numeric checks and stills do not certify anatomy, smoothness or EdClub motion fidelity. Detailed truth and limits: `../../docs/TYPING_HAND_ANIMATION_2026_10_21.md`.
+
+## Historical simple-scene direction and implementation
+
+Mode: Operate. The owner rejected the prior typing redesign with a laptop screenshot and then supplied a 44.77-second EdClub recording. They explicitly confirmed removing the large metric cards and Byte speech bubble in favor of a simple typing area, moving finger guidance and small indicators. This direction supersedes the previous visual signoff; no grading, curriculum, global header or account changes.
+
+## Direction contract
+
+THESIS: One quiet exercise canvas with readable text and fingers that physically reach the actual next key, not fixed mitten art with a colored spot.
+
+OWN-WORLD: Keep the real global KodeArcade header and violet accent. A light neutral learning canvas, white keycaps, outlined translucent instructional hands and compact system-type controls. No coach bubble, metric cards, scenery or decorative containers.
+
+STORY: Focus the displayed text, type, correct with Backspace, follow the moving recommended finger and opposite Shift, pause or mute, then receive the unchanged saved result. Four-state character feedback remains.
+
+FIRST VIEWPORT: Thin lesson/control row; centered passage or individually defined short-pattern tiles; keyboard and complete transparent hand guide beneath; small progress/accuracy/WPM/character-streak footer. Verify actual1311×685 laptop and1306×656, plus phone/tablet. Avoid solving fit with miniature keys or severed palms.
+
+FORM: Code-led, explicitly owner-pinned EdClub-style simplicity. Hand paths are an interactive measured keyboard diagram: each fingertip is computed from the actual DOM key rectangle and its finger assignment; paths change as keys change, not a painted scene. No EdClub visual/audio pixels ship. Original local Web Audio mechanical clicks are enabled on physical typing gestures, muted by a visible control, disposed on unmount; unavailable audio must never block typing. The supplied clip was visually inspected at six timestamps; this runtime could extract but not audition its audio, so exact sonic identity is not claimed.
+
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+
+## Implementation and review amendment — 21 October 2026
+
+Current source implements the open neutral field (#f7f7fa), thin system-type lesson/control row, individual early-grade tiles or large mono passage, centered key/hand diagram and small progress/real-metric footer. Large metric cards and Byte's bubble are removed. `TypingKeyboard` measures actual DOM key rectangles; `TypingHands` computes recommended fingertips, opposite Shift and Space from that geometry. The hand art is now an original continuous SVG contour with transparent keys beneath, not the initial fixed raster. Physical practice retains green correct, red-underlined mistake, amber repaired and violet current feedback. Inactive lines are hidden cleanly; active-line progression remains bounded and reduced motion removes transitions. Global public/private headers and K identity remain.
+
+Original local Web Audio clicks default on for the mounted session, have a visible mute/settings control and dispose on unmount. Sound availability never blocks practice. The supplied clip's audio could not be auditioned; no exact timbre or EdClub sonic-match claim is made. No supplied video pixels or audio ship. Native repair/writing and explicit writing download, curriculum, accuracy stars, protected bests, version-1 progress and private/public boundaries remain.
+
+The final same-reviewer disposition in `../review/typing-simple-finish.md` is `ship` for the three scored fixes: coherent hand/opposite-Shift contours, clean active-only line presentation and superseding documentation. The review states: “Clear. Ship covers the scored fixes, not the whole surface.” This does not claim a new whole-surface review or owner acceptance. Final supplied post-correction verification records 42/42 browser cases across desktop/phone/tablet, 13 focused unit tests, passing frontend build/server types, twelve valid refreshed scene/Space captures, production-preview smoke on port 4173 and eight reused rasters with zero missing provenance. The smoke typed `Our `, advanced to G, muted sound and observed zero page errors; a settled mounted-guide check confirmed opposite Shift after an initial timing-only sample. The reviewer accepted the detector's functional current-tile underline; its 31 route-local advisories are not a global rewrite instruction. Phone/tablet composition does not establish software-keyboard/IME support, and local account fixtures do not establish live production-account behavior. Audio-listening and browser/device limits remain. Details: `../../docs/TYPING_SIMPLE_GUIDE_2026_10_21.md`.

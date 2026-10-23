@@ -18,9 +18,8 @@ for (const course of ['arrows', 'words', 'builder'] as const) {
         }, NAV_KEY);
       }
       await page.goto(`/#/learn/${course}`);
-      const courseLabel = staleDrawing ? page.locator('.game-course-title') : page.getByRole('region', { name: 'Current course' });
+      const courseLabel = page.locator('.game-course-title');
       await expect(courseLabel).toContainText(courseFor(course).title);
-      if (!staleDrawing) await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
       await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
       await expect.poll(() => page.evaluate(key => JSON.parse(localStorage.getItem(key)!).view, NAV_KEY)).toBe('challenge');
       await page.reload();

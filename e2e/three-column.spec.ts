@@ -6,7 +6,8 @@ import { gradeSolutions } from '../src/gradeMissions';
 test('lesson, activity and code use responsive columns without decorative side terrain', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/#/learn/grade-3');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   await expect(page.locator('.activity-guide')).toBeVisible();
   await expect(page.locator('.world-scenery')).toHaveCount(0);
@@ -64,7 +65,9 @@ test('lesson, activity and code use responsive columns without decorative side t
   await page.getByRole('button', { name: 'Show next hint', exact: true }).click();
   await expect.poll(() => page.evaluate(() => JSON.parse(localStorage.getItem('kodearcade-v1')!).progress['grade-3-sequences-1'].hints)).toBe(2);
   await page.screenshot({ path: `.impeccable/review/three-column-${info.project.name}-hint.png`, fullPage: true });
-  const id = 'grade-3-conditionals-4';
+  // Slot 4 now migrates to Dash's collection activity. Use an unreplaced
+  // conditional mission to keep this layout check on Milo's decision scene.
+  const id = 'grade-3-conditionals-2';
   await page.evaluate(({ id, current, solution }) => {
     const save = JSON.parse(localStorage.getItem('kodearcade-v1')!);
     save.current = current;

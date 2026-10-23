@@ -26,6 +26,8 @@
 .learning-world .scene-heading, .learning-world .editor-title { background: #fff; border-bottom: 1px solid #e8e2f2; }
 .learning-world.challenge-active .tile-scene .scene-heading { padding: 14px 18px; gap: 10px; }
 .learning-world .stage-heading-copy { flex: 1; min-width: 0; }
+/* Keep score initialization from rewrapping the goal and moving the board. */
+.learning-world .tile-scene .score-display { min-inline-size: 18ch; flex-shrink: 0; text-align: center; }
 .learning-world.challenge-active .tile-scene .scene-heading h2 { font-size: clamp(1.05rem,1.6vw,1.45rem); line-height: 1.2; }
 .learning-world .scene-heading h2 svg { flex-shrink: 0; color: #078778; }
 .learning-world.challenge-active .tile-scene .goal { padding: 7px 0 0; font-size: .875rem; color: #49425e; line-height: 1.4; }
@@ -110,11 +112,15 @@
 .learning-entry .entry-option { border: 1px solid #d9ceee; border-radius: 14px; background: #fff; padding: 22px; gap: 16px; flex-wrap: nowrap; }
 .learning-entry .entry-option:hover { border-color: #7543df; background: #faf8ff; }
 .learning-entry .entry-world-art { width: 88px; height: 88px; flex: 0 0 88px; border-radius: 50%; background: #f0eafa; }
+.learning-entry .entry-world-art > .character-sprite { display: grid; place-items: center; color: #6237df; }
 .learning-entry .entry-course-copy { flex: 1; min-width: 0; }
 .learning-entry .entry-option h2 { font-size: 1.25rem; line-height: 1.2; display: flex; gap: 6px; align-items: center; }
 .learning-entry .entry-option p { font-size: .875rem; line-height: 1.5; }
 .learning-entry .entry-option small { font-size: .75rem; }
 .learning-entry .entry-computer { grid-column: 1 / -1; }
+.entry-labs { margin-top: 32px; padding: 24px 0; border-top: 1px solid #ded9ed; }
+.entry-labs > h2 { font: 600 1.4rem/1.2 Fredoka, 'Segoe UI', sans-serif; margin: 0; }
+.entry-labs > p { margin: 8px 0 20px; color: #575472; font-size: .875rem; line-height: 1.6; max-width: 68ch; }
 .learning-world :focus-visible, .learning-entry :focus-visible { outline: 3px solid #986cf5; outline-offset: 3px; }
 .learning-world .topbar :focus-visible { outline-color: #ffe28c; }
 .learning-world .game-tools .read-aloud>span { color: #241259; }

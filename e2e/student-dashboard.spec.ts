@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 const student = { learnerId: 'synthetic-learner', classroomId: 'synthetic-class', displayName: 'Sample Student', classroomName: 'Sample Grade 4 Class', assignments: [{ id: 'assignment', courseKey: 'grade-4' }] };
 test.beforeEach(async ({ page }) => {
   await page.route('**/api/capabilities', route => route.fulfill({ json: {} }));
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
 });
 test('signed-in dashboard has student navigation, real profile and assigned courses', async ({ page }, info) => {
   await page.route('**/api/student/courses', route => route.fulfill({ json: student }));
@@ -15,7 +16,10 @@ test('signed-in dashboard has student navigation, real profile and assigned cour
   await page.locator('.student-dashboard img').evaluateAll(images => Promise.all(images.map(image => (image as HTMLImageElement).decode())));
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   if (info.project.name === 'phone') {
-    const action = await page.getByRole('link', { name: 'Open Byte Lab · Grade 4', exact: true }).boundingBox();
+    const lab = page.getByRole('link', { name: 'Open Byte Lab · Grade 4', exact: true });
+    await lab.scrollIntoViewIfNeeded();
+    const action = await lab.boundingBox();
+    expect(action!.height).toBeGreaterThanOrEqual(44);
     expect(action!.y + action!.height).toBeLessThanOrEqual(await page.evaluate(() => innerHeight));
   }
   await page.screenshot({ path: `.impeccable/review/student-dashboard-${info.project.name}.png`, fullPage: true });

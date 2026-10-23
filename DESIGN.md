@@ -19,6 +19,16 @@ colors:
   learning-nav: "#241259"
   learning-action: "#6237df"
   learning-ground: "#eeebf8"
+  typing-light-top: "#f8f6ff"
+  typing-light-bottom: "#eeeafc"
+  typing-action: "#6d3fe0"
+  typing-ink: "#241a4d"
+  typing-muted: "#665b83"
+  typing-line: "#dfd6f3"
+  typing-current: "#7743e8"
+  typing-correct: "#166534"
+  typing-mistake: "#991b1b"
+  typing-corrected: "#854d0e"
   learning-ink: "#181339"
   learning-muted: "#575472"
   learning-line: "#ded9ed"
@@ -66,6 +76,26 @@ typography:
     fontFamily: "'Segoe UI', ui-sans-serif, system-ui, sans-serif"
     fontSize: ".875rem"
     lineHeight: 1.6
+  typing-lesson-headline:
+    fontFamily: "'Baloo 2', Fredoka, sans-serif"
+    fontSize: "clamp(1.9rem,2.7vw,2.8rem)"
+    fontWeight: 800
+    lineHeight: 1.1
+    letterSpacing: "-.02em"
+  typing-reading:
+    fontFamily: "Nunito, 'Segoe UI', sans-serif"
+    fontSize: ".875rem"
+    fontWeight: 700
+  typing-key-label:
+    fontFamily: "Nunito, sans-serif"
+    fontSize: ".875rem"
+    fontWeight: 700
+    lineHeight: 1.1
+  typing-beginner-tile:
+    fontFamily: "'Baloo 2', sans-serif"
+    fontSize: "3.6rem"
+    fontWeight: 800
+    lineHeight: 1
 rounded:
   chip: "5px"
   field: "7px"
@@ -74,6 +104,9 @@ rounded:
   workspace: "14px"
   dialog: "16px"
   learning-play: "10px"
+  typing-stage: "20px"
+  typing-panel: "16px"
+  typing-metric: "14px"
 spacing:
   small: "8px"
   control-gap: "10px"
@@ -137,6 +170,21 @@ components:
     textColor: "{colors.learning-nav}"
     padding: "16px"
     height: "62px"
+  typing-stage:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.typing-ink}"
+    rounded: "{rounded.typing-stage}"
+    padding: "13px 18px 11px"
+  typing-current-key:
+    backgroundColor: "{colors.typing-current}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.field}"
+    typography: "{typography.typing-key-label}"
+  typing-finger-panel:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.typing-muted}"
+    rounded: "{rounded.typing-panel}"
+    padding: "12px 10px"
 ---
 
 # Design System: KodeArcade
@@ -153,6 +201,8 @@ The approved 9 October learning extension makes each coding activity a playable 
 
 The approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 25/30/45 of the workspace columns to those roles. The article expands in normal flow, pushing activity instructions and hints down within one scrollable guide column. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.
 
+The superseding 22 October typing direction adapts the owner's supplied `typing-design.html`: a friendly Byte lesson hero, real progress/accuracy/streak, a bounded white practice panel and broad keyboard with textual finger panels. The latest owner direction rejects the animation's quality/smoothness and permits a still: the hero now uses one crisp static Byte behind a lavender laptop, with the faint scenic backdrop retained. The actual navy platform header carries the approved K and Fredoka wordmark across typing map, practice and results, including previews and signed-in sessions. The activity stays light under either OS color preference. Baloo 2 and Nunito are intentional route-local roles from the supplied implementation; this does not replace incumbent brand, coding or public-page typography. Instructional hand guides remain removed; Byte is decorative still artwork. The abandoned articulated guide, rejected sprite animation and their earlier scoped reviews remain history, not owner acceptance of those candidates.
+
 **Key Characteristics:**
 
 - A consistent three-piece block-built K.
@@ -161,6 +211,7 @@ The approved learning layout keeps lesson, activity instructions and progressive
 - Visible focus and reduced-motion support.
 - Purple learning navigation and readable white workspaces around semantic mascot tile worlds.
 - A persistent wide-screen lesson guide, smaller stage and readable native Blockly palette.
+- A scoped light typing lesson with supplied Baloo 2/Nunito lettering, meaningful feedback, broad keyboard and textual finger panels.
 
 This captures `src/styles.css`, `src/course.css`, `src/brand.css` and the approved scope in `docs/BRAND_IMPLEMENTATION.md` on 5 October 2026. It documents the current application and a small identity extension, not a new page composition.
 
@@ -197,6 +248,8 @@ Public pages use scoped cloud ground (#f8faff), deep ink (#101333) and action vi
 - **Drawer and selected-module:** dark navigation and its violet-tinted current state.
 - **Learning ground, ink, muted and line:** scoped lavender canvas, dark purple text, supporting copy and borders. Learning workspaces remain surface white, with a pale editor heading and darker panel border. Learning drawer and navigation-control fills keep navigation distinct from the stage.
 - **Learning focus and navigation focus:** violet outlines on light learning surfaces and warm yellow outlines inside purple navigation.
+- **Typing light top/bottom, ink, muted and line:** owner-supplied light violet atmosphere, dark readable lettering and quiet panel separation, scoped to the typing route. White panels sit over its vertical ground gradient.
+- **Typing action and current:** violet controls and the next/current key cue; the current cue also uses a visible outline. Typing correct, mistake and corrected shades retain green/red/amber feedback with underline, dotted edge or outline cues rather than color alone.
 
 **The Accent Legibility Rule.** Bright brand teal and yellow are identity accents, not small text colors on white; retain functional teal for readable block labels.
 
@@ -208,11 +261,13 @@ Fredoka is the locally hosted display face with a system fallback. The current c
 
 The principal heading uses the headline token and reduces to 1.7rem at the narrow breakpoint. The wordmark reduces to 1.3rem at 620px and 1.1rem at 360px. Lesson prose uses .93rem with 1.8 line-height and a maximum of 72ch; the introduction uses 1.075rem with 1.85 line-height and 70ch. The global 16px size is a root reference, not the size of every paragraph.
 
-**The Reading Voice Rule.** Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”
+**The Reading Voice Rule.** Preserve the plain system face for incumbent instructions and controls; the supplied typing interface alone uses its scoped Nunito reading/control roles. The tagline is exactly “Play. Build. Learn.”
 
 Public pages extend Fredoka to expressive hero and section headings. Body copy, navigation, course-card titles and step-card titles keep system type. The public hero uses responsive display sizing; learning headings and reading widths retain their own rules.
 
 Learning entry uses its scoped responsive Fredoka headline token. Tile-stage mission titles use the scoped Fredoka title token; editor headings also use Fredoka at 1.2rem, inherited from the course heading rules. Play uses system type at 1.15rem, goal copy at .875rem/1.4, and world/tool labels at .75rem. At 700px and below the stage goal becomes .85rem and world labels .7rem. Do not turn every utility label into display type.
+
+Typing is the owner-authorized local exception: its lesson headline and beginner tiles use Baloo 2, while controls, reading and key labels use Nunito. The headline token is the ordinary desktop size; tall desktops increase it to 3rem, compact laptops use 1.95rem and phones 1.8rem. Short beginner tiles use the dedicated tile role; long passages retain responsive Consolas/Courier New monospace and native repair/writing editors retain their editing behavior. The global header wordmark remains Fredoka. Baloo 2 Bold/ExtraBold and Nunito SemiBold/Bold are self-hosted under `public/fonts`, with adjacent OFL files and `typing-fonts-origin.txt`; no Google font network request is required at runtime. These exact supplied families are an intentional scoped system change, not a warning-driven global replacement.
 
 ## Layout
 
@@ -234,11 +289,17 @@ Spacing tokens record recurring observed dimensions, not a mandated new spacing 
 
 Public pages alternate wide illustrated sections with constrained readable content. Their navigation becomes an explicit menu at 900px; at 600px, two-column sections and the full catalog stack. Keep menu, search and learning links reachable. Decorative scene plates sit in isolated layers below real HTML, preserve their 3:2 aspect ratio and use linear masks to blend rectangular edges into the ground. Do not simulate an organic island contour with a generic mask. The approved sky hero retains its separate responsive crop.
 
+Typing uses a 1500px content maximum beneath the shared navy platform header, with a compact lesson/control row, Byte lesson hero and grouped live progress/accuracy/streak. A white bordered practice stage holds large beginner tiles or the active measured passage and its four-state legend. The guidance area has a 1280px maximum: finger-name panels flank the keyboard in 170px/minmax(0,1fr)/170px columns with 20px gaps. At 1000px and below the keyboard comes first and the finger lists share a row below; at 600px padding, labels and keycaps compact further. Wide viewports up to 720px tall compact the hero, stage and guide; wide viewports at least 850px tall enlarge them. Hands remain removed. Phone/tablet composition supports physical-keyboard teaching and does not establish software-keyboard or IME support. The complete surface contract is `.impeccable/surfaces/typing-claude-light.md`.
+
 ## Elevation & Depth
 
 Most surfaces are flat, separated by borders and tonal fills. Modal dialogs use the shared `0 20px 80px #11182740` shadow and a dimmed backdrop. The robot has a small local illustration shadow; do not apply it to the logo. Drawer motion uses 180ms ease-out, while board movement uses 360ms cubic-bezier(.16,1,.3,1). Respect both the application reduced-motion setting and the system preference.
 
 Public-page depth comes primarily from the generated landscape. Step cards use the observed soft shadow (`0 12px 30px -20px #897bc4`); it is a scoped marketing treatment, not a new workspace or logo shadow.
+
+The supplied typing treatment uses restrained local ambient shadows on white metrics and practice panels, and a small functional keycap shadow on the next key. These route-local values live in the sidecar. They do not authorize decorative bevels, new logo shadows or offset-shadow cards elsewhere.
+
+The typing hero retains its faint cloud/mountain/mint-hill/rocket backdrop behind real HTML, at .7 opacity with vertically faded edges and an open reading area. Decorative horizontal inset tracks main padding: 24px wide, 18px at 1000px and below, 12px at 600px and below, keeping artwork within the viewport without clipping the interactive page. Byte is a single transparent, high-resolution still illustration displayed with object-fit contain at the existing responsive dimensions (100px ordinary, 140px tall desktop, 80px compact laptop, 72px phone). There is no mascot animation, sprite background, keyframe loop or visibility observer. Existing exercise line/reduced-motion behavior remains separate. Both shipping hero rasters have exact adjacent prompts and embedded provenance; the rejected sprite and prompt are archived outside public assets.
 
 Learning tile depth is local: the map has a thin learning-line outline and no map shadow; moving sprites use `drop-shadow(0 3px 2px #14221766)` and destinations `drop-shadow(0 2px 2px #50351766)`. Decorative scenery strips around the map are removed. Help/tools use the existing compact popover shadow. The white editor and lesson containers stay border-led. Tile movement retains the incumbent movement timing, and drawing reveals ink along Dash's motion. Reduced motion removes sliding and celebration confetti.
 
@@ -282,6 +343,8 @@ The dark drawer groups modules and nested challenges. The current module has a v
 
 The learning toolbar uses learning navigation purple, a white wordmark, current grade/topic/challenge, numbered progress and lesson/listen/hint/course/settings controls. The learning drawer uses its scoped deeper purple fill. Keep Change course reachable and expose the active course; Computer Explorers retains its own activities.
 
+`PlatformHeader` now supplies the actual navy learning bar to course entry and every typing state, including browser previews. It keeps the real K and white Fredoka wordmark. Guest previews expose Log in; real signed-in adult sessions expose their name, My dashboard and Account settings; real learner sessions expose My courses. Assigned learners retain the existing `LearnerMenu` and guarded sign-out/settings behavior. A signed-in preview remains labeled as a device preview and never gains assigned-save claims through session presence alone. Marketing navigation belongs to public information pages, not these activity surfaces.
+
 ### Chips
 
 Concept labels are small violet-tinted informational chips using the concept colors and chip radius. They are not action buttons and do not require invented interaction states.
@@ -294,6 +357,8 @@ The active learning override uses white workspaces with the larger dialog radius
 
 ### Playable mascot stage and editor
 
+Score readouts reserve a stable 18ch minimum inline width. Replacing “not set” with a numeric result must not rewrap the mission goal or shift the tile map; the score keeps its existing semantic output, colors and responsive type size.
+
 The stage presents mission title and goal, mascot/world name, a named destination, semantic tile map, status and a Rows & columns toggle. Board text and live position descriptions remain available. A run advances the live character cell by cell while highlighting the executing Blockly block. Byte guides sequences/projects; Dash directions/order and drawing; Gigi loops; Fix debugging; Milo the monkey conditionals; Nova variables; Pip Computer Explorers. Pip's Events lookup is not an implemented formal Events curriculum.
 
 The white Blockly workspace keeps its real draggable palette and connected code canvas. Its light violet toolbox comes from the existing Blockly theme. The start label uses the block-start token; the measured white-text contrast is 4.626:1. Footer reference, keyboard helpers, history and editable long-program overview remain usable. Grades 5–6 offer Blocks/Text within the same editor; typed commands are a bounded teaching language, not full Python.
@@ -302,11 +367,33 @@ Palette blocks stay at native Blockly scale .95; longer lists use the native fly
 
 Drawing swaps only the execution stage for smooth white paper: a dotted target, progressive ink, Dash holding a pencil and a heading pointer. It reuses the navigation, editor and Play position. Drawing tools expose ink and pen width, and drawing work saves separately from core challenge progress.
 
+### Code-driven concept games — scoped extension, 22 October
+
+Rescue Islands, Secret Gates and Robot Workshop extend the existing learning stage for operators, Boolean logic and functions. Painted island, garden and workshop backgrounds combine with native-alpha Byte, timber, gate leaves and energy cells; cyan, mint and warm timber surrounds belong to these scenes. Keep the navy platform shell, white panels, violet Play, Fredoka stage/editor headings and plain semantic labels/code. Dynamic operands, truth values, calls, targets and ordered output remain HTML inscriptions and status text, with exact values even when pictured pieces are bounded; pictures must not invent counts, evaluated branches or successful completion. The concept-only wider stage retains the adjustable desktop editor and visible goal/Play/reset/Results at 1309 × 700. Preserve each scene's aspect ratio with matching letterboxing on tall screens; narrow/short screens use the incumbent stacked, document-scrolling layout. Results is a native disclosure, closed initially, with Escape returning focus to its summary. Byte's crossing is bounded (800 ms) and gate motion takes 600 ms; application/OS reduced motion removes spatial effects and hidden/offscreen scenes pause decorative motion. These component rules implement the owner's authorized functional adaptation of the three critique references, not a new global palette, typography or pixel-reproduction contract. See `docs/CONCEPT_GAMES_2026_10_22.md` and the matching surface brief for scope and evidence.
+
 ### Lessons and narration
 
 The activity guide puts concept prose and worked example, authored activity instructions and progressive hints alongside the challenge. Its reading role uses the learning-guide-reading token. The first challenge's concept opens automatically only on wide desktop; later concepts start closed. Generated grade-context instructions are omitted because the toolbar already supplies that context; authored instructions remain, and an identical instruction/goal is printed once within the guide. Hint reveal accounting and protected saved bests retain their existing behavior. A hint request expands the folded guide and brings its hint heading into view.
 
 Ordinary concept introductions retain once-per-course/module cadence and a manual Read lesson action during practice; reinforcement challenges go directly to building. Grade 1 Sequences retains its existing topic journey and captioned lesson video with text/read-aloud alternatives. Read-aloud stays opt-in, with visible Listen/Stop controls, local English device voices and clear unavailable-voice feedback. Extend future lesson media with captions and text alternatives. See `docs/LEARNING_ENTRY.md` and `docs/SEQUENCE_LESSON.md`.
+
+### Student dashboard Labs
+
+Assigned courses lead on home and classroom student dashboards. A single Labs section follows the course/help columns on desktop: Byte Lab, App Lab and Artist Lab once each, in compact horizontal icon-and-label tiles. On phones, stack the tiles directly after courses and before help. Use the existing violet/lavender shell, white surfaces, Fredoka headings, and violet/teal/ochre icon panels. A Project course selector appears only for multiple supported assignments and changes launch destinations without moving old work. Byte/App require an assigned Grade 3–6 course; Artist opens existing code art for Grades 1–6. Unavailable entries are non-interactive and explain why. No public-storage fallback, new access grants or new painting application. See `docs/DASHBOARD_LABS_2026_10_21.md`.
+
+The public course chooser reuses those three cards below Computer Explorers instead of a plain App Lab link. Its guidance explicitly says preview work is browser-local and separate from student accounts. Byte/Artist retain a supported last-used public course, with Grade 3/Grade 1 defaults; App Lab has its independent browser-preview route. The shared card renderer changes neither private eligibility nor saved data. Course circles show immediate topic icons until their existing character artwork loads, and retain icons if loading fails. No new rasters or global sprite-style changes.
+
+### App Lab desktop workbench
+
+App Lab retains its approved violet/lavender shell and Claude-derived rounded category blocks. The owner’s latest density refinement takes precedence over the initial spacious mockup: at ≥951px wide and ≥600px high, the shell occupies 100dvh with a 76px header, approximately 48px navigation, 32px pointer controls, 60px design tiles and compact property groups. Preview scaling preserves the 320 × 480 coordinate system. The preview footer has only Run/reset and actionable draft warnings: the bulb tip and Saving & design tips disclosure are removed in favour of a taller phone preview, with a 308px desktop preview column and 338px frame-width cap. Guidance remains available through Help. Keep navigation and Run visible; scroll long content inside properties, toolbox, code/text, data and the expanded debug console, not the desktop page. Touch-operated desktop controls retain 44px targets. Narrow and very short/zoomed windows keep document scrolling and the existing mobile composition. See `.impeccable/surfaces/app-lab.md` and `docs/APP_LAB_COMPACT_DESKTOP_2026_10_20.md`. Other learning surfaces are unchanged.
+
+### Typing lesson and guidance — superseding scoped system change, 22 October
+
+The owner-supplied implementation establishes the light lesson hero, grouped real metrics, larger bounded exercise/legend, next-key label and broad keyboard with textual left/right finger-name lists. The latest request replaces the rejected animated candidate with `public/images/typing/byte-typing.png`, a single static Byte/laptop illustration; `lesson-sky.png` remains behind the hero. These preserve actual Byte/platform identity rather than the demo mascot/star mark. White keycaps retain functional depth; violet identifies the next key and opposite Shift, while text and a selected list row name the recommended finger. Space retains “Either thumb.” Instructional hands, capsule artwork and articulated rig/motor remain removed. Neither rejected guide defects nor rejected sprite smoothness are canonized.
+
+Text entry and original clicks remain immediate. Active-line progression retains its bounded 280ms transition and saved/system reduced-motion behavior. Four-state feedback distinguishes correct, underlined mistake, dotted corrected-after-Backspace and outlined current positions; the earlier functional underline exception does not establish a decorative-card rule. Preserve pause, guide, mute, settings, writing protection and downloads. This adapts visual structure into the existing curriculum/input/progress system rather than importing the demo's scores, ACTS loop, global input handler or inert controls. Earlier simple-scene/removal `ship` verdicts remain historical scoped verdicts, not this replacement's finish clearance or owner acceptance. Current evidence and remaining limits are in `docs/TYPING_CLAUDE_PLATFORM_INTERFACE.md`.
+
+The owner's subsequent interaction correction makes the actual typing field ready immediately on practice arrival, activity/round entry, retry and resume, including native repair/writing inputs. Focus follows the committed task change without scrolling; changing ordinary text, toolbar controls or preferences does not retake focus. Pause, map, result and corrupt-progress recovery keep their own focus behavior, and results retain their focused heading. Scoped primary buttons keep white labels over dark violet on hover; secondary and quiet buttons use the established pale violet hover fill with dark ink/violet labels. Variant hover rules remain distinct so a generic light hover cannot wash out a primary action. This records interaction within the typing surface, without new global tokens.
 
 ### Brand lockup
 
@@ -321,7 +408,7 @@ The shared public navigation exposes Courses, How it works and For Parents, with
 ### Do:
 
 - Do reuse the approved three-piece K and the exact tagline.
-- Do preserve system typography for lesson reading and controls.
+- Do preserve system typography for incumbent lesson reading and controls, with Baloo 2/Nunito confined to the owner-supplied typing interface.
 - Do keep focus, text scaling and reduced-motion behavior visible in new work.
 - Do use the darker functional teal for white movement-block labels.
 - Do apply learning tokens only within the learning shell and entry; preserve public-page rules and the master mark.

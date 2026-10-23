@@ -11,6 +11,8 @@ async function openLoopsLesson(page: import('@playwright/test').Page) {
 test('Grade 1 topic teaches, assesses and derives its badge without perfect stars', async ({ page }, info) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/#/learn/grade-1');
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Sequences topic journey' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Try the mastery mission' })).toBeDisabled();
   const video = page.locator('video');
@@ -43,7 +45,8 @@ test('Grade 1 topic teaches, assesses and derives its badge without perfect star
 
 test('Grade 5 typed coding stays visible, animates before feedback and preserves both modes', async ({ page }, info) => {
   await page.goto('/#/learn/grade-5');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   const code = 'move_up()\nmove_right()\nmove_right()\nmove_right()\nmove_right()';
   await page.getByLabel('Your text program').fill(code);
@@ -124,11 +127,11 @@ test('long drawing overview preserves repeat scope and real drawing value ranges
     for (let i=22;i>=0;i--) body = { type:i%2 ? 'ka_draw_turn' : 'ka_draw_forward',id:`draw-${i}`,fields:i%2 ? {VALUE:90,SIDE:'left'} : {VALUE:60},...(body ? {next:{block:body}} : {}) };
     const repeat: State = {type:'ka_draw_repeat',id:'draw-repeat',fields:{COUNT:8},inputs:{DO:{block:body!}}};
     const start: State = {type:'ka_start',id:'draw-start',next:{block:repeat}};
-    localStorage.setItem('kodearcade-drawing-v2-grade-3-square',JSON.stringify({workspace:{blocks:{languageVersion:0,blocks:[start]}},mode:'blocks'}));
+    localStorage.setItem('kodearcade-drawing-v2-grade-3-create',JSON.stringify({workspace:{blocks:{languageVersion:0,blocks:[start]}},mode:'blocks'}));
   });
-  await page.goto('/#/learn/grade-3');
-  await openLoopsLesson(page);
-  await page.getByRole('button',{name:'Open drawing lab'}).click();
+  // A 24-instruction in-progress program belongs in free Artist Lab; the
+  // repeating-square lesson deliberately has a three-instruction budget.
+  await page.goto('/#/learn/grade-3/art');
   if (info.project.name==='desktop') await page.setViewportSize({width:1308,height:677});
   // Controlled cramped-host fixture exercises the same fallback used whenever
   // Blockly must scale below .55; normal challenge dimensions stay unchanged.
@@ -136,7 +139,8 @@ test('long drawing overview preserves repeat scope and real drawing value ranges
   const overview = page.getByRole('region',{name:'Program steps'});
   await expect(overview).toBeVisible();
   await overview.getByRole('button',{name:'Step 1: Repeat 8 times',exact:true}).click();
-  await expect(page.getByLabel('Selected repeat count')).toHaveAttribute('max','12');
+  await expect(page.getByLabel('Selected repeat count')).toHaveAttribute('min','0');
+  await expect(page.getByLabel('Selected repeat count')).not.toHaveAttribute('max');
   await page.getByLabel('Selected repeat count').fill('12');
   await overview.getByRole('button',{name:/Step 2: .*inside Repeat ×12: DO/}).click();
   await expect(page.getByLabel('Selected block value')).toHaveAttribute('max','150');
@@ -169,8 +173,10 @@ test('long drawing overview preserves repeat scope and real drawing value ranges
 
 test('Grade 1 drawing is arrow-led and progresses through several activities', async ({ page }, info) => {
   await page.goto('/#/learn/grade-1');
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
-  await expect(page.getByRole('navigation', {name:'Challenge progress'}).getByRole('button')).toHaveCount(1);
+  await expect(page.getByRole('navigation', {name:'Challenge progress'}).getByRole('button')).toHaveCount(4);
   await expect(page.locator('#drawing-code')).toHaveCount(0);
   await expect(page.locator('.blocklySvg').first()).toBeVisible();
   await page.getByText('Keyboard helpers', {exact:true}).click();
@@ -178,9 +184,9 @@ test('Grade 1 drawing is arrow-led and progresses through several activities', a
   await page.getByRole('button', {name:'Add block',exact:true}).click();
   await page.getByRole('button', { name: 'Run code' }).click();
   await expect(page.getByRole('dialog', {name:'You made it!'})).toBeVisible();
-  await page.getByRole('button', {name:'Back to module',exact:true}).click();
-  await page.getByRole('button', {name:'Next module',exact:true}).click();
-  await page.getByRole('button', {name:'Open drawing lab',exact:true}).click();
+  await page.getByRole('button', {name:'Close feedback',exact:true}).click();
+  await page.getByRole('button', {name:'Read lesson',exact:true}).click();
+  await page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /Turn a corner/ }).click();
   await expect(page.getByRole('region', { name: 'Dash drawing challenge' }).getByRole('heading', { name: 'Turn a corner', exact: true })).toBeVisible();
   await page.getByText('Keyboard helpers', {exact:true}).click();
   await page.getByRole('button', {name:'Add block',exact:true}).click();

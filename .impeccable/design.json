@@ -1,8 +1,91 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-09T00:00:00Z",
+  "generatedAt": "2026-10-22T00:00:00Z",
   "title": "Design System: KodeArcade",
   "extensions": {
+    "typingClaudeLight": {
+      "scope": "22 October owner-supplied typing-design.html adaptation: navy platform shell, forced light body and scoped Baloo 2/Nunito. Latest owner rejects Byte animation quality/smoothness and permits a static still, superseding previous sprite promises. Instructional hand guides remain removed; global identity remains intact.",
+      "source": "src/PlatformHeader.tsx; src/platform-header.css; src/LearningEntry.tsx; src/TypingCourse.tsx; src/TypingPractice.tsx; src/TypingKeyboard.tsx; src/typing-claude.css; src/typing-practice.css; .impeccable/surfaces/typing-claude-light.md",
+      "paletteRoles": {
+        "ground": [
+          "typing-light-top",
+          "typing-light-bottom"
+        ],
+        "text": "typing-ink",
+        "supportingText": "typing-muted",
+        "border": "typing-line",
+        "action": "typing-action",
+        "current": "typing-current",
+        "correct": "typing-correct",
+        "mistake": "typing-mistake",
+        "corrected": "typing-corrected",
+        "navigation": "learning-nav"
+      },
+      "typographyRoles": {
+        "lessonTitle": "typing-lesson-headline",
+        "instructionAndControls": "typing-reading",
+        "keycaps": "typing-key-label",
+        "beginnerTiles": "typing-beginner-tile",
+        "longPassage": "Consolas/Courier New monospace retained for measured active lines",
+        "identity": "Existing Fredoka wordmark remains"
+      },
+      "fontHosting": "public/fonts/Baloo2-Bold.ttf; Baloo2-ExtraBold.ttf; Nunito-SemiBold.ttf; Nunito-Bold.ttf; adjacent OFL-Baloo2.txt/OFL-Nunito.txt and typing-fonts-origin.txt. No runtime Google font request required. Nunito static SemiBold/Bold files cover the CSS-declared used ranges.",
+      "composition": "Navy platform header across map/practice/results and LearningEntry; single high-resolution static Byte/lavender-laptop illustration over faint cloud/mountain/mint-hill/rocket backdrop; true progress/accuracy/streak; bounded white exercise/four-state legend; next-key cue, broad keyboard and textual finger-name panels. Native repair/writing preserved. No mascot animation or instructional hand guides.",
+      "layout": {
+        "main": "1500px maximum with 24px horizontal padding",
+        "guide": "1280px maximum; 170px minmax(0,1fr) 170px columns and 20px gaps",
+        "compactLaptop": "Width >1000px and height <=720px: denser hero/stage/guide. Reviewer-directed height budget and reserved feedback space verified at the two named desktop sizes with real mixed correction/error feedback; no all-content/all-browser guarantee.",
+        "tallDesktop": "Width >1000px and height >=850px: larger hero/tiles/keycaps; guide side columns 190px",
+        "tablet": "At <=1000px keyboard precedes two textual finger panels",
+        "phone": "At <=600px use 12px main padding and compact labels/keys"
+      },
+      "accountBoundary": "Existing SessionProvider supplies guest/adult/learner navigation on previews; assigned LearnerMenu and guarded sign-out/settings remain. Session presence never promotes public browser-preview storage into assigned private saves. Writing remains session-only.",
+      "motion": "Active-line progression retains 280ms cubic-bezier(.16,1,.3,1), with saved/system reduced-motion transition removal. Byte is a plain static decorative img: no sprite background, keyframe loop, mascot animation/reduced-motion rule, offscreen/visibility observer/listener or hero paused plumbing. Input and original clicks remain immediate.",
+      "detector": "One pass: 81 findings, four repeated Baloo 2/Nunito warnings before DESIGN roles were recorded and 77 style advisories; no slop warning. Explicit owner-supplied font roles explain the intended system, not a detector rerun or automatic finding clearance.",
+      "provenance": "Current supplied scan: ten shipping rasters, zero missing origins. New static Byte and retained scenic background have exact adjacent prompts plus embedded metadata. Rejected sprite/prompt archived outside public assets.",
+      "acceptanceLimits": "Static platform/focus batch: 19 passed/two intentional desktop-only skips across 21 cases in approximately 1.5 minutes. Frontend build, thirteen units and diff check pass (unrelated CRLF warnings). Built port-4173 smoke: zero page errors/external requests; no mascot CSS animation/getAnimations entries, horizontal overflow or instructional hands; mixed-error footers 918.34375<=941 wide / 644.1875<=656 laptop. Final typing-byte-static-finish.md: ship, no material fixes. Reviewer opened practice desktop/phone/tablet, byte-static-built.png and source PNG. Static replacement scope only; no owner acceptance, acceptance of rejected animation quality, whole-surface certification or deployment.",
+      "artwork": {
+        "still": "public/images/typing/byte-typing.png; one high-resolution transparent Byte/lavender-laptop illustration generated from actual Byte identity; exact adjacent byte-typing.prompt.txt and embedded native-PNG prompt",
+        "backdrop": "public/images/typing/lesson-sky.png retained; faint scenery behind real HTML at .7 opacity with faded edges; horizontal inset matches 24px/18px/12px responsive content padding",
+        "display": "Plain decorative img with 140px width/height attributes; object-fit contain at 100px ordinary/140px tall/80px compact/72px phone",
+        "retired": ".impeccable/assets/retired-byte-sprite holds prior sprite/exact prompt recoverably outside public assets"
+      },
+      "responsiveCorrection": "Scoped reviewer resolved both original fixes and authorized art/motion, then found phone/tablet decorative overflow from fixed -24px inset. Matching -18px/-12px correction: platform/simple suites 19 pass/two intentional desktop-only skips across 21 cases, with decoration left>=0/right<=viewport on all three device classes and desktop feedback-height/motion. Main reports nine affected captures refreshed/opened, widths restored to 1082px phone/1620px tablet and no extra right strip. Final rebuild, server types and git diff check pass. Reviewer reopened all nine final affected captures and returned scoped ship at .impeccable/review/typing-claude-verdict.md for the two fixes, authorized art/motion and responsive correction; no new whole-surface certification or owner acceptance.",
+      "finish": {
+        "disposition": "ship",
+        "review": ".impeccable/review/typing-byte-static-finish.md",
+        "scope": "Latest owner-directed static Byte replacement only; no owner acceptance, acceptance of rejected animation quality, whole-surface certification or deployment. Earlier animation and focus/hover reviews retain their own historical scopes."
+      },
+      "focusAndHoverAmendment": {
+        "date": "2026-10-22",
+        "source": "src/TypingCourse.tsx; src/typing.css; e2e/typing-focus-hover.spec.ts",
+        "focus": "Actual practice field focuses after committed arrival/activity/round/retry/resume, including native repair/writing. Canceled animation frame with preventScroll; attempt state covers same-activity retry. Value/preferences do not trigger focus, preserving toolbar/settings interaction. Paused/map/result/corrupt-progress states excluded; native caret and result-heading behavior retained.",
+        "hover": "Primary hover uses incumbent violet-dark with white text; secondary/quiet hover uses pale violet with dark ink/violet. Explicit variant selectors prevent generic light hover overriding primary. No new tokens or global identity changes.",
+        "status": "33-case platform/redesign/focus batch: 31 passed/two intentional existing desktop-only skips in approximately 1.6 minutes. Build, thirteen units and diff check pass (unrelated CRLF warnings). Main opened all six final captures. Capture-only phone Skip-link artifact from test footer autoscroll corrected with test-only scroll to top; narrow six-case rerun passes in 23.9s, no UI change. Fresh scoped typing-focus-hover-finish.md: ship, no material fixes; reviewer reopened all six final captures and confirmed artifact removal.",
+        "finish": {
+          "disposition": "ship",
+          "review": ".impeccable/review/typing-focus-hover-finish.md",
+          "scope": "Immediate-input-focus and legible-button-hover correction only; not a new whole-surface certification, live-account/owner acceptance or deployment. Prior scoped verdicts retain their own earlier fixes/artwork scope."
+        }
+      },
+      "animationHistory": {
+        "status": "Rejected by owner for image/animation quality and smoothness. Retained historical scoped evidence only; not current runtime or owner acceptance.",
+        "motion": "Active-line progression retains 280ms cubic-bezier(.16,1,.3,1); saved/system reduced motion removes transition. Byte/laptop uses a .9s discrete four-frame 2x2 sprite cycle, with alternating arm poses/blink and anchored laptop. Pause, IntersectionObserver offscreen state and document visibility suspend it; OS/app reduced motion shows the first static frame. Input and original clicks stay immediate; no instructional hand animation.",
+        "artwork": {
+          "sprite": "public/images/typing/byte-typing-sprite.png; transparent 2x2 four-pose generated Byte/laptop sprite, replacing interim existing byte-peek.png",
+          "backdrop": "public/images/typing/lesson-sky.png; faint clouds/lilac mountains/mint hills/small rocket behind real hero HTML; .7 opacity and vertically faded edges Decorative inset matches main padding: 24px wide, 18px <=1000px, 12px <=600px; only decoration bounds change, interactive page is not clipped.",
+          "provenance": "Built-in imagegen using actual Byte identity and owner screenshot reference. Exact same-basename .prompt.txt files and embedded prompts accompany both new rasters."
+        },
+        "finish": {
+          "disposition": "ship",
+          "review": ".impeccable/review/typing-claude-verdict.md",
+          "scope": "Two original scored fixes, authorized Byte typing/scenic-background addition and responsive correction; not a new whole-surface certification or owner acceptance.",
+          "history": "Full typing-claude-finish.md fix and initial scoped fix remain historical; initial failed checks and fixture corrections are retained."
+        },
+        "acceptanceLimits": "After reviewer fixes/new art, full matrix 66 pass, two intentional desktop-only skips, one added regression fixture failure from reused mounted-route/attempt state. Test-only actual Try again reset: focused desktop rerun passes in 9.7s. 67 applicable checks pass across matrix/rerun, not a single all-69-pass run. Thirteen units/frontend build/server types pass. Built smoke zero page errors/external requests, no horizontal overflow/instructional hands; footer 918.34375<=941 wide and 644.1875<=656 laptop with feedback visible. Four animation positions, Pause/resume and app/OS reduced motion pass. Main reports 22 refreshed/opened captures plus four rendered Byte frames. Full finish fix is historical. Initial scoped review resolved two fixes/art then found decorative responsive overflow, now corrected and verified in 19 post-correction passes/two intentional skips; final scoped ship at .impeccable/review/typing-claude-verdict.md closes both original fixes, authorized Byte/scenery addition and responsive correction. This is not a new whole-surface certification or owner acceptance. Local fixtures are not live accounts/owner acceptance; no software-keyboard/IME, exact demo-JavaScript/reference audio, push, deployment or migration claim.",
+        "archive": ".impeccable/assets/retired-byte-sprite/byte-typing-sprite.png and byte-typing-sprite.prompt.txt; recoverable, outside shipping public assets"
+      }
+    },
     "learningWorld": {
       "scope": "9 October learning-only tile-world extension of Build & Play; frontmatter learning-* and block-* tokens are normative. Incumbent primitives and publicPages remain intact.",
       "source": "src/learning-world.css; src/App.tsx; src/ActivityGuide.tsx; src/BlockEditor.tsx; src/MissionStage.tsx; src/CharacterSprite.tsx; src/LearningEntry.tsx; src/DrawingLab.tsx; src/blockly.ts; docs/TILE_WORLD_REDESIGN.md",
@@ -64,41 +147,466 @@
       "scope": "7 October illustrated public-page extension of Build & Play; incumbent learning primitives remain unchanged.",
       "source": "src/landing.css; src/Landing.tsx; src/MarketingPages.tsx; docs/ILLUSTRATED_PAGES.md",
       "reference": "User-approved KodeArcade_ Byte’s Coding Adventure.png; code-led implementation, without a formal composition seed or quality card.",
-      "surfaceColors": { "ground": "#f8faff", "ink": "#101333", "action": "#6840f5" },
-      "responsive": { "menu": "900px", "stacked-sections-and-catalog": "600px" },
+      "surfaceColors": {
+        "ground": "#f8faff",
+        "ink": "#101333",
+        "action": "#6840f5"
+      },
+      "responsive": {
+        "menu": "900px",
+        "stacked-sections-and-catalog": "600px"
+      },
       "sceneTreatment": "Isolated decorative layers below real HTML; 3:2 scene plates preserve aspect ratio and use linear edge blending, not fabricated organic-contour masks. Approved sky hero has a separate responsive crop.",
       "provenance": "All nine shipped PNGs contain impeccable:prompt metadata; exact four new scene prompts are in docs/ILLUSTRATED_PAGES.md. Master SVG mark remains authoritative.",
       "components": [
         {
-          "name": "Public-page action", "kind": "button", "description": "Scoped public-page navigation action; learning controls retain their existing primitives.",
+          "name": "Public-page action",
+          "kind": "button",
+          "description": "Scoped public-page navigation action; learning controls retain their existing primitives.",
           "html": "<a class=\"ds-public-action\" href=\"/#/learn\">Start Learning</a>",
           "css": ".ds-public-action{display:inline-flex;align-items:center;justify-content:center;min-height:53px;padding:14px 25px;border-radius:13px;background:#6840f5;color:white;text-decoration:none;font-family:'Segoe UI',system-ui,sans-serif;font-size:1rem;font-weight:650;transition:background 160ms ease-out}.ds-public-action:hover{background:#5332d6}.ds-public-action:focus-visible{outline:3px solid #5332d6;outline-offset:4px}@media(prefers-reduced-motion:reduce){.ds-public-action{transition:none}}"
         }
       ]
     },
     "colorMeta": {
-      "learning-nav": {"role":"primary","displayName":"Learning Navigation Purple","tonalRamp":["oklch(15% .13 294)","oklch(27% .13 294)","oklch(38% .13 294)","oklch(50% .13 294)","oklch(61% .13 294)","oklch(73% .13 294)","oklch(84% .13 294)","oklch(95% .13 294)"]},
-      "learning-action": {"role":"primary","displayName":"Learning Action Violet","tonalRamp":["oklch(15% .21 292)","oklch(27% .21 292)","oklch(38% .21 292)","oklch(50% .21 292)","oklch(61% .21 292)","oklch(73% .21 292)","oklch(84% .21 292)","oklch(95% .21 292)"]},
-      "learning-ground": {"role":"neutral","displayName":"Learning Lavender Ground","tonalRamp":["oklch(15% .025 295)","oklch(27% .025 295)","oklch(38% .025 295)","oklch(50% .025 295)","oklch(61% .025 295)","oklch(73% .025 295)","oklch(84% .025 295)","oklch(95% .025 295)"]},
-      "learning-ink": {"role":"neutral","displayName":"Learning Purple Ink","tonalRamp":["oklch(15% .06 292)","oklch(27% .06 292)","oklch(38% .06 292)","oklch(50% .06 292)","oklch(61% .06 292)","oklch(73% .06 292)","oklch(84% .06 292)","oklch(95% .06 292)"]},
-      "learning-muted": {"role":"neutral","displayName":"Learning Muted Ink","tonalRamp":["oklch(15% .04 295)","oklch(27% .04 295)","oklch(38% .04 295)","oklch(50% .04 295)","oklch(61% .04 295)","oklch(73% .04 295)","oklch(84% .04 295)","oklch(95% .04 295)"]},
-      "learning-line": {"role":"neutral","displayName":"Learning Line","tonalRamp":["oklch(15% .025 295)","oklch(27% .025 295)","oklch(38% .025 295)","oklch(50% .025 295)","oklch(61% .025 295)","oklch(73% .025 295)","oklch(84% .025 295)","oklch(95% .025 295)"]},
-      "learning-panel-line": {"role":"neutral","displayName":"Learning Panel Line","tonalRamp":["oklch(15% .06 295)","oklch(27% .06 295)","oklch(38% .06 295)","oklch(50% .06 295)","oklch(61% .06 295)","oklch(73% .06 295)","oklch(84% .06 295)","oklch(95% .06 295)"]},
-      "learning-editor-ground": {"role":"neutral","displayName":"Learning Editor Ground","tonalRamp":["oklch(15% .02 295)","oklch(27% .02 295)","oklch(38% .02 295)","oklch(50% .02 295)","oklch(61% .02 295)","oklch(73% .02 295)","oklch(84% .02 295)","oklch(95% .02 295)"]},
-      "learning-drawer": {"role":"neutral","displayName":"Learning Drawer","tonalRamp":["oklch(15% .06 292)","oklch(27% .06 292)","oklch(38% .06 292)","oklch(50% .06 292)","oklch(61% .06 292)","oklch(73% .06 292)","oklch(84% .06 292)","oklch(95% .06 292)"]},
-      "learning-nav-control": {"role":"primary","displayName":"Learning Navigation Control","tonalRamp":["oklch(15% .11 294)","oklch(27% .11 294)","oklch(38% .11 294)","oklch(50% .11 294)","oklch(61% .11 294)","oklch(73% .11 294)","oklch(84% .11 294)","oklch(95% .11 294)"]},
-      "learning-focus": {"role":"primary","displayName":"Learning Focus Violet","tonalRamp":["oklch(15% .18 295)","oklch(27% .18 295)","oklch(38% .18 295)","oklch(50% .18 295)","oklch(61% .18 295)","oklch(73% .18 295)","oklch(84% .18 295)","oklch(95% .18 295)"]},
-      "learning-nav-focus": {"role":"tertiary","displayName":"Learning Navigation Focus","tonalRamp":["oklch(15% .12 90)","oklch(27% .12 90)","oklch(38% .12 90)","oklch(50% .12 90)","oklch(61% .12 90)","oklch(73% .12 90)","oklch(84% .12 90)","oklch(95% .12 90)"]},
-      "block-start": {"role":"tertiary","displayName":"Start Ochre","tonalRamp":["oklch(15% .12 78)","oklch(27% .12 78)","oklch(38% .12 78)","oklch(50% .12 78)","oklch(61% .12 78)","oklch(73% .12 78)","oklch(84% .12 78)","oklch(95% .12 78)"]},
-      "block-conditional": {"role":"tertiary","displayName":"Conditional Amber","tonalRamp":["oklch(15% .14 60)","oklch(27% .14 60)","oklch(38% .14 60)","oklch(50% .14 60)","oklch(61% .14 60)","oklch(73% .14 60)","oklch(84% .14 60)","oklch(95% .14 60)"]},
-      "block-variable": {"role":"secondary","displayName":"Variable Berry","tonalRamp":["oklch(15% .16 350)","oklch(27% .16 350)","oklch(38% .16 350)","oklch(50% .16 350)","oklch(61% .16 350)","oklch(73% .16 350)","oklch(84% .16 350)","oklch(95% .16 350)"]},
-      "violet": { "role": "primary", "displayName": "Build Violet", "tonalRamp": ["oklch(15% .17 290)", "oklch(27% .17 290)", "oklch(38% .17 290)", "oklch(50% .17 290)", "oklch(61% .17 290)", "oklch(73% .17 290)", "oklch(84% .17 290)", "oklch(95% .17 290)"] },
-      "brand-teal": { "role": "secondary", "displayName": "Play Teal", "tonalRamp": ["oklch(15% .10 180)", "oklch(27% .10 180)", "oklch(38% .10 180)", "oklch(50% .10 180)", "oklch(61% .10 180)", "oklch(73% .10 180)", "oklch(84% .10 180)", "oklch(95% .10 180)"] },
-      "brand-yellow": { "role": "tertiary", "displayName": "Play Yellow", "tonalRamp": ["oklch(15% .13 85)", "oklch(27% .13 85)", "oklch(38% .13 85)", "oklch(50% .13 85)", "oklch(61% .13 85)", "oklch(73% .13 85)", "oklch(84% .13 85)", "oklch(95% .13 85)"] },
-      "ink": { "role": "neutral", "displayName": "Ink", "tonalRamp": ["oklch(15% .025 260)", "oklch(27% .025 260)", "oklch(38% .025 260)", "oklch(50% .025 260)", "oklch(61% .025 260)", "oklch(73% .025 260)", "oklch(84% .025 260)", "oklch(95% .025 260)"] },
-      "cloud": { "role": "neutral", "displayName": "Cloud", "tonalRamp": ["oklch(15% .008 275)", "oklch(27% .008 275)", "oklch(38% .008 275)", "oklch(50% .008 275)", "oklch(61% .008 275)", "oklch(73% .008 275)", "oklch(84% .008 275)", "oklch(95% .008 275)"] }
+      "typing-light-top": {
+        "role": "neutral",
+        "displayName": "Typing Light Violet Ground Top",
+        "tonalRamp": [
+          "oklch(15% .02 295)",
+          "oklch(27% .02 295)",
+          "oklch(38% .02 295)",
+          "oklch(50% .02 295)",
+          "oklch(61% .02 295)",
+          "oklch(73% .02 295)",
+          "oklch(84% .02 295)",
+          "oklch(95% .02 295)"
+        ]
+      },
+      "typing-light-bottom": {
+        "role": "neutral",
+        "displayName": "Typing Light Violet Ground Bottom",
+        "tonalRamp": [
+          "oklch(15% 0.03 295)",
+          "oklch(27% 0.03 295)",
+          "oklch(38% 0.03 295)",
+          "oklch(50% 0.03 295)",
+          "oklch(61% 0.03 295)",
+          "oklch(73% 0.03 295)",
+          "oklch(84% 0.03 295)",
+          "oklch(95% 0.03 295)"
+        ]
+      },
+      "typing-action": {
+        "role": "primary",
+        "displayName": "Typing Action Violet",
+        "tonalRamp": [
+          "oklch(15% 0.2 295)",
+          "oklch(27% 0.2 295)",
+          "oklch(38% 0.2 295)",
+          "oklch(50% 0.2 295)",
+          "oklch(61% 0.2 295)",
+          "oklch(73% 0.2 295)",
+          "oklch(84% 0.2 295)",
+          "oklch(95% 0.2 295)"
+        ]
+      },
+      "typing-ink": {
+        "role": "neutral",
+        "displayName": "Typing Purple Ink",
+        "tonalRamp": [
+          "oklch(15% 0.07 295)",
+          "oklch(27% 0.07 295)",
+          "oklch(38% 0.07 295)",
+          "oklch(50% 0.07 295)",
+          "oklch(61% 0.07 295)",
+          "oklch(73% 0.07 295)",
+          "oklch(84% 0.07 295)",
+          "oklch(95% 0.07 295)"
+        ]
+      },
+      "typing-muted": {
+        "role": "neutral",
+        "displayName": "Typing Supporting Ink",
+        "tonalRamp": [
+          "oklch(15% 0.05 295)",
+          "oklch(27% 0.05 295)",
+          "oklch(38% 0.05 295)",
+          "oklch(50% 0.05 295)",
+          "oklch(61% 0.05 295)",
+          "oklch(73% 0.05 295)",
+          "oklch(84% 0.05 295)",
+          "oklch(95% 0.05 295)"
+        ]
+      },
+      "typing-line": {
+        "role": "neutral",
+        "displayName": "Typing Quiet Border",
+        "tonalRamp": [
+          "oklch(15% 0.04 295)",
+          "oklch(27% 0.04 295)",
+          "oklch(38% 0.04 295)",
+          "oklch(50% 0.04 295)",
+          "oklch(61% 0.04 295)",
+          "oklch(73% 0.04 295)",
+          "oklch(84% 0.04 295)",
+          "oklch(95% 0.04 295)"
+        ]
+      },
+      "typing-current": {
+        "role": "primary",
+        "displayName": "Typing Current Key Violet",
+        "tonalRamp": [
+          "oklch(15% 0.2 295)",
+          "oklch(27% 0.2 295)",
+          "oklch(38% 0.2 295)",
+          "oklch(50% 0.2 295)",
+          "oklch(61% 0.2 295)",
+          "oklch(73% 0.2 295)",
+          "oklch(84% 0.2 295)",
+          "oklch(95% 0.2 295)"
+        ]
+      },
+      "typing-correct": {
+        "role": "secondary",
+        "displayName": "Typing Correct Green",
+        "tonalRamp": [
+          "oklch(15% 0.12 150)",
+          "oklch(27% 0.12 150)",
+          "oklch(38% 0.12 150)",
+          "oklch(50% 0.12 150)",
+          "oklch(61% 0.12 150)",
+          "oklch(73% 0.12 150)",
+          "oklch(84% 0.12 150)",
+          "oklch(95% 0.12 150)"
+        ]
+      },
+      "typing-mistake": {
+        "role": "secondary",
+        "displayName": "Typing Mistake Red",
+        "tonalRamp": [
+          "oklch(15% 0.14 25)",
+          "oklch(27% 0.14 25)",
+          "oklch(38% 0.14 25)",
+          "oklch(50% 0.14 25)",
+          "oklch(61% 0.14 25)",
+          "oklch(73% 0.14 25)",
+          "oklch(84% 0.14 25)",
+          "oklch(95% 0.14 25)"
+        ]
+      },
+      "typing-corrected": {
+        "role": "tertiary",
+        "displayName": "Typing Repaired Amber",
+        "tonalRamp": [
+          "oklch(15% 0.12 75)",
+          "oklch(27% 0.12 75)",
+          "oklch(38% 0.12 75)",
+          "oklch(50% 0.12 75)",
+          "oklch(61% 0.12 75)",
+          "oklch(73% 0.12 75)",
+          "oklch(84% 0.12 75)",
+          "oklch(95% 0.12 75)"
+        ]
+      },
+      "learning-nav": {
+        "role": "primary",
+        "displayName": "Learning Navigation Purple",
+        "tonalRamp": [
+          "oklch(15% .13 294)",
+          "oklch(27% .13 294)",
+          "oklch(38% .13 294)",
+          "oklch(50% .13 294)",
+          "oklch(61% .13 294)",
+          "oklch(73% .13 294)",
+          "oklch(84% .13 294)",
+          "oklch(95% .13 294)"
+        ]
+      },
+      "learning-action": {
+        "role": "primary",
+        "displayName": "Learning Action Violet",
+        "tonalRamp": [
+          "oklch(15% .21 292)",
+          "oklch(27% .21 292)",
+          "oklch(38% .21 292)",
+          "oklch(50% .21 292)",
+          "oklch(61% .21 292)",
+          "oklch(73% .21 292)",
+          "oklch(84% .21 292)",
+          "oklch(95% .21 292)"
+        ]
+      },
+      "learning-ground": {
+        "role": "neutral",
+        "displayName": "Learning Lavender Ground",
+        "tonalRamp": [
+          "oklch(15% .025 295)",
+          "oklch(27% .025 295)",
+          "oklch(38% .025 295)",
+          "oklch(50% .025 295)",
+          "oklch(61% .025 295)",
+          "oklch(73% .025 295)",
+          "oklch(84% .025 295)",
+          "oklch(95% .025 295)"
+        ]
+      },
+      "learning-ink": {
+        "role": "neutral",
+        "displayName": "Learning Purple Ink",
+        "tonalRamp": [
+          "oklch(15% .06 292)",
+          "oklch(27% .06 292)",
+          "oklch(38% .06 292)",
+          "oklch(50% .06 292)",
+          "oklch(61% .06 292)",
+          "oklch(73% .06 292)",
+          "oklch(84% .06 292)",
+          "oklch(95% .06 292)"
+        ]
+      },
+      "learning-muted": {
+        "role": "neutral",
+        "displayName": "Learning Muted Ink",
+        "tonalRamp": [
+          "oklch(15% .04 295)",
+          "oklch(27% .04 295)",
+          "oklch(38% .04 295)",
+          "oklch(50% .04 295)",
+          "oklch(61% .04 295)",
+          "oklch(73% .04 295)",
+          "oklch(84% .04 295)",
+          "oklch(95% .04 295)"
+        ]
+      },
+      "learning-line": {
+        "role": "neutral",
+        "displayName": "Learning Line",
+        "tonalRamp": [
+          "oklch(15% .025 295)",
+          "oklch(27% .025 295)",
+          "oklch(38% .025 295)",
+          "oklch(50% .025 295)",
+          "oklch(61% .025 295)",
+          "oklch(73% .025 295)",
+          "oklch(84% .025 295)",
+          "oklch(95% .025 295)"
+        ]
+      },
+      "learning-panel-line": {
+        "role": "neutral",
+        "displayName": "Learning Panel Line",
+        "tonalRamp": [
+          "oklch(15% .06 295)",
+          "oklch(27% .06 295)",
+          "oklch(38% .06 295)",
+          "oklch(50% .06 295)",
+          "oklch(61% .06 295)",
+          "oklch(73% .06 295)",
+          "oklch(84% .06 295)",
+          "oklch(95% .06 295)"
+        ]
+      },
+      "learning-editor-ground": {
+        "role": "neutral",
+        "displayName": "Learning Editor Ground",
+        "tonalRamp": [
+          "oklch(15% .02 295)",
+          "oklch(27% .02 295)",
+          "oklch(38% .02 295)",
+          "oklch(50% .02 295)",
+          "oklch(61% .02 295)",
+          "oklch(73% .02 295)",
+          "oklch(84% .02 295)",
+          "oklch(95% .02 295)"
+        ]
+      },
+      "learning-drawer": {
+        "role": "neutral",
+        "displayName": "Learning Drawer",
+        "tonalRamp": [
+          "oklch(15% .06 292)",
+          "oklch(27% .06 292)",
+          "oklch(38% .06 292)",
+          "oklch(50% .06 292)",
+          "oklch(61% .06 292)",
+          "oklch(73% .06 292)",
+          "oklch(84% .06 292)",
+          "oklch(95% .06 292)"
+        ]
+      },
+      "learning-nav-control": {
+        "role": "primary",
+        "displayName": "Learning Navigation Control",
+        "tonalRamp": [
+          "oklch(15% .11 294)",
+          "oklch(27% .11 294)",
+          "oklch(38% .11 294)",
+          "oklch(50% .11 294)",
+          "oklch(61% .11 294)",
+          "oklch(73% .11 294)",
+          "oklch(84% .11 294)",
+          "oklch(95% .11 294)"
+        ]
+      },
+      "learning-focus": {
+        "role": "primary",
+        "displayName": "Learning Focus Violet",
+        "tonalRamp": [
+          "oklch(15% .18 295)",
+          "oklch(27% .18 295)",
+          "oklch(38% .18 295)",
+          "oklch(50% .18 295)",
+          "oklch(61% .18 295)",
+          "oklch(73% .18 295)",
+          "oklch(84% .18 295)",
+          "oklch(95% .18 295)"
+        ]
+      },
+      "learning-nav-focus": {
+        "role": "tertiary",
+        "displayName": "Learning Navigation Focus",
+        "tonalRamp": [
+          "oklch(15% .12 90)",
+          "oklch(27% .12 90)",
+          "oklch(38% .12 90)",
+          "oklch(50% .12 90)",
+          "oklch(61% .12 90)",
+          "oklch(73% .12 90)",
+          "oklch(84% .12 90)",
+          "oklch(95% .12 90)"
+        ]
+      },
+      "block-start": {
+        "role": "tertiary",
+        "displayName": "Start Ochre",
+        "tonalRamp": [
+          "oklch(15% .12 78)",
+          "oklch(27% .12 78)",
+          "oklch(38% .12 78)",
+          "oklch(50% .12 78)",
+          "oklch(61% .12 78)",
+          "oklch(73% .12 78)",
+          "oklch(84% .12 78)",
+          "oklch(95% .12 78)"
+        ]
+      },
+      "block-conditional": {
+        "role": "tertiary",
+        "displayName": "Conditional Amber",
+        "tonalRamp": [
+          "oklch(15% .14 60)",
+          "oklch(27% .14 60)",
+          "oklch(38% .14 60)",
+          "oklch(50% .14 60)",
+          "oklch(61% .14 60)",
+          "oklch(73% .14 60)",
+          "oklch(84% .14 60)",
+          "oklch(95% .14 60)"
+        ]
+      },
+      "block-variable": {
+        "role": "secondary",
+        "displayName": "Variable Berry",
+        "tonalRamp": [
+          "oklch(15% .16 350)",
+          "oklch(27% .16 350)",
+          "oklch(38% .16 350)",
+          "oklch(50% .16 350)",
+          "oklch(61% .16 350)",
+          "oklch(73% .16 350)",
+          "oklch(84% .16 350)",
+          "oklch(95% .16 350)"
+        ]
+      },
+      "violet": {
+        "role": "primary",
+        "displayName": "Build Violet",
+        "tonalRamp": [
+          "oklch(15% .17 290)",
+          "oklch(27% .17 290)",
+          "oklch(38% .17 290)",
+          "oklch(50% .17 290)",
+          "oklch(61% .17 290)",
+          "oklch(73% .17 290)",
+          "oklch(84% .17 290)",
+          "oklch(95% .17 290)"
+        ]
+      },
+      "brand-teal": {
+        "role": "secondary",
+        "displayName": "Play Teal",
+        "tonalRamp": [
+          "oklch(15% .10 180)",
+          "oklch(27% .10 180)",
+          "oklch(38% .10 180)",
+          "oklch(50% .10 180)",
+          "oklch(61% .10 180)",
+          "oklch(73% .10 180)",
+          "oklch(84% .10 180)",
+          "oklch(95% .10 180)"
+        ]
+      },
+      "brand-yellow": {
+        "role": "tertiary",
+        "displayName": "Play Yellow",
+        "tonalRamp": [
+          "oklch(15% .13 85)",
+          "oklch(27% .13 85)",
+          "oklch(38% .13 85)",
+          "oklch(50% .13 85)",
+          "oklch(61% .13 85)",
+          "oklch(73% .13 85)",
+          "oklch(84% .13 85)",
+          "oklch(95% .13 85)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% .025 260)",
+          "oklch(27% .025 260)",
+          "oklch(38% .025 260)",
+          "oklch(50% .025 260)",
+          "oklch(61% .025 260)",
+          "oklch(73% .025 260)",
+          "oklch(84% .025 260)",
+          "oklch(95% .025 260)"
+        ]
+      },
+      "cloud": {
+        "role": "neutral",
+        "displayName": "Cloud",
+        "tonalRamp": [
+          "oklch(15% .008 275)",
+          "oklch(27% .008 275)",
+          "oklch(38% .008 275)",
+          "oklch(50% .008 275)",
+          "oklch(61% .008 275)",
+          "oklch(73% .008 275)",
+          "oklch(84% .008 275)",
+          "oklch(95% .008 275)"
+        ]
+      }
     },
     "typographyMeta": {
+      "typing-lesson-headline": {
+        "displayName": "Typing lesson headline",
+        "purpose": "Supplied Baloo 2 ExtraBold lesson identity only within typing; 1.95rem compact laptop, 3rem tall desktop, 1.8rem phone."
+      },
+      "typing-reading": {
+        "displayName": "Typing reading and controls",
+        "purpose": "Supplied Nunito roles scoped to the typing interface; existing platform header stays system/Fredoka."
+      },
+      "typing-key-label": {
+        "displayName": "Typing keycap label",
+        "purpose": "Nunito Bold key labels with responsive utility sizing."
+      },
+      "typing-beginner-tile": {
+        "displayName": "Typing beginner tile",
+        "purpose": "Baloo 2 ExtraBold short-pattern tiles; long senior passages retain measured mono lines."
+      },
       "headline": {
         "displayName": "Course headline",
         "purpose": "Current course h1; locally hosted Fredoka."
@@ -126,6 +634,21 @@
     },
     "shadows": [
       {
+        "name": "typing-metric",
+        "value": "0 5px 16px -9px #6b4da54d",
+        "purpose": "Scoped white progress/metric grouping only."
+      },
+      {
+        "name": "typing-stage",
+        "value": "0 7px 22px -17px #7550ad60",
+        "purpose": "Scoped bounded white typing practice stage only."
+      },
+      {
+        "name": "typing-next-key",
+        "value": "0 3px 0 #5427a4",
+        "purpose": "Functional selected-key depth, not a decorative-card rule."
+      },
+      {
         "name": "dialog",
         "value": "0 20px 80px #11182740",
         "purpose": "Settings and feedback dialogs."
@@ -147,8 +670,16 @@
       }
     ],
     "motion": [
-      { "name": "drawer", "value": "180ms ease-out", "purpose": "Base drawer transform and main width/margin; learning main does not move. Disabled by reduced motion." },
-      { "name": "robot-movement", "value": "360ms cubic-bezier(.16,1,.3,1)", "purpose": "Execution-stage movement; disabled by reduced motion." }
+      {
+        "name": "drawer",
+        "value": "180ms ease-out",
+        "purpose": "Base drawer transform and main width/margin; learning main does not move. Disabled by reduced motion."
+      },
+      {
+        "name": "robot-movement",
+        "value": "360ms cubic-bezier(.16,1,.3,1)",
+        "purpose": "Execution-stage movement; disabled by reduced motion."
+      }
     ],
     "breakpoints": [
       {
@@ -276,14 +807,15 @@
   ],
   "narrative": {
     "northStar": "Build & Play",
-    "overview": "A friendly K assembled from coding blocks connects making with play. Violet, teal and yellow carry the identity against ink lettering and cloud backgrounds. The approved extension adds a consistent mark, wordmark and heading voice to the existing learning application.\n\nThe working surface stays legible and task-focused: a quiet lesson or mission heading, a visible execution stage, and a block editor. Flat geometry and rounded corners support the playful identity without competing with the learner's program.\n\nThe approved 9 October learning extension makes each coding activity a playable top-down tile world. Deep purple navigation frames white workspaces on pale lavender ground; the live mascot, walkable path, obstacles and destination share one meaningful map. The same shell carries grade selection, lessons, Blockly and bounded typed practice; drawing changes the stage to smooth white paper with Dash's pencil.\n\nThe approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 25/30/45 of the workspace columns to those roles. The article expands in normal flow, pushing activity instructions and hints down within one scrollable guide column. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.",
+    "overview": "A friendly K assembled from coding blocks connects making with play. Violet, teal and yellow carry the identity against ink lettering and cloud backgrounds. The approved extension adds a consistent mark, wordmark and heading voice to the existing learning application.\r\n\r\nThe working surface stays legible and task-focused: a quiet lesson or mission heading, a visible execution stage, and a block editor. Flat geometry and rounded corners support the playful identity without competing with the learner's program.\r\n\r\nThe approved 9 October learning extension makes each coding activity a playable top-down tile world. Deep purple navigation frames white workspaces on pale lavender ground; the live mascot, walkable path, obstacles and destination share one meaningful map. The same shell carries grade selection, lessons, Blockly and bounded typed practice; drawing changes the stage to smooth white paper with Dash's pencil.\r\n\r\nThe approved learning layout keeps lesson, activity instructions and progressive hints beside a smaller execution stage and the editor. Wide screens devote 25/30/45 of the workspace columns to those roles. The article expands in normal flow, pushing activity instructions and hints down within one scrollable guide column. The square map is centred on white, and the native Blockly palette keeps readable targets as the workspace changes size. The course drawer overlays the learning workspace without moving its panels.\r\n\r\nThe superseding 22 October typing direction adapts the owner's supplied `typing-design.html`: a friendly Byte lesson hero, real progress/accuracy/streak, a bounded white practice panel and broad keyboard with textual finger panels. The latest owner direction rejects the animation's quality/smoothness and permits a still: the hero now uses one crisp static Byte behind a lavender laptop, with the faint scenic backdrop retained. The actual navy platform header carries the approved K and Fredoka wordmark across typing map, practice and results, including previews and signed-in sessions. The activity stays light under either OS color preference. Baloo 2 and Nunito are intentional route-local roles from the supplied implementation; this does not replace incumbent brand, coding or public-page typography. Instructional hand guides remain removed; Byte is decorative still artwork. The abandoned articulated guide, rejected sprite animation and their earlier scoped reviews remain history, not owner acceptance of those candidates.",
     "keyCharacteristics": [
       "A consistent three-piece block-built K.",
       "Fredoka for the wordmark and principal course heading; system type for reading and controls.",
       "Light bordered workspaces and a dark course drawer.",
       "Visible focus and reduced-motion support.",
       "Purple learning navigation and readable white workspaces around semantic mascot tile worlds.",
-      "A persistent wide-screen lesson guide, smaller stage and readable native Blockly palette."
+      "A persistent wide-screen lesson guide, smaller stage and readable native Blockly palette.",
+      "A scoped light typing lesson with supplied Baloo 2/Nunito lettering, meaningful feedback, broad keyboard and textual finger panels."
     ],
     "rules": [
       {
@@ -298,7 +830,7 @@
       },
       {
         "name": "The Reading Voice Rule",
-        "body": "Preserve the plain system face for instructions and controls. The tagline is exactly “Play. Build. Learn.”",
+        "body": "Preserve the plain system face for incumbent instructions and controls; the supplied typing interface alone uses its scoped Nunito reading/control roles. The tagline is exactly “Play. Build. Learn.”",
         "section": "typography"
       },
       {
@@ -309,14 +841,19 @@
     ],
     "dos": [
       "Do reuse the approved three-piece K and the exact tagline.",
-      "Do preserve system typography for lesson reading and controls.",
+      "Do preserve system typography for incumbent lesson reading and controls, with Baloo 2/Nunito confined to the owner-supplied typing interface.",
       "Do keep focus, text scaling and reduced-motion behavior visible in new work.",
       "Do use the darker functional teal for white movement-block labels.",
       "Do apply learning tokens only within the learning shell and entry; preserve public-page rules and the master mark.",
       "Do keep Play below the stage, real Blockly geometry, meaningful obstacle tiles and readable board alternatives.",
       "Do preserve the shared white-paper drawing shell and Grade 1–6 entry choices.",
       "Do keep native palette blocks at .95 scale and let long flyout lists scroll.",
-      "Do keep lesson prose, authored instructions and hints reachable within the responsive activity guide."
+      "Do show task-specific instruction budgets with an explanation, excluding the start block. Keep valid at-limit programs neutral and reserve warning color for over-budget drafts.",
+      "Do render pickups, gates and bridges from real runtime state, with equivalent textual board descriptions. Keep the shared learning shell unchanged; see docs/INTERACTIVE_CHALLENGES.md.",
+      "Do keep lesson prose, authored instructions and hints reachable within the responsive activity guide.",
+      "Do use aligned semantic activity lists with number/check, purpose and text status; keep whole rows touch-friendly and allow descriptions to wrap.",
+      "Do place drawing in the module whose code it practises and return to that module at the end. Preserve stable drawing save IDs and independent practice rewards.",
+      "Do end module overviews with a named Next module action, or Explore courses at the final module, without adding a perfect-star or drawing gate. See docs/LEARNING_UX_REVIEW.md."
     ],
     "donts": [
       "Don't substitute a generic code icon for the approved mark.",

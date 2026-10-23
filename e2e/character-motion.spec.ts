@@ -13,7 +13,7 @@ async function seed(page: import('@playwright/test').Page, topic = 'sequences', 
   const id = `grade-3-${topic}-1`, save = emptySave();
   save.course = 'grade-3'; save.current = missions.findIndex(m => m.id === id);
   save.reducedMotion = reduced; save.soundEnabled = !reduced;
-  save.progress[id] = { blocks: [], attempts: 0, hints: 0, complete: false, lessonSeen: true, worldLayout: 'tiles-v1', workspace: { blocks: { languageVersion: 0, blocks: [{ type: 'ka_start', next: { block: gradeSolutions[id] } }] } } };
+  save.progress[id] = { blocks: [], attempts: 0, hints: 0, complete: false, lessonSeen: true, workspaceTour: 'completed', worldLayout: 'tiles-v1', workspace: { blocks: { languageVersion: 0, blocks: [{ type: 'ka_start', next: { block: gradeSolutions[id] } }] } } };
   await page.addInitScript(save => {
     localStorage.setItem('kodearcade-v1',JSON.stringify(save));
     const state = window as typeof window & { notes: string[] }; state.notes = [];
@@ -25,6 +25,7 @@ async function seed(page: import('@playwright/test').Page, topic = 'sequences', 
   }, save);
   await page.goto('/#/learn/grade-3');
   await expect(page.locator('.tile-scene')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
 }
 
 for (const [name, topic, motion] of cast) test(`${name} moves with personality and celebrates before feedback`, async ({ page }, info) => {
@@ -33,7 +34,13 @@ for (const [name, topic, motion] of cast) test(`${name} moves with personality a
   await expect(page.locator('.tile-scene')).toHaveAttribute('data-character',name);
   expect(await page.evaluate(() => (window as typeof window & { notes: string[] }).notes)).toEqual([]);
   const selectors = ['.tile-map','.editor'];
-  const boxes = await Promise.all(selectors.map(s => page.locator(s).boundingBox()));
+  // A phone scrolls to reach Play and return focus after feedback. Compare
+  // document geometry so that genuine layout shifts still fail, not scrolling.
+  const layoutBox = (selector: string) => page.locator(selector).evaluate(element => {
+    const box = element.getBoundingClientRect();
+    return { x: box.x + scrollX, y: box.y + scrollY, width: box.width, height: box.height };
+  });
+  const boxes = await Promise.all(selectors.map(layoutBox));
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect(page.locator('.character-motion.is-stepping')).toHaveCSS('animation-name', motion);
   await expect(page.locator('.character-ground-shadow')).toHaveCSS('animation-name','step-shadow');
@@ -51,7 +58,7 @@ for (const [name, topic, motion] of cast) test(`${name} moves with personality a
   expect(notes.length).toBeGreaterThan(9);
   if (name === 'Milo') expect(notes).toContain('sawtooth');
   for (let i=0;i<selectors.length;i++) {
-    const after = await page.locator(selectors[i]).boundingBox();
+    const after = await layoutBox(selectors[i]);
     for (const key of ['x','y','width','height'] as const) expect(after![key]).toBeCloseTo(boxes[i]![key],1);
   }
   await page.getByRole('button', { name: 'Reset position' }).click();
@@ -113,6 +120,6 @@ test('animated K loading screen uses the actual logo and clears when ready', asy
     expect(svg).toContain('prefers-reduced-motion'); expect(svg).toContain('@keyframes assemble');
     await page.screenshot({path:`.impeccable/review/k-loading-${info.project.name}.png`});
   } finally { release(); }
-  await expect(page.getByRole('button',{name:'Start challenge',exact:true})).toBeVisible();
+  await expect(page.getByRole('button',{name:'Run code',exact:true})).toBeVisible();
   await expect(page.locator('.brand-loader')).toHaveCount(0);
 });

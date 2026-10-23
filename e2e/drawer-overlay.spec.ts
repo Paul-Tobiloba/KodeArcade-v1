@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('course drawer overlays without resizing the board or canvas', async ({ page }, info) => {
   await page.goto('/#/learn/grade-2');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   await expect(page.locator('.blocklyFlyout .ka_arrow_right')).toBeVisible();
   const selectors = ['.workspace-grid', '.tile-map', '.editor', '.blocklySvg > .blocklyWorkspace > .blocklyBlockCanvas .ka_start > .blocklyPath'];

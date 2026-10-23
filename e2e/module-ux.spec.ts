@@ -17,7 +17,8 @@ test('the last core challenge returns to its module with drawing and next-module
   await page.addInitScript(save => localStorage.setItem('kodearcade-v1', JSON.stringify(save)), save);
   await page.goto('/#/learn/grade-3');
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
-  await page.getByRole('dialog', { name: 'You made it!' }).getByRole('button', { name: 'Back to module', exact: true }).click();
+  await page.getByRole('dialog', { name: 'You made it!' }).getByRole('button', { name: 'Take module quiz', exact: true }).click();
+  await page.getByRole('button', { name: 'Back to module', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Say it once, repeat it with a loop', exact: true })).toBeFocused();
   await expect(page.getByRole('region', { name: 'Loops drawing activities' })).toBeVisible();
   await page.getByRole('button', { name: 'Next module', exact: true }).click();
@@ -29,7 +30,8 @@ test('completed journey has aligned readable rows, a real next module and no pro
   for (const id of sequenceCore) save.progress[id] = { blocks: [], attempts: 7, hints: 4, complete: true, stars: 1, lessonSeen: true };
   await page.addInitScript(save => localStorage.setItem('kodearcade-v1', JSON.stringify(save)), save);
   await page.goto('/#/learn/grade-1');
-  await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
   const rows = page.getByRole('list', { name: 'Core activities' }).locator('.activity-row');
   await expect(rows).toHaveCount(10);
   await expect(rows.locator('.activity-row-action')).toContainText(Array(10).fill('Completed'));
@@ -44,22 +46,24 @@ test('completed journey has aligned readable rows, a real next module and no pro
   expect((await new AxeBuilder({ page }).withTags(['wcag2a','wcag2aa']).analyze()).violations).toEqual([]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Next module', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'The order changes the journey', exact: true })).toBeFocused();
-  await expect(page.getByRole('region', { name: 'Direction & order drawing activities' })).toBeVisible();
-  await expect(page.getByRole('list', { name: 'Drawing activities' }).locator('li')).toHaveCount(3);
+  await expect(page.getByRole('heading', { name: 'A bug is a clue', exact: true })).toBeFocused();
+  await expect(page.getByRole('region', { name: 'Debugging module overview' })).toBeVisible();
   expect(await page.evaluate(() => Object.values(JSON.parse(localStorage.getItem('kodearcade-v1')!).progress).filter((p: any) => p.complete).length)).toBe(10);
 });
 
-test('drawing belongs to its module, finishes back there and retains its saved work', async ({ page }) => {
+test('drawing belongs to its merged module and retains its saved work', async ({ page }) => {
   await page.goto('/#/learn/grade-1');
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await page.getByRole('button', { name: 'Module overview', exact: true }).click();
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
-  await expect(page.locator('.topbar .game-context')).toContainText('Sequences · Drawing 1 of 1');
+  await expect(page.locator('.topbar .game-context')).toContainText('Sequences, directions & order · Drawing 1 of 4');
   await page.getByText('Keyboard helpers', { exact: true }).click();
   await page.getByRole('button', { name: 'Add block', exact: true }).click();
   await page.getByRole('button', { name: 'Add block', exact: true }).click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   const feedback = page.getByRole('dialog', { name: 'You made it!' });
-  await feedback.getByRole('button', { name: 'Back to module' }).click();
+  await feedback.getByRole('button', { name: 'Close feedback' }).click();
+  await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Sequences topic journey' })).toBeVisible();
   const row = page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /A little trail/ });
   await expect(row).toContainText('Completed');
@@ -67,10 +71,9 @@ test('drawing belongs to its module, finishes back there and retains its saved w
   await expect(page.getByRole('button', { name: /Drawing 1: A little trail, completed/ })).toBeVisible();
   await expect(page.locator('.editor-title')).toContainText('2 / 24 blocks');
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
-  await page.getByRole('button', { name: 'Next module', exact: true }).click();
   await page.getByRole('list', { name: 'Drawing activities' }).getByRole('button', { name: /Turn a corner/ }).click();
-  await expect(page.locator('.topbar .game-context')).toContainText('Direction & order · Drawing 1 of 3');
-  await expect(page.getByRole('navigation', { name: 'Challenge progress' }).getByRole('button')).toHaveCount(3);
+  await expect(page.locator('.topbar .game-context')).toContainText('Sequences, directions & order · Drawing 2 of 4');
+  await expect(page.getByRole('navigation', { name: 'Challenge progress' }).getByRole('button')).toHaveCount(4);
 });
 
 test('older grades group loops and variables separately and the last module offers a way out', async ({ page }, info) => {
@@ -88,7 +91,7 @@ test('older grades group loops and variables separately and the last module offe
   await page.getByRole('button', { name: 'Open drawing lab' }).click();
   await expect(page.locator('.topbar .game-context')).toContainText('Variables · Drawing 1 of 1');
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
-  await page.getByRole('button', { name: 'Next module', exact: true }).click();
+  await moduleLesson(page, 'Build project');
   await expect(page.getByRole('link', { name: 'Explore courses', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next module', exact: true })).toHaveCount(0);
   await expect(page.getByRole('list', { name: 'Drawing activities' })).toContainText('Make it yours');

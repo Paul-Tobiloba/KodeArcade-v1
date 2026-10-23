@@ -30,7 +30,7 @@ test('all six courses start in the real workspace, remember skip and keep module
     await expect(page.locator('.tour-card')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'Module overview', exact: true }).click();
-    await expect(page.getByRole('region', { name: 'Sequences end-of-module quiz' }).getByRole('button', { name: 'Start quiz', exact: true })).toBeVisible();
+    await expect(page.getByRole('region', { name: 'Sequences, directions & order end-of-module quiz' }).getByRole('button', { name: 'Start quiz', exact: true })).toBeVisible();
     await expect(page.getByRole('list', { name: 'Core activities' })).toBeVisible();
     if (grade === 1) {
       await page.getByRole('button', { name: 'Open drawing lab', exact: true }).click();

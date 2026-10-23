@@ -9,7 +9,8 @@ test('meadow workspace, star/chime sequence, retry toast and protected best rewa
     AudioContext.prototype.createOscillator = function () { const oscillator = create.call(this); const start = oscillator.start.bind(oscillator); oscillator.start = (when?: number) => { audioWindow.playedNotes.push(oscillator.frequency.value); start(when); }; return oscillator; };
   });
   await page.goto('/#/learn/arrows');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
+  if (await page.getByRole('button', { name:'Skip tour', exact:true }).isVisible()) await page.getByRole('button', { name:'Skip tour', exact:true }).click();
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await page.evaluate(() => { (document.activeElement as HTMLElement)?.blur(); window.scrollTo(0, 0); return document.fonts.ready; });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -52,7 +53,8 @@ test('meadow workspace, star/chime sequence, retry toast and protected best rewa
   await page.getByRole('button', { name: 'Clear code', exact: true }).click();
   await page.locator('.blocklyFlyout .blocklyDraggable.ka_arrow_right').click();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
-  await expect(page.locator('.reward-stars .earned')).toHaveCount(2);
+  await expect(page.locator('.reward-stars .earned')).toHaveCount(5);
+  await expect(page.getByText('Practice completed with support. All five stars are yours; mastery is separate.', { exact:true })).toBeVisible();
   await page.getByRole('button', { name: 'Close feedback' }).click();
   await page.reload();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
@@ -65,7 +67,8 @@ test('meadow workspace, star/chime sequence, retry toast and protected best rewa
 test('stopped runs do not count and muted reduced-motion celebrations remain usable', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/learn/arrows');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
+  if (await page.getByRole('button', { name:'Skip tour', exact:true }).isVisible()) await page.getByRole('button', { name:'Skip tour', exact:true }).click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByLabel('Character sound effects', { exact: true }).uncheck();
   await page.getByRole('button', { name: 'Done', exact: true }).click();

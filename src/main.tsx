@@ -13,6 +13,9 @@ import './course.css';
 import './brand.css';
 import './learning-world.css';
 const App = React.lazy(() => import('./App'));
+const AppLab = React.lazy(() => import('./AppLab'));
+const TypingCourse = React.lazy(() => import('./TypingCourse'));
+const CodingPractical = React.lazy(() => import('./CodingPractical'));
 const AccountPortal = React.lazy(() => import('./AccountPortal'));
 const StudentActivity = React.lazy(() => import('./StudentCourses').then(module => ({ default: module.StudentActivity })));
 function Router() {
@@ -20,12 +23,14 @@ function Router() {
   React.useEffect(() => { const change = () => setHash(location.hash); addEventListener('hashchange', change); return () => removeEventListener('hashchange', change); }, []);
   const learning = hash.startsWith('#/learn') || hash === '#workspace';
   const studentActivity = hash.startsWith('#/student-play/');
+  const appLab = hash === '#/app-lab';
+  const typing = hash.startsWith('#/typing/');
   const account = accountRoute(hash);
   const courseRoute = hash.split('/')[2];
   const courseSelected = isCourse(courseRoute) || courseRoute === 'computer';
   const route = hash.split('/')[1];
   const marketingPage: MarketingPage = route === 'courses' || route === 'how-it-works' || route === 'parents' || route === 'for-schools' ? route : 'home';
   React.useEffect(() => { window.scrollTo(0, 0); }, [learning, marketingPage, courseRoute, account]);
-  return studentActivity ? <React.Suspense fallback={<LoadingScreen />}><StudentActivity key={courseRoute} course={courseRoute} /></React.Suspense> : account ? <React.Suspense fallback={<LoadingScreen />}><AccountPortal key={hash} route={account} /></React.Suspense> : learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<LoadingScreen />}><App key={courseRoute} /></React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
+  return typing ? /^grade-[1-6]$/.test(courseRoute ?? '') ? <React.Suspense fallback={<LoadingScreen />}><TypingCourse key={hash} grade={Number(courseRoute.split('-')[1])} lessonId={hash.split('/')[3]} /></React.Suspense> : <LearningEntry /> : appLab ? <React.Suspense fallback={<LoadingScreen />}><AppLab /></React.Suspense> : studentActivity ? <React.Suspense fallback={<LoadingScreen />}><StudentActivity key={courseRoute} course={courseRoute} /></React.Suspense> : account ? <React.Suspense fallback={<LoadingScreen />}><AccountPortal key={hash} route={account} /></React.Suspense> : learning ? !courseSelected ? <LearningEntry /> : <React.Suspense fallback={<LoadingScreen />}>{hash.split('/')[3] === 'practical' ? <CodingPractical key={hash} grade={Number(courseRoute.split('-')[1])}/> : <App key={courseRoute} />}</React.Suspense> : marketingPage === 'home' ? <Landing /> : <MarketingPages key={marketingPage} page={marketingPage} />;
 }
 ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><ConfirmationProvider><SessionProvider><Router /></SessionProvider></ConfirmationProvider></React.StrictMode>);

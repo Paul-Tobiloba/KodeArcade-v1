@@ -16,7 +16,8 @@ test('sound cues follow runs and mute persists', async ({ page }) => {
   const notes = () => page.evaluate(() => (window as typeof window & { playedNotes: number[] }).playedNotes.length);
   await page.goto('/#/learn/words');
   expect(await notes()).toBe(0);
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
   await expect.poll(notes).toBe(3);
   await page.getByRole('button', { name: 'Dismiss retry message', exact: true }).click();

@@ -22,8 +22,8 @@ async function dragRight(page: Page, touch = false) {
 }
 test('drag blocks, run, recover, save and resume', async ({ page, isMobile }) => {
   const errors: string[] = []; page.on('pageerror', e => errors.push(e.message)); await page.goto('/#/learn/words'); await expect(page.locator('.course-app')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Every program starts with a sequence');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await expect(page.locator('.blocklyFlyout .blocklyDraggable')).toHaveCount(4);
   await dragRight(page, isMobile); await expect(page.getByText('1 / 24 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Run code', exact: true }).click();
@@ -68,9 +68,10 @@ test('preferences, keyboard helpers and reset', async ({ page }) => {
 });
 test('capture workspace and audit the app shell', async ({ page }, testInfo) => {
   await page.goto('/#/learn/words'); await expect(page.locator('.course-app')).toBeVisible();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
   await page.screenshot({ path: `.impeccable/review/${testInfo.project.name}-lesson.png`, fullPage: true });
   expect((await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()).violations).toEqual([]);
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   await expect(page.locator('.blocklyFlyout .blocklyDraggable')).toHaveCount(4);
   await expect.poll(async () => {
     const hint = await page.getByRole('button', { name: 'Get a hint', exact: true }).boundingBox();
@@ -104,13 +105,12 @@ test('drawer modules, concept review, and code preservation', async ({ page }, t
   await expect(moduleEntries.getByRole('button').filter({ hasNotText: /quiz/i })).toHaveCount(10);
   await expect(moduleEntries.getByRole('button', { name: 'Loops quiz', exact: true })).toBeVisible();
   await page.locator('.challenge-list button').filter({ hasText: 'Two little loops' }).click();
-  await expect(page.getByRole('heading', { name: 'Try it: Two little loops' })).toBeVisible();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Code editor', exact: true })).toBeVisible();
   await page.getByText('Keyboard helpers', { exact: true }).click();
   await page.getByRole('button', { name: 'Add block', exact: true }).click();
   await expect(page.getByText('1 / 4 blocks', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Read lesson', exact: true }).click();
-  await page.getByRole('button', { name: 'Continue to challenge', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Listen to topic', exact: true })).toBeVisible();
   await expect(page.getByText('1 / 4 blocks', { exact: true })).toBeVisible();
   if (await page.getByRole('button', { name: 'Show modules', exact: true }).isVisible()) await page.getByRole('button', { name: 'Show modules', exact: true }).click();
   await expect(page.locator('#module-drawer')).toContainText('Variables');

@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen",
+  "prompt": "Use case: illustration-story. Asset type: production raster game layer, not a screenshot. The reference is the approved KodeArcade game mockup, used ONLY for its central painted game art, color and perspective. Create a sharp polished storybook 2.5D game asset matching that approved art. No app header, panels, borders, controls, numbers, lettering, text, watermark or fake transparency grid. Composition is designed for independent live HTML overlays; do not bake any simulation state into the art. Generate ONLY an isolated CLOSED pair of teal wooden arched garden gate doors with violet metal cross-braces and a round central violet lock with a small golden padlock, matching the reference's central gate. Front view, symmetrical pair, gently rounded arch top, entire door silhouette and no stone arch or wall. Native transparent alpha background with ample transparent margin on all sides. No garden, no pipes, no robot, no lettering. This single door pair will cover an open arch, then move aside when the child's Boolean evaluates True. Match a door pair height about 1.1 times its width. Sharp hardware and wood detail at usable game resolution.",
+  "reference": ".impeccable/mocks/concept-games/secret-gates.png",
+  "transparent_background": true
+}

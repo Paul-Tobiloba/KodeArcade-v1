@@ -10,7 +10,8 @@ test('tile worlds share real collision cells, mascot goals and a responsive work
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: `.impeccable/review/worlds-${info.project.name}-entry.png`, fullPage: true });
   await page.locator('a[href="/#/learn/grade-3"]').click();
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   const worlds = [
     ['sequences','Byte','charging station'], ['directions','Dash','carrot basket'],
     ['loops','Gigi','golden leaf'], ['debugging','Fix','toolbox'],

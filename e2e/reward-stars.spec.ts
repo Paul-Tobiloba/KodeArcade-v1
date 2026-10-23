@@ -20,12 +20,12 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/session', route => route.fulfill({ json: null }));
 });
 
-test('shiny stars reveal once in a symmetric, upright, responsive arch', async ({ page }, info) => {
+test('shiny stars reveal once in a symmetric, gently fanned, responsive arch', async ({ page }, info) => {
   await completeChallenge(page);
   await expect(page.getByRole('img', { name: 'You earned 5 of 5 stars' })).toBeVisible();
   await expect(page.locator('.reward-stars .earned')).toHaveCount(5);
   await expect(page.locator('.reward-stars img')).toHaveCount(5);
-  await expect(page.locator('.reward-star.earned').first()).toHaveCSS('animation-name', 'star-arrives');
+  await expect(page.locator('.reward-star.earned img').first()).toHaveCSS('animation-name', 'typing-star-arrival');
   await expect(page.locator('.earned .reward-star-shine').first()).toHaveCSS('animation-iteration-count', '1');
   await page.locator('.reward-stars').evaluate(async group => {
     await Promise.all([...group.querySelectorAll('img')].map(image => image.decode()));
@@ -34,10 +34,10 @@ test('shiny stars reveal once in a symmetric, upright, responsive arch', async (
   });
   const stars = await page.locator('.reward-star-slot').evaluateAll(slots => slots.map(slot => {
     const box = slot.getBoundingClientRect(), star = slot.querySelector('.reward-star')!, matrix = new DOMMatrix(getComputedStyle(star).transform);
-    return { x: box.x, width: box.width, cy: box.y + box.height / 2, upright: matrix.b === 0 && matrix.c === 0 };
+    return { x: box.x, width: box.width, layoutWidth: parseFloat(getComputedStyle(slot).width), cy: box.y + box.height / 2, upright: matrix.b === 0 && matrix.c === 0 };
   }));
-  expect(stars[0].width / stars[2].width).toBeCloseTo(.58, 1);
-  expect(stars[1].width / stars[2].width).toBeCloseTo(.8, 1);
+  expect(stars[0].layoutWidth / stars[2].layoutWidth).toBeCloseTo(.83, 1);
+  expect(stars[1].layoutWidth / stars[2].layoutWidth).toBeCloseTo(.95, 1);
   expect(stars[4].width).toBeCloseTo(stars[0].width, 1);
   expect(stars[3].width).toBeCloseTo(stars[1].width, 1);
   expect(stars[2].cy).toBeLessThan(stars[1].cy);
@@ -58,16 +58,16 @@ test('shiny stars reveal once in a symmetric, upright, responsive arch', async (
   await expect(page.locator('.star-dialog')).not.toBeVisible();
 });
 
-for (const preference of ['saved', 'system'] as const) test(`reduced motion (${preference}) shows partial rewards immediately without shine`, async ({ page }, info) => {
+for (const preference of ['saved', 'system'] as const) test(`reduced motion (${preference}) shows full practice rewards immediately without shine`, async ({ page }, info) => {
   if (preference === 'system') await page.emulateMedia({ reducedMotion: 'reduce' });
   await completeChallenge(page, preference === 'saved', 5);
-  await expect(page.getByRole('img', { name: 'You earned 3 of 5 stars' })).toBeVisible();
-  await expect(page.locator('.reward-stars .earned')).toHaveCount(3);
-  await expect(page.locator('.reward-stars .unearned')).toHaveCount(2);
+  await expect(page.getByRole('img', { name: 'You earned 5 of 5 stars' })).toBeVisible();
+  await expect(page.locator('.reward-stars .earned')).toHaveCount(5);
+  await expect(page.locator('.reward-stars .unearned')).toHaveCount(0);
   await expect(page.locator('.reward-star.earned').first()).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.reward-star-shine').first()).toHaveCSS('animation-name', 'none');
   await expect(page.locator('.celebration-confetti')).toHaveCount(0);
-  if (preference === 'saved') await page.locator('.star-dialog').screenshot({ path: `.impeccable/review/reward-stars-partial-${info.project.name}.png` });
+  if (preference === 'saved') await page.locator('.star-dialog').screenshot({ path: `.impeccable/review/coding-rewards-still-${info.project.name}.png` });
   await page.keyboard.press('Escape');
   await expect(page.locator('.star-dialog')).not.toBeVisible();
 });
@@ -77,4 +77,15 @@ test('closing feedback early cancels pending star reveals', async ({ page }) => 
   await page.getByRole('button', { name: 'Close feedback' }).click();
   await expect(page.locator('.star-dialog')).not.toBeVisible();
   await expect(page.locator('.reward-stars .earned')).toHaveCount(0);
+});
+
+test('legacy lower stars stay unchanged until a successful retry, then improve once', async ({page}) => {
+  const id='grade-3-sequences-1',save=emptySave();save.course='grade-3';save.current=missions.findIndex(m=>m.id===id);save.soundEnabled=false;save.reducedMotion=true;
+  save.progress[id]={blocks:[],attempts:15,hints:4,complete:true,stars:2,lessonSeen:true,worldLayout:'tiles-v1',workspace:{blocks:{languageVersion:0,blocks:[{type:'ka_start',next:{block:gradeSolutions[id]}}]}}};
+  await page.addInitScript(save=>localStorage.setItem('kodearcade-v1',JSON.stringify(save)),save);await page.goto('/#/learn/grade-3');
+  const record=()=>page.evaluate(id=>JSON.parse(localStorage.getItem('kodearcade-v1')!).progress[id],id);
+  expect((await record()).stars).toBe(2);expect((await record()).practice).toBeUndefined();
+  await page.getByRole('button',{name:'Run code',exact:true}).click();await expect(page.locator('.reward-stars .earned')).toHaveCount(5);
+  expect((await record()).stars).toBe(5);expect((await record()).practice).toEqual({version:1,complete:true,supportUsed:true});
+  await page.getByRole('button',{name:'Close feedback'}).click();await page.getByRole('button',{name:'Run code',exact:true}).click();await expect(page.locator('.reward-stars .earned')).toHaveCount(5);expect((await record()).stars).toBe(5);
 });

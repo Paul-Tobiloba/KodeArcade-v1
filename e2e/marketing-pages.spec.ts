@@ -9,7 +9,7 @@ test('public pages, mobile navigation and course entry', async ({ page }, testIn
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Courses', exact: true }).click();
   await expect(page).toHaveURL(/#\/courses$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Small steps.');
-  await expect(page.locator('.adventure-card')).toHaveCount(4);
+  await expect(page.locator('.adventure-card')).toHaveCount(7);
   await page.getByLabel('Find an adventure').fill('keyboard');
   await expect(page.locator('.adventure-card')).toHaveCount(1);
   await page.getByLabel('Find an adventure').fill('');
@@ -25,8 +25,8 @@ test('public pages, mobile navigation and course entry', async ({ page }, testIn
   }
   await page.getByRole('navigation', { name: 'Footer navigation' }).getByRole('link', { name: 'Courses', exact: true }).click();
   await expect(page).toHaveURL(/#\/courses$/);
-  await page.locator('.adventure-card').filter({ hasText: 'Little Explorers' }).getByRole('link', { name: 'Start this course' }).click();
-  await expect(page).toHaveURL(/#\/learn\/arrows$/);
-  await expect(page.getByRole('region', { name: 'Current course' })).toContainText('Little Explorers');
+  await page.locator('.adventure-card').filter({ hasText: 'Grade 1 · First Adventures' }).getByRole('link', { name: 'Start this course' }).click();
+  await expect(page).toHaveURL(/#\/learn\/grade-1$/);
+  await expect(page.locator('.game-course-title')).toContainText('Grade 1 · First Adventures');
   expect(errors).toEqual([]);
 });

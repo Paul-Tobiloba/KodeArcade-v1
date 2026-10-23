@@ -1,0 +1,67 @@
+import { expect, test } from '@playwright/test';
+
+test('new sample apps run, remain editable and reopen from the saved gallery', async ({ page }, info) => {
+  await page.route('**/api/session', route => route.fulfill({ json: null }));
+  const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/#/app-lab');
+  await expect(page.locator('.al-starters > div:not(.al-workspace-heading) > button')).toHaveCount(8);
+  await page.screenshot({ path: `.impeccable/review/app-lab-samples-gallery-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: /^Number Detective/ }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  const preview = page.locator('.al-preview');
+  await preview.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: /^Score: 1$/ })).toBeVisible();
+  await preview.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: /^Score: 1$/ })).toBeVisible();
+  await preview.getByRole('button', { name: 'Next question', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: 'What is 3 x 4?' })).toBeVisible();
+  await preview.getByRole('combobox', { name: 'answer', exact: true }).selectOption('12');
+  await preview.getByRole('button', { name: 'Check answer', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: /^Score: 2$/ })).toBeVisible();
+  await page.locator('.al-preview-panel').screenshot({ path: `.impeccable/review/app-lab-sample-quiz-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+
+  await page.getByRole('button', { name: 'New app', exact: true }).click();
+  await page.getByRole('button', { name: /^Mini Calculator/ }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await preview.getByRole('combobox', { name: 'operation', exact: true }).selectOption('Multiply');
+  await preview.getByRole('button', { name: 'Calculate', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: /^Result: 24$/ })).toBeVisible();
+  await page.locator('.al-preview-panel').screenshot({ path: `.impeccable/review/app-lab-sample-calculator-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+
+  await page.getByRole('button', { name: 'New app', exact: true }).click();
+  await page.getByRole('button', { name: /^Story Paths/ }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await preview.getByRole('button', { name: 'Explore the forest', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: 'The hidden garden' })).toBeVisible();
+  await preview.getByRole('button', { name: 'Choose another path', exact: true }).click();
+  await preview.getByRole('button', { name: 'Climb the sky tower', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: 'A signal in the stars' })).toBeVisible();
+  await page.locator('.al-preview-panel').screenshot({ path: `.impeccable/review/app-lab-sample-story-${info.project.name}.png` });
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+
+  await page.getByRole('button', { name: 'New app', exact: true }).click();
+  await page.getByRole('button', { name: /^Mission Checklist/ }).click();
+  await page.getByRole('button', { name: 'Run app', exact: true }).click();
+  await preview.getByRole('checkbox', { name: 'Read for ten minutes', exact: true }).check();
+  await preview.getByRole('checkbox', { name: 'Build a tiny app', exact: true }).check();
+  await preview.getByRole('button', { name: 'Update my progress', exact: true }).click();
+  await expect(preview.locator('.al-runtime-label').filter({ hasText: /^Completed: 2 of 3$/ })).toBeVisible();
+  await page.locator('.al-preview-panel').screenshot({ path: `.impeccable/review/app-lab-sample-checklist-${info.project.name}.png` });
+  await page.screenshot({ path: `.impeccable/review/app-lab-sample-running-${info.project.name}.png`, fullPage: true });
+  await page.getByRole('button', { name: 'Stop app', exact: true }).click();
+  await page.getByRole('button', { name: 'Code', exact: true }).click();
+  await page.getByRole('button', { name: 'Show text', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'App JavaScript code', exact: true })).toContainText('setCell("missions"');
+  await page.reload();
+  await expect(page.getByRole('textbox', { name: 'App project name', exact: true })).toHaveValue('Mission Checklist');
+  await page.locator('.al-library summary').click();
+  const gallery = page.getByRole('combobox', { name: 'Open saved app', exact: true });
+  await expect(gallery.locator('option')).toHaveCount(4);
+  const quizId = await gallery.locator('option').filter({ hasText: 'Number Detective' }).getAttribute('value');
+  await gallery.selectOption(quizId!);
+  await expect(page.getByRole('textbox', { name: 'App project name', exact: true })).toHaveValue('Number Detective');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect(errors).toEqual([]);
+});

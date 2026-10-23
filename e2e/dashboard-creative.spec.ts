@@ -17,20 +17,28 @@ async function fixture(page: Page, grades = [4], home = false) {
   return docs;
 }
 
-test('dashboard exposes both assigned creative spaces and each link opens the signed-in editor', async ({ page }, info) => {
+test('dashboard exposes each lab once below courses and opens the signed-in editors', async ({ page }, info) => {
   const docs = await fixture(page), errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/#/student-courses');
-  const nav = page.getByRole('navigation', { name: 'Creative spaces', exact: true });
-  await expect(nav.getByRole('link')).toHaveCount(2);
+  const nav = page.getByRole('navigation', { name: 'Labs', exact: true });
+  await expect(nav.getByRole('link')).toHaveCount(3);
   await expect(nav.getByRole('link', { name: 'Open Byte Lab · Grade 4', exact: true })).toHaveAttribute('href', '/#/student-play/grade-4/lab');
-  await expect(nav.getByRole('link', { name: 'Open Drawing & Art · Grade 4', exact: true })).toHaveAttribute('href', '/#/student-play/grade-4/art');
+  await expect(nav.getByRole('link', { name: 'Open Artist Lab · Grade 4', exact: true })).toHaveAttribute('href', '/#/student-play/grade-4/art');
+  await expect(nav.getByRole('link', { name: 'Open App Lab · Grade 4', exact: true })).toHaveAttribute('href', '/#/student-play/grade-4/apps');
+  const order = await page.evaluate(() => ({ courses: document.querySelector('.student-course-section')!.getBoundingClientRect().bottom, labs: document.querySelector('.student-labs')!.getBoundingClientRect().top }));
+  expect(order.labs).toBeGreaterThan(order.courses);
+  if (info.project.name === 'phone') expect(await page.locator('.student-labs').evaluate(labs => labs.getBoundingClientRect().bottom < document.querySelector('.student-dashboard-help')!.getBoundingClientRect().top)).toBe(true);
+  await expect(page.getByRole('combobox', { name: 'Project course' })).toHaveCount(0);
   await page.locator('.student-welcome img').evaluate((image: HTMLImageElement) => image.decode());
-  expect((await new AxeBuilder({ page }).include('.student-creative-spaces').analyze()).violations).toEqual([]);
+  expect((await new AxeBuilder({ page }).include('.student-labs').analyze()).violations).toEqual([]);
   await page.screenshot({ path: `.impeccable/review/dashboard-creative-${info.project.name}.png`, fullPage: true });
+  await nav.getByRole('link', { name: 'Open App Lab · Grade 4', exact: true }).click();
+  await expect(page.getByRole('textbox', { name: 'App project name', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to KodeArcade', exact: true }).click();
   await nav.getByRole('link', { name: 'Open Byte Lab · Grade 4', exact: true }).click();
   await expect(page.getByRole('textbox', { name: 'Project name', exact: true })).toBeVisible();
   await page.getByRole('link', { name: 'KodeArcade home', exact: true }).click();
-  await page.getByRole('link', { name: 'Open Drawing & Art · Grade 4', exact: true }).click();
+  await page.getByRole('link', { name: 'Open Artist Lab · Grade 4', exact: true }).click();
   await expect(page.locator('.drawing-artboard')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Make it yours', exact: true, level: 2 })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'My projects', exact: true })).toHaveCount(0);
@@ -56,12 +64,14 @@ test('dashboard exposes both assigned creative spaces and each link opens the si
 
 test('home learners get grade-scoped choices, younger learners get art only and no assignment grants no entry', async ({ page }) => {
   await fixture(page, [1, 6], true); await page.goto('/#/student-courses');
-  const nav = page.getByRole('navigation', { name: 'Creative spaces', exact: true });
+  const nav = page.getByRole('navigation', { name: 'Labs', exact: true });
   await expect(nav.getByRole('link')).toHaveCount(3);
   await expect(nav.getByRole('link', { name: 'Open Byte Lab · Grade 1', exact: true })).toHaveCount(0);
-  await expect(nav.getByRole('link', { name: 'Open Drawing & Art · Grade 1', exact: true })).toBeVisible();
   await expect(nav.getByRole('link', { name: 'Open Byte Lab · Grade 6', exact: true })).toBeVisible();
-  await nav.getByRole('link', { name: 'Open Drawing & Art · Grade 1', exact: true }).click();
+  await page.getByRole('combobox', { name: 'Project course' }).selectOption('grade-1');
+  await expect(nav.getByRole('link')).toHaveCount(1);
+  await expect(nav.locator('[aria-disabled="true"]')).toHaveCount(2);
+  await nav.getByRole('link', { name: 'Open Artist Lab · Grade 1', exact: true }).click();
   await expect(page.locator('.drawing-artboard')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Make it yours', exact: true, level: 2 })).toBeVisible();
   await page.goto('/#/student-play/grade-5/art');
@@ -70,7 +80,32 @@ test('home learners get grade-scoped choices, younger learners get art only and 
   await page.route('**/api/student/courses', r => r.fulfill({ json: { ...identity, displayName: 'Sample Maker', classroomName: 'Sample class', assignments: [] } }));
   await page.goto('/#/student-courses');
   await expect(page.getByRole('heading', { name: 'Your next adventure is on its way', exact: true })).toBeVisible();
-  await expect(nav).toHaveCount(0);
+  await expect(nav.getByRole('link')).toHaveCount(0);
+  await expect(nav.locator('[aria-disabled="true"]')).toHaveCount(3);
+});
+
+for (const home of [false, true]) test(`${home ? 'home' : 'classroom'} dashboard has one set of labs for multiple assigned grades`, async ({ page }, info) => {
+  const docs = await fixture(page, [3, 4, 5], home);
+  const original = structuredClone([...docs]);
+  const progressRequests: string[] = [];
+  page.on('request', request => { if (request.url().includes('/student/progress/')) progressRequests.push(request.url()); });
+  await page.goto('/#/student-courses');
+  const nav = page.getByRole('navigation', { name: 'Labs', exact: true });
+  await expect(page.getByRole('heading', { name: home ? 'Your home adventures' : 'Your assigned courses', exact: true })).toBeVisible();
+  await expect(nav.getByRole('link')).toHaveCount(3);
+  for (const name of ['Byte Lab', 'App Lab', 'Artist Lab']) await expect(nav.getByText(name, { exact: true })).toHaveCount(1);
+  await expect(page.locator('.student-creative-row')).toHaveCount(0);
+  await page.getByRole('combobox', { name: 'Project course' }).selectOption('grade-5');
+  for (const [name, path] of [['Byte Lab', 'lab'], ['App Lab', 'apps'], ['Artist Lab', 'art']]) {
+    await expect(nav.getByRole('link', { name: `Open ${name} · Grade 5`, exact: true })).toHaveAttribute('href', `/#/student-play/grade-5/${path}`);
+  }
+  expect(progressRequests).toEqual([]);
+  expect([...docs]).toEqual(original);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect((await new AxeBuilder({ page }).include('.student-labs').analyze()).violations).toEqual([]);
+  await page.screenshot({ path: `.impeccable/review/dashboard-labs-${home ? 'home' : 'classroom'}-${info.project.name}.png`, fullPage: true });
+  await page.goto('/#/student-play/grade-2/apps');
+  await expect(page.getByRole('heading', { name: 'This activity isn’t available', exact: true })).toBeVisible();
 });
 
 test('direct art ignores stale quiz navigation while ordinary course resume restores the drawing instead of Byte Lab', async ({ page }) => {

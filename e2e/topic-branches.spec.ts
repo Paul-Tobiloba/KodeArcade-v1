@@ -4,7 +4,8 @@ import { missions } from '../src/learning';
 test('compact decision view distinguishes DO from ELSE', async ({ page }, info) => {
   test.skip(info.project.name === 'tablet', 'Desktop and narrow phone exercise the compact fallback.');
   await page.goto('/#/learn/words');
-  await page.getByRole('button', { name: 'Start challenge', exact: true }).click();
+  await page.getByRole('button', { name: 'Skip tour', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Run code', exact: true })).toBeVisible();
   if (info.project.name === 'desktop') await page.setViewportSize({ width: 1308, height: 677 });
   await page.evaluate(({ current, compact }) => {
     type Node = { type: string; fields?: Record<string, string | number>; inputs?: Record<string, { block: Node }>; next?: { block: Node } };
@@ -26,11 +27,16 @@ test('compact decision view distinguishes DO from ELSE', async ({ page }, info) 
   await expect(overview).toBeVisible();
   await expect(overview.getByRole('button', { name: /Move right, inside.*IF right clear: DO/ })).toBeVisible();
   await expect(overview.getByRole('button', { name: /Move up, inside.*IF right clear: ELSE/ })).toBeVisible();
+  await page.evaluate(async () => { await document.fonts.ready; });
   const host = (await page.locator('.blockly-host').boundingBox())!;
+  // Long programs deliberately scroll inside the overview. Every step must
+  // become fully reachable there, not fit simultaneously without scrolling.
   for (const tile of await overview.locator('li>button').all()) {
+    await tile.scrollIntoViewIfNeeded();
+    await expect(tile).toBeInViewport({ ratio: 1 });
     const box = (await tile.boundingBox())!;
     if (info.project.name === 'desktop') expect(box.y + box.height).toBeLessThanOrEqual(host.y + host.height);
   }
-  await page.evaluate(async () => { await document.fonts.ready; });
+  await overview.locator('ol').evaluate(list => { list.scrollTop = 0; });
   await page.screenshot({ path: `.impeccable/review/topics-${info.project.name}-branches.png`, fullPage: true });
 });

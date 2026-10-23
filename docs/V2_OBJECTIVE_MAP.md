@@ -1,5 +1,7 @@
 # V2 curriculum objective map
 
+Planning update, 20 October: the [V3 grade-by-grade proposal](CURRICULUM_V3_GRADE_MAP_2026_10_20.md) provides the revised progression, practical assessment/rewards model and traceability for all 32 objectives. It is not an implementation claim. This V2 map and the source DOCX are retained as historical references.
+
 Implementation update, 16 October: Operators, Boolean logic and Functions now have six-activity concept modules and topic-focused quizzes in Grades 3–6. Grades 5–6 include bounded parameters/numeric returns, and Grade 6 composition. This supersedes older planned-only statements for those limited features below; it does not satisfy the full content contract, integrated games, arbitrary Python, recursion or all 32 objectives. See [concept-module scope](CONCEPT_MODULES_2026_10_16.md). The source DOCX and planning table are unchanged.
 
 Version: V2.0 planning baseline, 9 October 2026. Source: [Master Curriculum Objectives](KodeArcade_V2_Master_Curriculum_Objectives.docx). This maps the owner's age-track objectives into Grades 1–6; it is not a national school-standard alignment. Grades 1–2 correspond broadly to Little Coders, Grades 3–4 to Code Explorers, Grades 5–6 to Code Creators. Readiness can override placement, including learners aged 12–14.
